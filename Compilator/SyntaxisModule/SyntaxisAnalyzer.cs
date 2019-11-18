@@ -4,9 +4,6 @@ using Compilator.SyntaxisModule.Structures.AbstractStructures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Compilator.SyntaxisModule
 {
     public class SyntaxisAnalyzer
@@ -37,8 +34,8 @@ namespace Compilator.SyntaxisModule
             switch (t.GetTokenType())
             {
                 case TokenType.Identificator: return new NodeIdentificator() { token = t };
-                //?case TokenType.KeyWord: 
-                //?case TokenType.Operator:
+                case TokenType.KeyWord: return new NodeIdentificator() { token = t };
+                //?case TokenType.Operator: ?-Unary or Binary operations
                 case TokenType.CharData: return new NodeChar() { token = t };
                 case TokenType.DoubleData: return new NodeDouble() { token = t };
                 case TokenType.IntData: return new NodeInt() { token = t };
