@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.852
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compilator", "Compilator\Compilator.csproj", "{92A96D4A-106B-4C7F-8715-5AA136793255}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnalyzerCMD", "TestConsole\AnalyzerCMD.csproj", "{6F0718D4-3450-4A2F-87DE-5FB8E925B740}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tester", "Tester\Tester.csproj", "{D23CBD36-130D-4DCB-8442-890B4A4B4450}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{92A96D4A-106B-4C7F-8715-5AA136793255}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92A96D4A-106B-4C7F-8715-5AA136793255}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92A96D4A-106B-4C7F-8715-5AA136793255}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92A96D4A-106B-4C7F-8715-5AA136793255}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F0718D4-3450-4A2F-87DE-5FB8E925B740}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F0718D4-3450-4A2F-87DE-5FB8E925B740}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F0718D4-3450-4A2F-87DE-5FB8E925B740}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F0718D4-3450-4A2F-87DE-5FB8E925B740}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D23CBD36-130D-4DCB-8442-890B4A4B4450}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D23CBD36-130D-4DCB-8442-890B4A4B4450}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D23CBD36-130D-4DCB-8442-890B4A4B4450}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D23CBD36-130D-4DCB-8442-890B4A4B4450}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6B9625CD-2B76-44AA-A69F-3A60DD9EFCD0}
+	EndGlobalSection
+EndGlobal
