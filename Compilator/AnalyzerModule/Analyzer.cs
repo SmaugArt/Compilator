@@ -61,6 +61,7 @@ namespace Compilator.AnalyzerModule
 
         virtual public Token GetToken()
         {
+            SavePreviousStatus(); //for step back
             StatusKey statusOfAnalyz = StatusKey.Start;
 
             if (currentStatus != AnalyzerStatus.OK) return null;
@@ -110,8 +111,9 @@ namespace Compilator.AnalyzerModule
                     GetBackSymbol();
                     newString = newString.Substring(0, newString.Length - 1); //удаляем последний символ
 
-                    reader.DiscardBufferedData();
-                    reader.BaseStream.Seek(currentPos.globalPos, SeekOrigin.Begin);//перемещаем указатель ///!!!!! возможно с нуля нужно считать global pos
+                    //reader.DiscardBufferedData();
+                    //reader.BaseStream.Seek(currentPos.globalPos, SeekOrigin.Begin);//перемещаем указатель ///!!!!! возможно с нуля нужно считать global pos
+                    StepBack();
                     break;
                 }
 
@@ -152,9 +154,16 @@ namespace Compilator.AnalyzerModule
 
                 Token nToken = new Token(newString, positionOfline, positionOfWord, typeOfToken);
 
-                if (!nToken.Finalyze()) currentStatus = AnalyzerStatus.Error;
+                if (!nToken.Finalyze())
+                {
+                    currentStatus = AnalyzerStatus.Error;
+                    return nToken;
+                }
+
+                if (reader.Peek() == -1) currentStatus = AnalyzerStatus.Empty;
 
                 return nToken;
+
             }
             else //if == incorrect
             {

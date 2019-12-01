@@ -48,16 +48,16 @@ namespace Compilator.SyntaxisModule.Structures.AbstractStructures
             this.bodyGrammatic = bodyGrammatic;
         }
 
-        public bool isValid(SyntaxisNode node)
-        {
-            if (node.typeNode != SyntaxNodeType.ToString()) return false;
+        //public bool isValid(SyntaxisNode node)
+        //{
+        //    if (node.typeNode != SyntaxNodeType.ToString()) return false;
 
-            if (node.token.GetTokenType() != tokenType) return false;
+        //    if (node.token.GetTokenType() != tokenType) return false;
 
-            if (bodyGrammatic != null && bodyGrammatic != node.token.GetText()) return false;
+        //    if (bodyGrammatic != null && bodyGrammatic != node.token.GetText()) return false;
 
-            return true;
-        }
+        //    return true;
+        //}
     }
 
     public class EmptyTerminal : GrammaticBody { public EmptyTerminal() => typeOfGrammaticBody = Term.Empty; }

@@ -51,12 +51,12 @@
             this.FilePath1Box.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.FilePath1Box.Name = "FilePath1Box";
             this.FilePath1Box.ReadOnly = true;
-            this.FilePath1Box.Size = new System.Drawing.Size(373, 22);
+            this.FilePath1Box.Size = new System.Drawing.Size(876, 22);
             this.FilePath1Box.TabIndex = 0;
             // 
             // SearchPathButton1
             // 
-            this.SearchPathButton1.Location = new System.Drawing.Point(393, 11);
+            this.SearchPathButton1.Location = new System.Drawing.Point(895, 13);
             this.SearchPathButton1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.SearchPathButton1.Name = "SearchPathButton1";
             this.SearchPathButton1.Size = new System.Drawing.Size(75, 23);
@@ -67,7 +67,7 @@
             // 
             // SearchButton2
             // 
-            this.SearchButton2.Location = new System.Drawing.Point(392, 39);
+            this.SearchButton2.Location = new System.Drawing.Point(894, 41);
             this.SearchButton2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.SearchButton2.Name = "SearchButton2";
             this.SearchButton2.Size = new System.Drawing.Size(75, 23);
@@ -82,7 +82,7 @@
             this.FilePatch2Box.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.FilePatch2Box.Name = "FilePatch2Box";
             this.FilePatch2Box.ReadOnly = true;
-            this.FilePatch2Box.Size = new System.Drawing.Size(373, 22);
+            this.FilePatch2Box.Size = new System.Drawing.Size(876, 22);
             this.FilePatch2Box.TabIndex = 2;
             // 
             // openFileDialog2
@@ -93,7 +93,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(485, 11);
+            this.label1.Location = new System.Drawing.Point(987, 13);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(122, 17);
             this.label1.TabIndex = 4;
@@ -102,7 +102,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(485, 44);
+            this.label2.Location = new System.Drawing.Point(987, 46);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(111, 17);
             this.label2.TabIndex = 5;
@@ -110,18 +110,18 @@
             // 
             // textBox1
             // 
-            this.textBox1.Font = new System.Drawing.Font("Calibri", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.textBox1.Font = new System.Drawing.Font("Consolas", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.textBox1.Location = new System.Drawing.Point(13, 98);
             this.textBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(593, 340);
+            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBox1.Size = new System.Drawing.Size(1096, 340);
             this.textBox1.TabIndex = 6;
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(245, 69);
+            this.button1.Location = new System.Drawing.Point(491, 67);
             this.button1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(92, 23);
@@ -134,7 +134,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(621, 450);
+            this.ClientSize = new System.Drawing.Size(1121, 450);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label2);

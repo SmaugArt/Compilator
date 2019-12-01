@@ -21,6 +21,7 @@ namespace Compilator
             InitializeComponent();
             programmLines = new List<string>();
             passLines = new List<string>();
+            textBox1.ScrollBars = ScrollBars.Both;
         }
 
         private void SearchPathButton1_Click(object sender, EventArgs e)
@@ -50,28 +51,34 @@ namespace Compilator
             {
                 Analyzer analyzer = new AnalyzerWithoutCommentary(reader);
 
-                while (analyzer.GetStatus() == AnalyzerStatus.OK)
-                {
-                    tokens.Add(analyzer.GetToken());
-                }
+                SyntaxisModule.SyntaxisAnalyzer syn = new SyntaxisModule.SyntaxisAnalyzer(analyzer);
+                var tree = syn.SyntaxisParse();
+                textBox1.Text = syn.PrintTree(tree);
+                //tree.Print();
 
-                if (tokens[tokens.Count - 1] == null) tokens.RemoveAt(tokens.Count - 1);
+                //while (analyzer.GetStatus() == AnalyzerStatus.OK)
+                //{
+                //    tokens.Add(analyzer.GetToken());
+                //}
+
+                //if (tokens[tokens.Count - 1] == null) tokens.RemoveAt(tokens.Count - 1);
             }
 
-            StringBuilder SB = new StringBuilder();
-            StringBuilder SB2 = new StringBuilder();
+            ///Часть проверки
+            //StringBuilder SB = new StringBuilder();
+            //StringBuilder SB2 = new StringBuilder();
 
-            foreach (Token item in tokens)
-            {
-                SB.AppendLine(item.ToString());
-            }
+            //foreach (Token item in tokens)
+            //{
+            //    SB.AppendLine(item.ToString());
+            //}
 
-            using (StreamReader reader = new StreamReader(pathToPassFile))
-            {
-                while (reader.Peek() > -1) SB2.AppendLine(reader.ReadLine());
-            }
-            char[] s1 = SB.ToString().ToCharArray();
-            char[] s2 = SB2.ToString().ToCharArray();
+            //using (StreamReader reader = new StreamReader(pathToPassFile))
+            //{
+            //    while (reader.Peek() > -1) SB2.AppendLine(reader.ReadLine());
+            //}
+            //char[] s1 = SB.ToString().ToCharArray();
+            //char[] s2 = SB2.ToString().ToCharArray();
 
             ///Проверка на несовпадающий символ
             ////for (int i = 0; i < s1.Length; i++)
@@ -88,18 +95,18 @@ namespace Compilator
             //    writer.Write(SB.ToString());
             //}
 
-            if (SB.ToString().Equals(SB2.ToString()))
-            {
-                SB.AppendLine("-----------------------");
-                SB.AppendLine("Проверка прошла успешно");
-            }
-            else
-            {
-                SB.AppendLine("-----------------------");
-                SB.AppendLine("Проверка завершилась провалом!");
-            }
+            //if (SB.ToString().Equals(SB2.ToString()))
+            //{
+            //    SB.AppendLine("-----------------------");
+            //    SB.AppendLine("Проверка прошла успешно");
+            //}
+            //else
+            //{
+            //    SB.AppendLine("-----------------------");
+            //    SB.AppendLine("Проверка завершилась провалом!");
+            //}
 
-            textBox1.Text = SB.ToString();
+            //textBox1.Text = SB.ToString();
         }
     }
 }
