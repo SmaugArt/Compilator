@@ -29,8 +29,9 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
             opLess, // <
             opGreater, // >
             opGreaterOrEquals, // >=
-            opLessOrEquals // <=
-            
+            opLessOrEquals, // <=
+            opToDegree //^
+
         }
 
         private static Dictionary<string, OP> operatorsDictionary;
@@ -61,7 +62,8 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
                 {"<", OP.opLess},
                 {">", OP.opGreater},
                 {">=", OP.opGreaterOrEquals},
-                {"<=", OP.opLessOrEquals}
+                {"<=", OP.opLessOrEquals},
+                {"^", OP.opToDegree}
             };
         }
 

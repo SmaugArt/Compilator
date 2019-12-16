@@ -16,6 +16,7 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
                 new SymToken { startSym = ';', endSym = ';', status = StatusKey.Complete },
                 new SymToken { startSym = ',', endSym = ',', status = StatusKey.Complete },
                 new SymToken { startSym = '.', endSym = '.', status = StatusKey.Complete },
+                new SymToken { startSym = '^', endSym = '^', status = StatusKey.Complete },
                 new SymToken { startSym = '>', endSym = '>', status = StatusKey.RightAngleBracket },
                 new SymToken { startSym = '<', endSym = '<', status = StatusKey.LeftAngleBracket },
 

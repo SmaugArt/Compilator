@@ -22,10 +22,11 @@ namespace Compilator.GeneralStructures
     public class Token
     {
         string text; //текст который получаем из строки
-        int line;
-        int letter;
+        public int line { get; private set; }
+        public int letter { get; private set; }
         TokenType type;
-        object value;
+        public object value { get; private set; }
+
 
         public Token(string text, int linePos, int letterPos, TokenType tokenType)
         {

@@ -53,7 +53,7 @@ namespace Compilator
 
                 SyntaxisModule.SyntaxisAnalyzer syn = new SyntaxisModule.SyntaxisAnalyzer(analyzer);
                 var tree = syn.SyntaxisParse();
-                textBox1.Text = syn.PrintTree(tree);
+                textBox1.Text = tree.ToString();
                 //tree.Print();
 
                 //while (analyzer.GetStatus() == AnalyzerStatus.OK)

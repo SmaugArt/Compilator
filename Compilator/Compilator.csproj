@@ -63,10 +63,8 @@
     <Compile Include="GeneralStructures\Token.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SyntaxisModule\Structures\AbstractStructures\AbstractGrammatic.cs" />
-    <Compile Include="SyntaxisModule\Structures\AbstractStructures\GrammaticNode.cs" />
-    <Compile Include="SyntaxisModule\Structures\AbstractStructures\Node.cs" />
-    <Compile Include="SyntaxisModule\Structures\Grammatics.cs" />
+    <Compile Include="SyntaxisModule\Structures\Node.cs" />
+    <Compile Include="SyntaxisModule\SynException.cs" />
     <Compile Include="SyntaxisModule\SyntaxisAnalyzer.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
