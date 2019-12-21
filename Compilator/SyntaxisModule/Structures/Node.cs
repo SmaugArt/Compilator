@@ -120,6 +120,41 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "OCExpressionNode:   " + token.GetText();
     }
 
+    public class MemberAccessNode : SyntaxisNode
+    {
+        public MemberAccessNode() : base() { }
+
+        public override string NodeText() => "MemberAccessNode:   " + token.GetText();
+    }
+
+    public class PostIncrementNode : SyntaxisNode
+    {
+        public PostIncrementNode() : base() { }
+
+        public override string NodeText() => "PostIncrementNode:   " + token.GetText();
+    }
+
+    public class PostDecrementNode : SyntaxisNode
+    {
+        public PostDecrementNode() : base() { }
+
+        public override string NodeText() => "PostDecrementNode:   " + token.GetText();
+    }
+
+    public class ElementAccessNode : SyntaxisNode
+    {
+        public ElementAccessNode() : base() { }
+
+        public override string NodeText() => "ElementAccessNode:  []";
+    }
+
+    public class InvocationExpressionNode : SyntaxisNode
+    {
+        public InvocationExpressionNode() : base() { }
+
+        public override string NodeText() => "InvocationExpressionNode: ()";
+    }
+
 
 
 

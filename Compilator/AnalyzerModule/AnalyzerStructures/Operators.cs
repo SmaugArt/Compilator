@@ -30,7 +30,11 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
             opGreater, // >
             opGreaterOrEquals, // >=
             opLessOrEquals, // <=
-            opToDegree //^
+            opToDegree, //^
+            opIncrementExpression, //++
+            opDecrementExpression, //--
+            opLeftSquareBracket,
+            opRightSquareBracket
 
         }
 
@@ -63,7 +67,11 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
                 {">", OP.opGreater},
                 {">=", OP.opGreaterOrEquals},
                 {"<=", OP.opLessOrEquals},
-                {"^", OP.opToDegree}
+                {"^", OP.opToDegree},
+                {"++", OP.opIncrementExpression },
+                {"--", OP.opDecrementExpression },
+                {"[", OP.opIncrementExpression },
+                {"]", OP.opDecrementExpression }
             };
         }
 

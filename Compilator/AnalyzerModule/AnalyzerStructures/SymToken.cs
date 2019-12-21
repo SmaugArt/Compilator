@@ -32,7 +32,9 @@
         CharDataP1,
         CharDataP2,
         CharEcran,
-        StringEcran
+        StringEcran,
+        DoublePlus,
+        DoubleMinus
     }
     public class SymToken
     {

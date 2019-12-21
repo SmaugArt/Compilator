@@ -57,6 +57,8 @@ namespace Compilator.AnalyzerModule
             sTokens.Add(StatusKey.CharDataP1, new CharDataP1());
             sTokens.Add(StatusKey.CharDataP2, new CharDataP2());
             sTokens.Add(StatusKey.CharEcran, new CharEcran());
+            sTokens.Add(StatusKey.DoublePlus, new DoublePlus());
+            sTokens.Add(StatusKey.DoubleMinus, new DoubleMinus());
         }
 
         virtual public Token GetToken()

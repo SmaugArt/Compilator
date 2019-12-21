@@ -69,51 +69,112 @@ namespace Compilator.SyntaxisModule
 
 
 
-        private SyntaxisNode DoubleParsePlusMinus() //expression c 2-мя уровнями приоритета +-
-        {
-            var left = DoubleParseMultiplyDivide(); //парсит терминал чекаем, что такое и при необходимости вызываем ошибку
-            if (left.GetType() != typeof(NodeDouble) && left.GetType() != typeof(NodeInt) && left.GetType() != typeof(NodeBinaryOp))
-                throw SynException.ShowException(EXType.IncorrectNode ,left.token.ToString());
-
-            var t = analyzer.GetToken();
-
-            if (t != null && (t.GetText() == "+" || t.GetText() == "-"))
-                return new NodeBinaryOp() { token = t, children = new List<SyntaxisNode>() { left, DoubleParsePlusMinus()}};
-
-            analyzer.StepBack();
-            return left;
-
-        }
-
-        private SyntaxisNode DoubleParseMultiplyDivide() //term - слогаемое */
-        {
-            var left = ParseFactor(); //парсит терминал чекаем, что такое и при необходимости вызываем ошибку
-            if (left.GetType() != typeof(NodeDouble) && left.GetType() != typeof(NodeInt))
-                throw SynException.ShowException(EXType.IncorrectNode, left.token.ToString());
-
-            var t = analyzer.GetToken();
-
-            if (t != null && t.GetText() == "*" || t != null && t.GetText() == "/") //t!= null - проверка на конец считывания
-                return new NodeBinaryOp() { token = t, children = new List<SyntaxisNode>() { left, DoubleParseMultiplyDivide() } };//LeftNode = left, RightNode = ParseTerm() };
-
-            analyzer.StepBack();
-            return left;
-        }
-
-
-
-        //private SyntaxisNode TypeCast() //приведение типов
+        //private SyntaxisNode DoubleParsePlusMinus() //expression c 2-мя уровнями приоритета +-
         //{
+        //    var left = DoubleParseMultiplyDivide(); //парсит терминал чекаем, что такое и при необходимости вызываем ошибку
+        //    if (left.GetType() != typeof(NodeDouble) && left.GetType() != typeof(NodeInt) && left.GetType() != typeof(NodeBinaryOp))
+        //        throw SynException.ShowException(EXType.IncorrectNode ,left.token.ToString());
+
+        //    var t = analyzer.GetToken();
+
+        //    if (t != null && (t.GetText() == "+" || t.GetText() == "-"))
+        //        return new NodeBinaryOp() { token = t, children = new List<SyntaxisNode>() { left, DoubleParsePlusMinus()}};
+
+        //    analyzer.StepBack();
+        //    return left;
 
         //}
 
-        //private Declaration() { } //объявление переменной
+        //private SyntaxisNode DoubleParseMultiplyDivide() //term - слогаемое */
+        //{
+        //    var left = ParseFactor(); //парсит терминал чекаем, что такое и при необходимости вызываем ошибку
+        //    if (left.GetType() != typeof(NodeDouble) && left.GetType() != typeof(NodeInt))
+        //        throw SynException.ShowException(EXType.IncorrectNode, left.token.ToString());
 
-        private SyntaxisNode ParsePrimaryExpression() //factor - Пуcть будет методом получения нода узла
+        //    var t = analyzer.GetToken();
+
+        //    if (t != null && t.GetText() == "*" || t != null && t.GetText() == "/") //t!= null - проверка на конец считывания
+        //        return new NodeBinaryOp() { token = t, children = new List<SyntaxisNode>() { left, DoubleParseMultiplyDivide() } };//LeftNode = left, RightNode = ParseTerm() };
+
+        //    analyzer.StepBack();
+        //    return left;
+        //}
+
+
+
+        ////////private SyntaxisNode TypeCast() //приведение типов
+        ////////{
+
+        ////////}
+
+        ////////private Declaration() { } //объявление переменной
+
+
+        private SyntaxisNode ParsePimaryExpression() //without array_creation_expression
+        {
+            SyntaxisNode parsePNACE = Parse_Primary_No_Array_Creation_Expression();
+
+            Token token = analyzer.GetToken();
+            if (token == null) return parsePNACE;
+
+            //+++++member_access
+            if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opDot)
+            {
+                Token token2 = analyzer.GetToken();
+
+                if(token2 == null || token2.GetTokenType() != TokenType.Identificator) //without type_argument_list
+                    throw SynException.ShowException(EXType.IncorrectToken, "");
+
+                return new MemberAccessNode()
+                { token = token, children = new List<SyntaxisNode>()
+                                 { parsePNACE, new NodeIdentificator() { token = token2 } }
+                };
+            }
+            //-----member_access
+
+            //+++++post increment expression
+            if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opIncrementExpression)
+                return new PostIncrementNode(){ token = token, children =new List<SyntaxisNode>() { parsePNACE }};
+            //-----post increment expression
+
+            //+++++post decrement expression
+            if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opDecrementExpression)
+                return new PostDecrementNode() { token = token, children = new List<SyntaxisNode>() { parsePNACE } };
+            //-----post decrement expression
+
+            //+++++element_access
+            if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opLeftSquareBracket)
+            {
+                ExpressionNode newNode = ParseExpression();
+
+                Token token2 = analyzer.GetToken();
+                if (token2==null || token2.GetTokenType() != TokenType.Operator || (Operators.OP) token2.value != Operators.OP.opRightSquareBracket)
+                    throw new Exception("Ожидается \"]\", но получен:" + ((token2 ==null)? "Null": token2.ToString()));
+
+                return new ElementAccessNode() { token=token, children = new List<SyntaxisNode>() { parsePNACE, newNode } };
+            }
+            //-----element_access
+
+            //+++++invocation expression
+            if (token.GetTokenType() == TokenType.Operator && (Operators.OP) token.value == Operators.OP.opLeftCurlyBracket) //without parameters constructor
+            {
+                Token token2 = analyzer.GetToken();
+                if (token2 == null || token2.GetTokenType() != TokenType.Operator || (Operators.OP)token2.value != Operators.OP.opRightCurlyBracket)
+                    throw new Exception("Ожидается \")\", но получен:" + ((token2 == null) ? "Null" : token2.ToString()));
+
+                return new InvocationExpressionNode() { token =token, children = new List<SyntaxisNode>() { parsePNACE } };
+            } 
+            //-----invocation expression
+
+            analyzer.StepBack();
+            return parsePNACE;
+        }
+
+        private SyntaxisNode Parse_Primary_No_Array_Creation_Expression() //like a Primary expression
         {
             Token t = analyzer.GetToken();
 
-            if (t == null) return new EmptyNode();
+            if (t == null) throw SynException.ShowException(EXType.NullNode, t.ToString());//return new EmptyNode(); //?
 
             switch (t.GetTokenType())
             {
@@ -131,29 +192,41 @@ namespace Compilator.SyntaxisModule
                         return new NodeBool() { token = t };
                     if((KeyWords.KW)t.value == KeyWords.KW.kwNull)
                         return new NullNode() { token = t };
-                    //++++object_creation_expression
+                    //++++object_creation_expression ///Делаем без переменных, иначе придется реализовывать деревоы
                     if ((KeyWords.KW)t.value == KeyWords.KW.kwNew)
                     {
                         SyntaxisNode type = ParseType(); //получаю type (Некий идентификатор или KeyWord)
-                        Token LeftCyrcleBr = analyzer.GetToken();
-                        if (LeftCyrcleBr.GetTokenType() != TokenType.Operator || (Operators.OP)LeftCyrcleBr.value != Operators.OP.opLeftCurlyBracket)
-                            throw new Exception("Ожидается \"(\", но получен:" + LeftCyrcleBr.ToString());
-                        
-                        while (true)
-                        {
-                            //параметры
-                            List<SyntaxisNode> par = ParseObjectOrCollectionInitializer();//ParseArgumentList(); //char data == standart datatype
-                        }
 
-                        return new ObjectCreationExpressionNode() { token = t, children = new List<SyntaxisNode>() { DATA } };
+                        Token opLeftParenthesis = analyzer.GetToken();
+                        if (opLeftParenthesis.GetTokenType() != TokenType.Operator || (Operators.OP)opLeftParenthesis.value != Operators.OP.opLeftParenthesis)
+                            throw new Exception("Expected \"(\", but get:" + opLeftParenthesis.ToString());
+                        Token opRightParenthesis = analyzer.GetToken();
+
+                        if (opRightParenthesis.GetTokenType() != TokenType.Operator || (Operators.OP)opRightParenthesis.value != Operators.OP.opRightParenthesis)
+                            throw new Exception("Expected \")\", but get:" + opRightParenthesis.ToString());
+
+                        Token LeftCyrkleBrace = analyzer.GetToken();
+                        if (LeftCyrkleBrace.GetTokenType() != TokenType.Operator || (Operators.OP)LeftCyrkleBrace.value != Operators.OP.opLeftCurlyBracket)
+                            throw new Exception("Expected \"{\", but get:" + LeftCyrkleBrace.ToString());
+
+                        //параметры
+                        List<SyntaxisNode> par = ParseObjectOrCollectionInitializer();//ParseArgumentList(); //char data == standart datatype
+
+                        Token RightCyrkleBrace = analyzer.GetToken();
+                        if (RightCyrkleBrace.GetTokenType() != TokenType.Operator || (Operators.OP)RightCyrkleBrace.value != Operators.OP.opRightCurlyBracket)
+                            throw new Exception("Expected \"{\", but get:" + RightCyrkleBrace.ToString());
+
+                        return new ObjectCreationExpressionNode() { token = t, children = par };
                     }
                     //----object_creation_expression
                     break;
                 //----Literal
+
                 //++++Simple  name???????????????????????????????????
                 case TokenType.Identificator:
                     return new NodeIdentificator() { token = t };
-                //----Simple Nmae
+                //----Simple Name
+
                 //++++parenthesized_expression
                 case TokenType.Operator:
                     if ((Operators.OP)t.value == Operators.OP.opLeftCurlyBracket) //съедаем Expression
@@ -166,53 +239,47 @@ namespace Compilator.SyntaxisModule
                     }
                     break;
                 //----parenthesized_expression
-                default:
-                    throw SynException.ShowException(EXType.IncorrectToken, t.ToString());
             }
 
-            while (true) //может быть [][] и т.д.
-            {
-                //++++member_access
-
-                //----member_access
-                //element_access
-                //invocation expression
-            }
+            throw SynException.ShowException(EXType.IncorrectToken, t.ToString());
         }
 
-
-
-
-
-
-
-
-
-        private SyntaxisNode ParseFactor() //factor - Пуcть будет методом получения нода узла
+        private ExpressionNode ParseExpression() //without NonAssigmentExpressions
         {
-            Token t = analyzer.GetToken();
 
-            if (t == null) return new EmptyNode();
-
-            switch (t.GetTokenType())
-            {
-                case TokenType.Identificator:
-                    return new NodeIdentificator() { token = t };
-                case TokenType.KeyWord:
-                    return new NodeIdentificator() { token = t };
-                //?case TokenType.Operator: ?-Unary or Binary operations
-                case TokenType.CharData:
-                    return new NodeChar() { token = t };
-                case TokenType.DoubleData:
-                    return new NodeDouble() { token = t };
-                case TokenType.IntData:
-                    return new NodeInt() { token = t };
-                case TokenType.StringData:
-                    return new NodeString() { token = t };
-                default:
-                    throw SynException.ShowException(EXType.IncorrectToken,t.ToString());
-            }
         }
+
+
+
+
+
+
+
+        //private SyntaxisNode ParseFactor() //factor - Пуcть будет методом получения нода узла
+        //{
+        //    Token t = analyzer.GetToken();
+
+        //    if (t == null) return new EmptyNode();
+
+        //    switch (t.GetTokenType())
+        //    {
+        //        case TokenType.Identificator:
+        //            return new NodeIdentificator() { token = t };
+        //        case TokenType.KeyWord:
+        //            return new NodeIdentificator() { token = t };
+        //        //?case TokenType.Operator: ?-Unary or Binary operations
+        //        case TokenType.CharData:
+        //            return new NodeChar() { token = t };
+        //        case TokenType.DoubleData:
+        //            return new NodeDouble() { token = t };
+        //        case TokenType.IntData:
+        //            return new NodeInt() { token = t };
+        //        case TokenType.StringData:
+        //            return new NodeString() { token = t };
+        //        default:
+        //            throw SynException.ShowException(EXType.IncorrectToken,t.ToString());
+        //    }
+        //}
 
 
         #region Print
@@ -322,7 +389,7 @@ namespace Compilator.SyntaxisModule
 
         //    return pos;
         //}
-        
+
         ///// <summary>
         ///// Подсчитывает количество отступов, требуемых для построения узла дерева
         ///// </summary>

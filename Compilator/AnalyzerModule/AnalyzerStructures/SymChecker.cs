@@ -11,8 +11,10 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
                 new SymToken { startSym = '}', endSym = '}', status = StatusKey.Complete },
                 new SymToken { startSym = '(', endSym = '(', status = StatusKey.Complete },
                 new SymToken { startSym = ')', endSym = ')', status = StatusKey.Complete },
+                new SymToken { startSym = '[', endSym = '[', status = StatusKey.Complete },
+                new SymToken { startSym = ']', endSym = ']', status = StatusKey.Complete },
                 new SymToken { startSym = '*', endSym = '*', status = StatusKey.Complete },
-                new SymToken { startSym = '+', endSym = '+', status = StatusKey.Complete },
+                new SymToken { startSym = '+', endSym = '+', status = StatusKey.DoublePlus },
                 new SymToken { startSym = ';', endSym = ';', status = StatusKey.Complete },
                 new SymToken { startSym = ',', endSym = ',', status = StatusKey.Complete },
                 new SymToken { startSym = '.', endSym = '.', status = StatusKey.Complete },
@@ -21,7 +23,7 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
                 new SymToken { startSym = '<', endSym = '<', status = StatusKey.LeftAngleBracket },
 
                 new SymToken { startSym = '/', endSym = '/', status = StatusKey.SlashStatus }, //деление или коментарий
-                new SymToken { startSym = '-', endSym = '-', status = StatusKey.Complete },//MinusStatus },
+                new SymToken { startSym = '-', endSym = '-', status = StatusKey.DoubleMinus },//MinusStatus },
                 new SymToken { startSym = 'A', endSym = 'Z', status = StatusKey.Identificator },
                 new SymToken { startSym = 'a', endSym = 'z', status = StatusKey.Identificator },
                 new SymToken { startSym = '0', endSym = '9', status = StatusKey.IntData },
@@ -221,5 +223,17 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
     {
         public RightAngleBracket() : base(TokenType.Operator, TokenType.Operator, StatusKey.SymBack) =>
             sToken.Add(new SymToken { startSym = '=', endSym = '=', status = StatusKey.Complete });
+    }
+
+    class DoublePlus : ASymChecker
+    {
+        public DoublePlus() : base(TokenType.Operator, TokenType.Operator, StatusKey.SymBack) =>
+            sToken.Add(new SymToken { startSym = '+', endSym = '+', status = StatusKey.Complete });
+    }
+
+    class DoubleMinus : ASymChecker
+    {
+        public DoubleMinus() : base(TokenType.Operator, TokenType.Operator, StatusKey.SymBack) =>
+            sToken.Add(new SymToken { startSym = '-', endSym = '-', status = StatusKey.Complete });
     }
 }
