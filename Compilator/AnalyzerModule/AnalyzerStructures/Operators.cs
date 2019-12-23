@@ -34,7 +34,8 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
             opIncrementExpression, //++
             opDecrementExpression, //--
             opLeftSquareBracket,
-            opRightSquareBracket
+            opRightSquareBracket,
+			opQuestionMark //?
 
         }
 
@@ -71,8 +72,9 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
                 {"++", OP.opIncrementExpression },
                 {"--", OP.opDecrementExpression },
                 {"[", OP.opIncrementExpression },
-                {"]", OP.opDecrementExpression }
-            };
+                {"]", OP.opDecrementExpression },
+				{"?", OP.opQuestionMark },
+			};
         }
 
         public static OP GetOperator(string str)
