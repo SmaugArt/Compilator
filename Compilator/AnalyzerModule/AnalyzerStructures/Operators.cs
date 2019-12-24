@@ -33,9 +33,10 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
             opToDegree, //^
             opIncrementExpression, //++
             opDecrementExpression, //--
-            opLeftSquareBracket,
-            opRightSquareBracket,
-			opQuestionMark //?
+            opLeftSquareBracket,//[
+            opRightSquareBracket,//]
+			opQuestionMark, //?
+            opDoubleDot, //:
 
         }
 
@@ -74,6 +75,7 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
                 {"[", OP.opIncrementExpression },
                 {"]", OP.opDecrementExpression },
 				{"?", OP.opQuestionMark },
+                {":", OP.opDoubleDot},
 			};
         }
 

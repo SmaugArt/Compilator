@@ -35,29 +35,29 @@ namespace Compilator.SyntaxisModule.Structures
         }
     }
 
-    public class NodeLiteral : SyntaxisNode
+    public class NodeLiteral : ExpressionNode
     {
         public NodeLiteral():base() { }
         public override string NodeText() => "LiteralNode: "+token.GetText();
         
     }
 
-    public class NodeBinaryOp : SyntaxisNode
-    {
-        public NodeBinaryOp() : base() { }
-        //public SyntaxisNode LeftNode;
-        //public SyntaxisNode RightNode;
-        public override string NodeText() => "BinaryOperat: " + token.GetText();
-    }
+    //public class NodeBinaryOp : SyntaxisNode
+    //{
+    //    public NodeBinaryOp() : base() { }
+    //    //public SyntaxisNode LeftNode;
+    //    //public SyntaxisNode RightNode;
+    //    public override string NodeText() => "BinaryOperat: " + token.GetText();
+    //}
 
-    public class NodeUnaryOp : SyntaxisNode
-    {
-        public NodeUnaryOp() : base() { }
-        //public SyntaxisNode arg; //аргумент унарных операций
-        public override string NodeText() => "UnaryOperat:  " + token.GetText();
-    }
+    //public class NodeUnaryOp : SyntaxisNode
+    //{
+    //    public NodeUnaryOp() : base() { }
+    //    //public SyntaxisNode arg; //аргумент унарных операций
+    //    public override string NodeText() => "UnaryOperat:  " + token.GetText();
+    //}
 
-    public class NodeIdentificator : SyntaxisNode
+    public class NodeIdentificator : ExpressionNode
     {
         public NodeIdentificator():base() { }
         public override string NodeText() => "Identificator:" + token.GetText();
@@ -113,11 +113,88 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "ExpressionNode:   " + token.GetText();
     }
 
-    public class ObjectCreationExpressionNode : SyntaxisNode
+    public class ConditionalExpressionNode : ExpressionNode //:
+    {
+        public ConditionalExpressionNode() : base() { }
+
+        public override string NodeText() => "ConditionalExpressionNode:" + token.GetText();
+    }
+
+    public class ConditionalOrExpressionNode : ExpressionNode //||
+    {
+        public ConditionalOrExpressionNode() : base() { }
+
+        public override string NodeText() => "ConditionalOrExpressionNode:" + token.GetText();
+    }
+
+    public class ConditionalAndExpressionNode : ExpressionNode //&&
+    {
+        public ConditionalAndExpressionNode() : base() { }
+
+        public override string NodeText() => "ConditionalAndExpressionNode:" + token.GetText();
+    }
+
+    public class InclusiveOrExpressionNode : ExpressionNode //|
+    {
+        public InclusiveOrExpressionNode() : base() { }
+
+        public override string NodeText() => "InclusiveOrExpressionNode:" + token.GetText();
+    }
+    
+    public class ExclusiveOrExpressionNode : ExpressionNode //^
+    {
+        public ExclusiveOrExpressionNode() : base() { }
+
+        public override string NodeText() => "ExclusiveOrExpressionNode:" + token.GetText();
+    }
+
+    public class AndExpressionNode : ExpressionNode //&
+    {
+        public AndExpressionNode() : base() { }
+
+        public override string NodeText() => "AndExpressionNode:" + token.GetText();
+    }
+
+    public class EqualityExpressionNode : ExpressionNode //==, !=
+    {
+        public EqualityExpressionNode() : base() { }
+
+        public override string NodeText() => "EqualityExpressionNode:" + token.GetText();
+    }
+    
+    public class RelationalExpressionNode : ExpressionNode //Is,As, >=, <=, >, <
+    {
+        public RelationalExpressionNode() : base() { }
+
+        public override string NodeText() => "RelationalExpressionNode:" + token.GetText();
+    }
+
+    public class BinaryOperationExpressionNode : ExpressionNode //Is,As, >=, <=, >, <
+    {
+        public BinaryOperationExpressionNode() : base() { }
+
+        public override string NodeText() => "BinaryOperationExpressionNode:" + token.GetText();
+    }
+
+    public class UnaryOperationExpressionNode : ExpressionNode //Is,As, >=, <=, >, <
+    {
+        public UnaryOperationExpressionNode() : base() { }
+
+        public override string NodeText() => "UnaryOperationExpressionNode:" + token.GetText();
+    }
+
+    public class ObjectCreationExpressionNode : ExpressionNode
     {
         public ObjectCreationExpressionNode() : base() { }
 
         public override string NodeText() => "OCExpressionNode:   " + token.GetText();
+    }
+
+    public class CastEspression : ExpressionNode
+    {
+        public CastEspression() : base() { }
+
+        public override string NodeText() => "CastEspression:   " + token.GetText();
     }
 
     public class MemberAccessNode : SyntaxisNode

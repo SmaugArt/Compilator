@@ -14,7 +14,7 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
                 new SymToken { startSym = '[', endSym = '[', status = StatusKey.Complete },
                 new SymToken { startSym = ']', endSym = ']', status = StatusKey.Complete },
                 new SymToken { startSym = '*', endSym = '*', status = StatusKey.Complete },
-                new SymToken { startSym = '+', endSym = '+', status = StatusKey.DoublePlus },
+                new SymToken { startSym = '+', endSym = '+', status = StatusKey.DoublePlus }, //just check:Can be a complete
                 new SymToken { startSym = ';', endSym = ';', status = StatusKey.Complete },
                 new SymToken { startSym = ',', endSym = ',', status = StatusKey.Complete },
                 new SymToken { startSym = '.', endSym = '.', status = StatusKey.Complete },
@@ -22,9 +22,10 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
                 new SymToken { startSym = '>', endSym = '>', status = StatusKey.RightAngleBracket },
                 new SymToken { startSym = '<', endSym = '<', status = StatusKey.LeftAngleBracket },
 				new SymToken { startSym = '?', endSym = '?', status = StatusKey.Complete },
+                new SymToken { startSym = ':', endSym = ':', status = StatusKey.Complete },
 
-				new SymToken { startSym = '/', endSym = '/', status = StatusKey.SlashStatus }, //деление или коментарий
-                new SymToken { startSym = '-', endSym = '-', status = StatusKey.DoubleMinus },//MinusStatus },
+                new SymToken { startSym = '/', endSym = '/', status = StatusKey.SlashStatus }, //деление или коментарий
+                new SymToken { startSym = '-', endSym = '-', status = StatusKey.DoubleMinus },//just check:Can be a complete
                 new SymToken { startSym = 'A', endSym = 'Z', status = StatusKey.Identificator },
                 new SymToken { startSym = 'a', endSym = 'z', status = StatusKey.Identificator },
                 new SymToken { startSym = '0', endSym = '9', status = StatusKey.IntData },
