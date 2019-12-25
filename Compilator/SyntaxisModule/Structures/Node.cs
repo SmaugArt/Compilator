@@ -62,6 +62,14 @@ namespace Compilator.SyntaxisModule.Structures
         public NodeIdentificator():base() { }
         public override string NodeText() => "Identificator:" + token.GetText();
     } //: base("IdentificatorNode") { } }
+
+    ////public class NamespaceNode : ExpressionNode
+    ////{
+    ////    public NamespaceNode() : base() { }
+
+    ////    public override string NodeText() => "NamespaceNode:" + token.GetText();
+    ////}
+        
     public class NodeChar : NodeLiteral
     {
         public NodeChar() : base() { }
@@ -90,6 +98,20 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "BoolNode:   " + token.GetText();
     }
 
+    public class SimpleTypeNode : SyntaxisNode
+    {
+        public SimpleTypeNode() : base() { }
+
+        public override string NodeText() => "SimpleTypeNode:   " + token.GetText();
+    }
+
+    public class NullableTypeNode : SimpleTypeNode
+    {
+        public NullableTypeNode() : base() { }
+
+        public override string NodeText() => "NullableTypeNode:   " + token.GetText();
+    }
+
     public class NullNode : NodeLiteral
     {
         public NullNode() : base() { }
@@ -104,6 +126,13 @@ namespace Compilator.SyntaxisModule.Structures
         public EmptyNode() : base() { }
 
         public override string NodeText() => "Empty node! Lexer reached the end of the line.";
+    }
+
+    public class OperatorNode : SyntaxisNode
+    {
+        public OperatorNode() : base() { }
+
+        public override string NodeText() => "OperatorNode: "+token.GetText();
     }
 
     public class ExpressionNode : SyntaxisNode
@@ -197,6 +226,13 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "CastEspression:   " + token.GetText();
     }
 
+    public class AssignmentNode : ExpressionNode
+    {
+        public AssignmentNode() : base() { }
+
+        public override string NodeText() => "AssignmentNode:   " + token.GetText();
+    }
+
     public class MemberAccessNode : SyntaxisNode
     {
         public MemberAccessNode() : base() { }
@@ -232,10 +268,34 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "InvocationExpressionNode: ()";
     }
 
+    public class ArrayTypeNode : SyntaxisNode
+    {
+        public ArrayTypeNode() : base() { }
 
+        public override string NodeText() => "ArrayTypeNode: []";
+    }
 
+    public class ObjectInitializerNode : SyntaxisNode
+    {
+        public ObjectInitializerNode() : base() { }
 
+        public override string NodeText() => "ArrayTypeNode: {}";
+    }
 
+    public class MemberInitializerListNode : SyntaxisNode
+    {
+        public MemberInitializerListNode() : base() { }
+
+        public override string NodeText() => "ObjectInitializerNode:" + token.GetText();
+    }
+
+    public class MemberInitializerNode : SyntaxisNode
+    {
+
+        public MemberInitializerNode() : base() { }
+
+        public override string NodeText() => "MemberInitializerNode:" + token.GetText();
+    }
 
     public class GlobalNode : SyntaxisNode //содержит using, class и структуры enum/struct
     {

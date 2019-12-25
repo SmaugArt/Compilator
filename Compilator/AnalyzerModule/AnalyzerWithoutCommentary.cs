@@ -9,6 +9,7 @@ namespace Compilator.AnalyzerModule
         private List<int> valueOfSteps;
         public AnalyzerWithoutCommentary(StreamReader reader) : base(reader) => valueOfSteps = new List<int>();
 
+        public new int stepBackCount { get { return valueOfSteps.Count; } }
         public override Token GetToken()
         {
             Token token = base.GetToken();

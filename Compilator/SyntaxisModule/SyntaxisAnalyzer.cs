@@ -7,190 +7,199 @@ using System.Collections.Generic;
 
 namespace Compilator.SyntaxisModule
 {
-	public class SyntaxisAnalyzer
-	{
-		private Analyzer analyzer;
+    public class SyntaxisAnalyzer
+    {
+        private Analyzer analyzer;
 
-		#region PrintParameters
-		private List<int> LengthOfStrLevel; //(максимальная) длина строки уровня (дерева)
-		private List<string> StrLines; //список строк, которые нужны для отрисовки дерева 
-		#endregion
-		public SyntaxisAnalyzer(Analyzer analyzer)
-		{
-			this.analyzer = analyzer;
-			LengthOfStrLevel = new List<int>();
-			StrLines = new List<string>();
-			int i = 3;
-		}
+        #region PrintParameters
+        private List<int> LengthOfStrLevel; //(максимальная) длина строки уровня (дерева)
+        private List<string> StrLines; //список строк, которые нужны для отрисовки дерева 
+        #endregion
+        public SyntaxisAnalyzer(Analyzer analyzer)
+        {
+            this.analyzer = analyzer;
+            LengthOfStrLevel = new List<int>();
+            StrLines = new List<string>();
+            int i = 3;
+        }
 
-		/// <summary>
-		/// Метод проверяет обязательное условие, 
-		/// что первый токен отличен от пустого
-		/// таким образом левое значения всегда будет ненулевым!!!
-		/// </summary>
-		/// <returns></returns>
-		public SyntaxisNode SyntaxisParse()
-		{
-			if (analyzer.GetToken() == null)
-				return new NodeLiteral() { token = new Token("", 0, 0, TokenType.Null) };
+        /// <summary>
+        /// Метод проверяет обязательное условие, 
+        /// что первый токен отличен от пустого
+        /// таким образом левое значения всегда будет ненулевым!!!
+        /// </summary>
+        /// <returns></returns>
+        public SyntaxisNode SyntaxisParse()
+        {
+            if (analyzer.GetToken() == null)
+                return new NodeLiteral() { token = new Token("", 0, 0, TokenType.Null) };
 
-			analyzer.StepBack();
-			return DoubleParsePlusMinus();
-			int i = (int)10.1 ^ (int)2.1;
-		}
+            analyzer.StepBack();
+            return DoubleParsePlusMinus();
+            int i = (int)10.1 ^ (int)2.1;
+        }
 
-		private SyntaxisNode Compilation_Unit()
-		{
-			while (true) {
-				var left = ParseFactor();
-				if ()
-					UsingDirectives();
-			}
-
-
-		}
+        private SyntaxisNode Compilation_Unit()
+        {
+            while (true) {
+                var left = ParseFactor();
+                if ()
+                    UsingDirectives();
+            }
 
 
+        }
 
-		private SyntaxisNode ParsePimaryExpression() //without array_creation_expression
-		{
-			SyntaxisNode parsePNACE = Parse_Primary_No_Array_Creation_Expression();
 
-			Token token = analyzer.GetToken();
-			if (token == null) return parsePNACE;
+        #region Primary_Expression
+        private SyntaxisNode ParsePimaryExpression() //without array_creation_expression
+        {
+            SyntaxisNode parsePNACE = Parse_Primary_No_Array_Creation_Expression();
 
-			//+++++member_access
-			if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opDot) {
-				Token token2 = analyzer.GetToken();
+            Token token = analyzer.GetToken();
+            if (token == null) return parsePNACE;
 
-				if (token2 == null || token2.GetTokenType() != TokenType.Identificator) //without type_argument_list
-					throw SynException.ShowException(EXType.IncorrectToken, "");
+            //+++++member_access
+            if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opDot) {
 
-				return new MemberAccessNode() { token = token, children = new List<SyntaxisNode>()
-								 { parsePNACE, new NodeIdentificator() { token = token2 } }
-				};
-			}
-			//-----member_access
+                return new MemberAccessNode() { token = token, children = new List<SyntaxisNode>()
+                                 { parsePNACE, Parse_Identificator() }
+                };
+            }
+            //-----member_access
 
-			//+++++post increment expression
-			if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opIncrementExpression)
-				return new PostIncrementNode() { token = token, children = new List<SyntaxisNode>() { parsePNACE } };
-			//-----post increment expression
+            //+++++post increment expression
+            if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opIncrementExpression)
+                return new PostIncrementNode() { token = token, children = new List<SyntaxisNode>() { parsePNACE } };
+            //-----post increment expression
 
-			//+++++post decrement expression
-			if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opDecrementExpression)
-				return new PostDecrementNode() { token = token, children = new List<SyntaxisNode>() { parsePNACE } };
-			//-----post decrement expression
+            //+++++post decrement expression
+            if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opDecrementExpression)
+                return new PostDecrementNode() { token = token, children = new List<SyntaxisNode>() { parsePNACE } };
+            //-----post decrement expression
 
-			//+++++element_access
-			if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opLeftSquareBracket) {
-				ExpressionNode newNode = ParseExpression();
+            //+++++element_access
+            if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opLeftSquareBracket) {
+                ExpressionNode newNode = ParseExpression();
 
-				Token token2 = analyzer.GetToken();
-				if (token2 == null || token2.GetTokenType() != TokenType.Operator || (Operators.OP)token2.value != Operators.OP.opRightSquareBracket)
-					throw new Exception("Ожидается \"]\", но получен:" + ((token2 == null) ? "Null" : token2.ToString()));
+                Token token2 = analyzer.GetToken();
+                if (token2 == null || token2.GetTokenType() != TokenType.Operator || (Operators.OP)token2.value != Operators.OP.opRightSquareBracket)
+                    throw new Exception("Ожидается \"]\", но получен:" + ((token2 == null) ? "Null" : token2.ToString()));
 
-				return new ElementAccessNode() { token = token, children = new List<SyntaxisNode>() { parsePNACE, newNode } };
-			}
-			//-----element_access
+                return new ElementAccessNode() { token = token, children = new List<SyntaxisNode>() { parsePNACE, newNode } };
+            }
+            //-----element_access
 
-			//+++++invocation expression
-			if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opLeftCurlyBracket) //without parameters constructor
-			{
-				Token token2 = analyzer.GetToken();
-				if (token2 == null || token2.GetTokenType() != TokenType.Operator || (Operators.OP)token2.value != Operators.OP.opRightCurlyBracket)
-					throw new Exception("Ожидается \")\", но получен:" + ((token2 == null) ? "Null" : token2.ToString()));
+            //+++++invocation expression
+            if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opLeftParenthesis) //without parameters constructor
+            {
+                Token token2 = analyzer.GetToken();
+                if (token2 == null || token2.GetTokenType() != TokenType.Operator || (Operators.OP)token2.value != Operators.OP.opRightParenthesis)
+                    throw new Exception("Ожидается \")\", но получен:" + ((token2 == null) ? "Null" : token2.ToString()));
 
-				return new InvocationExpressionNode() { token = token, children = new List<SyntaxisNode>() { parsePNACE } };
-			}
-			//-----invocation expression
+                return new InvocationExpressionNode() { token = token, children = new List<SyntaxisNode>() { parsePNACE } };
+            }
+            //-----invocation expression
 
-			analyzer.StepBack();
-			return parsePNACE;
-		}
+            analyzer.StepBack();
+            return parsePNACE;
+        }
 
-		private ExpressionNode Parse_Primary_No_Array_Creation_Expression() //like a Primary expression
-		{
-			Token t = analyzer.GetToken();
+        private ExpressionNode Parse_Primary_No_Array_Creation_Expression() //like a Primary expression
+        {
+            Token t = analyzer.GetToken();
 
-			if (t == null) throw SynException.ShowException(EXType.NullNode, t.ToString());//return new EmptyNode(); //?
+            if (t == null) throw SynException.ShowException(EXType.NullNode, t.ToString());//return new EmptyNode(); //?
 
-			switch (t.GetTokenType()) {
-				//+++++Literal
-				case TokenType.CharData:
-					return new NodeChar() { token = t };
-				case TokenType.DoubleData:
-					return new NodeDouble() { token = t };
-				case TokenType.IntData:
-					return new NodeInt() { token = t };
-				case TokenType.StringData:
-					return new NodeString() { token = t };
-				case (TokenType.KeyWord):
-					if ((KeyWords.KW)t.value == KeyWords.KW.kwTrue || (KeyWords.KW)t.value == KeyWords.KW.kwFalse)
-						return new NodeBool() { token = t };
-					if ((KeyWords.KW)t.value == KeyWords.KW.kwNull)
-						return new NullNode() { token = t };
-					//++++object_creation_expression ///Делаем без переменных, иначе придется реализовывать деревоы
-					if ((KeyWords.KW)t.value == KeyWords.KW.kwNew) {
-						SyntaxisNode type = ParseType(); //получаю type (Некий идентификатор или KeyWord)
+            switch (t.GetTokenType()) {
+                //+++++Literal
+                case TokenType.CharData:
+                    return new NodeChar() { token = t };
+                case TokenType.DoubleData:
+                    return new NodeDouble() { token = t };
+                case TokenType.IntData:
+                    return new NodeInt() { token = t };
+                case TokenType.StringData:
+                    return new NodeString() { token = t };
+                case (TokenType.KeyWord):
+                    if ((KeyWords.KW)t.value == KeyWords.KW.kwTrue || (KeyWords.KW)t.value == KeyWords.KW.kwFalse)
+                        return new NodeBool() { token = t };
+                    if ((KeyWords.KW)t.value == KeyWords.KW.kwNull)
+                        return new NullNode() { token = t };
+                    //++++object_creation_expression ///Делаем без переменных, иначе придется реализовывать деревоы
+                    if ((KeyWords.KW)t.value == KeyWords.KW.kwNew) {
+                        SyntaxisNode type = Type_Parse_Level1(); //получаю type (Некий идентификатор или KeyWord)
 
-						Token opLeftParenthesis = analyzer.GetToken();
-						if (opLeftParenthesis.GetTokenType() != TokenType.Operator || (Operators.OP)opLeftParenthesis.value != Operators.OP.opLeftParenthesis)
-							throw new Exception("Expected \"(\", but get:" + opLeftParenthesis.ToString());
-						Token opRightParenthesis = analyzer.GetToken();
+                        Token opLeftParenthesis = analyzer.GetToken();
+                        if (opLeftParenthesis.GetTokenType() != TokenType.Operator || (Operators.OP)opLeftParenthesis.value != Operators.OP.opLeftParenthesis)
+                            throw new Exception("Expected \"(\", but get:" + opLeftParenthesis.ToString());
+                        Token opRightParenthesis = analyzer.GetToken();
 
-						if (opRightParenthesis.GetTokenType() != TokenType.Operator || (Operators.OP)opRightParenthesis.value != Operators.OP.opRightParenthesis)
-							throw new Exception("Expected \")\", but get:" + opRightParenthesis.ToString());
+                        if (opRightParenthesis.GetTokenType() != TokenType.Operator || (Operators.OP)opRightParenthesis.value != Operators.OP.opRightParenthesis)
+                            throw new Exception("Expected \")\", but get:" + opRightParenthesis.ToString());
 
-						Token LeftCyrkleBrace = analyzer.GetToken();
-						if (LeftCyrkleBrace.GetTokenType() != TokenType.Operator || (Operators.OP)LeftCyrkleBrace.value != Operators.OP.opLeftCurlyBracket)
-							throw new Exception("Expected \"{\", but get:" + LeftCyrkleBrace.ToString());
+                        Token LeftCyrkleBrace = analyzer.GetToken();
+                        if (LeftCyrkleBrace.GetTokenType() != TokenType.Operator || (Operators.OP)LeftCyrkleBrace.value != Operators.OP.opLeftCurlyBracket)
+                            throw new Exception("Expected \"{\", but get:" + LeftCyrkleBrace.ToString());
 
-						//параметры
-						List<SyntaxisNode> par = ParseObjectOrCollectionInitializer();//ParseArgumentList(); //char data == standart datatype
+                        //параметры
+                        SyntaxisNode par = ParseObjectOrCollectionInitializer();//ParseArgumentList(); //char data == standart datatype
 
-						Token RightCyrkleBrace = analyzer.GetToken();
-						if (RightCyrkleBrace.GetTokenType() != TokenType.Operator || (Operators.OP)RightCyrkleBrace.value != Operators.OP.opRightCurlyBracket)
-							throw new Exception("Expected \"{\", but get:" + RightCyrkleBrace.ToString());
+                        Token RightCyrkleBrace = analyzer.GetToken();
+                        if (RightCyrkleBrace.GetTokenType() != TokenType.Operator || (Operators.OP)RightCyrkleBrace.value != Operators.OP.opRightCurlyBracket)
+                            throw new Exception("Expected \"{\", but get:" + RightCyrkleBrace.ToString());
 
-						return new ObjectCreationExpressionNode() { token = t, children = par };
-					}
-					//----object_creation_expression
-					break;
-				//----Literal
+                        return new ObjectCreationExpressionNode() { token = t, children = new List<SyntaxisNode>() { par } };
+                    }
+                    //----object_creation_expression
+                    break;
+                //----Literal
 
-				//++++Simple  name???????????????????????????????????
-				case TokenType.Identificator:
-					return new NodeIdentificator() { token = t };
-				//----Simple Name
+                //++++Simple  name???????????????????????????????????
+                case TokenType.Identificator:
+                    return new NodeIdentificator() { token = t };
+                //----Simple Name
 
-				//++++parenthesized_expression
-				case TokenType.Operator:
-					if ((Operators.OP)t.value == Operators.OP.opLeftCurlyBracket) //съедаем Expression
-					{
-						ExpressionNode node = ParseExpression();
-						Token t2 = analyzer.GetToken();
-						if (t2.GetTokenType() == TokenType.Operator && (Operators.OP)t2.value == Operators.OP.opRightCurlyBracket)
-							return node;
-						throw new Exception("Ожидается \")\", но получен:" + t2.ToString());
-					}
-					break;
-					//----parenthesized_expression
-			}
+                //++++parenthesized_expression
+                case TokenType.Operator:
+                    if ((Operators.OP)t.value == Operators.OP.opLeftParenthesis) //съедаем Expression
+                    {
+                        ExpressionNode node = ParseExpression();
+                        Token t2 = analyzer.GetToken();
+                        if (t2.GetTokenType() == TokenType.Operator && (Operators.OP)t2.value == Operators.OP.opRightParenthesis)
+                            return node;
+                        throw new Exception("Ожидается \")\", но получен:" + t2.ToString());
+                    }
+                    break;
+                    //----parenthesized_expression
+            }
 
-			throw SynException.ShowException(EXType.IncorrectToken, t.ToString());
-		}
+            throw SynException.ShowException(EXType.IncorrectToken, t.ToString());
+        }
 
-		private ExpressionNode ParseExpression() //without lambda and query and assigmentExpression
-		{
-			return Parse_Conditional_Expression();
-		}
+        private ExpressionNode ParseExpression() //without lambda and query and assigmentExpression
+        {
+            int stepBackCount = analyzer.stepBackCount;
 
-		private ExpressionNode Parse_Conditional_Expression()
-		{
-			var left = Null_Coalescing_Expression();
+            try
+            {
+                return Parse_Conditional_Expression();
+            }
+            catch
+            {
+                for (int i = analyzer.stepBackCount; i > stepBackCount;)
+                    analyzer.StepBack();
 
-			Token token1 = analyzer.GetToken();
+                return Assignment_Parse();
+            }
+
+        }
+
+        private ExpressionNode Parse_Conditional_Expression()
+        {
+            var left = Null_Coalescing_Expression();
+
+            Token token1 = analyzer.GetToken();
 
             if (token1 != null && token1.GetTokenType() == TokenType.Operator && token1.value.Equals(Operators.OP.opQuestionMark))
             {
@@ -202,14 +211,14 @@ namespace Compilator.SyntaxisModule
 
                 var right = ParseExpression();
 
-                return new ConditionalExpressionNode() { token = token1, children = new List<SyntaxisNode>() {left, middle, right } };
-			} 
+                return new ConditionalExpressionNode() { token = token1, children = new List<SyntaxisNode>() { left, middle, right } };
+            }
 
             analyzer.StepBack();
             return left;
-		}
+        }
 
-		private ExpressionNode Null_Coalescing_Expression() => Conditional_Or_Expression();
+        private ExpressionNode Null_Coalescing_Expression() => Conditional_Or_Expression();
 
         private ExpressionNode Conditional_Or_Expression() //||
         {
@@ -231,7 +240,7 @@ namespace Compilator.SyntaxisModule
             var left = Inclusive_Or_Expression();
             Token operatorAnd = analyzer.GetToken();
 
-            if(operatorAnd != null && operatorAnd.GetTokenType() == TokenType.Operator && operatorAnd.value.Equals(Operators.OP.opAnd))
+            if (operatorAnd != null && operatorAnd.GetTokenType() == TokenType.Operator && operatorAnd.value.Equals(Operators.OP.opAnd))
             {
                 return new ConditionalAndExpressionNode() { token = operatorAnd, children = new List<SyntaxisNode>() { left, Conditional_And_Expression() } };
             }
@@ -287,7 +296,7 @@ namespace Compilator.SyntaxisModule
             var left = Relational_Expression_IS_AS();
             Token opEqualOrNotEqual = analyzer.GetToken();
 
-            if (opEqualOrNotEqual != null && opEqualOrNotEqual.GetTokenType() == TokenType.Operator && 
+            if (opEqualOrNotEqual != null && opEqualOrNotEqual.GetTokenType() == TokenType.Operator &&
                 (opEqualOrNotEqual.value.Equals(Operators.OP.opDoubleEquals) || opEqualOrNotEqual.value.Equals(Operators.OP.opNotEquals)))
             {
                 return new EqualityExpressionNode() { token = opEqualOrNotEqual, children = new List<SyntaxisNode>() { left, EqualityExpression() } };
@@ -305,7 +314,7 @@ namespace Compilator.SyntaxisModule
             if (kwISorAS != null && kwISorAS.GetTokenType() == TokenType.KeyWord &&
                 (kwISorAS.value.Equals(KeyWords.KW.kwIs) || kwISorAS.value.Equals(KeyWords.KW.kwAs)))
             {
-                return new RelationalExpressionNode() { token = kwISorAS, children = new List<SyntaxisNode>() { left, TypeParse() } };
+                return new RelationalExpressionNode() { token = kwISorAS, children = new List<SyntaxisNode>() { left, Type_Parse_Level1() } };
             }
 
             analyzer.StepBack();
@@ -318,7 +327,7 @@ namespace Compilator.SyntaxisModule
             Token token = analyzer.GetToken();
 
             if (token == null || token.GetTokenType() != TokenType.Operator)
-                throw SynException.ShowException(EXType.IncorrectToken, (token == null)? "Null reference":token.ToString());
+                throw SynException.ShowException(EXType.IncorrectToken, (token == null) ? "Null reference" : token.ToString());
 
             switch ((Operators.OP)token.value)
             {
@@ -356,7 +365,7 @@ namespace Compilator.SyntaxisModule
                 (token.value.Equals(Operators.OP.opPlus) || token.value.Equals(Operators.OP.opMinus)))
             {
                 var right = Additive_Expression();
-                return new BinaryOperationExpressionNode() { token=token, children=new List<SyntaxisNode>() {left, right } };
+                return new BinaryOperationExpressionNode() { token = token, children = new List<SyntaxisNode>() { left, right } };
             }
 
             analyzer.StepBack();
@@ -384,7 +393,7 @@ namespace Compilator.SyntaxisModule
         /// переходом к Primary_Expression
         /// </summary>
         /// <returns></returns>
-        private ExpressionNode Unary_Expression_Primary_Part() 
+        private ExpressionNode Unary_Expression_Primary_Part()
         {
             var left = Unary_Expression();
 
@@ -412,240 +421,269 @@ namespace Compilator.SyntaxisModule
                             Unary_Expression_Primary_Part()
                         }
                     };
-                case Operators.OP.opLeftCurlyBracket:
-                    var type = TypeParse();
+                case Operators.OP.opLeftParenthesis:
+                    var type = Type_Parse_Level1();
                     Token leftCyrklyBrasket = analyzer.GetToken();
 
                     if (leftCyrklyBrasket == null || leftCyrklyBrasket.GetTokenType() != TokenType.Operator ||
-                        !leftCyrklyBrasket.value.Equals(Operators.OP.opRightCurlyBracket))
-                        throw SynException.ShowException(EXType.IncorrectToken, (leftCyrklyBrasket ==null)?"Expected \")\"": leftCyrklyBrasket.ToString());
-                    return new CastEspression() { token= token, children = new List<SyntaxisNode>() { type, Unary_Expression_Primary_Part() } }; 
+                        !leftCyrklyBrasket.value.Equals(Operators.OP.opRightParenthesis))
+                        throw SynException.ShowException(EXType.IncorrectToken, (leftCyrklyBrasket == null) ? "Expected \")\"" : leftCyrklyBrasket.ToString());
+                    return new CastEspression() { token = token, children = new List<SyntaxisNode>() { type, Unary_Expression_Primary_Part() } };
 
             }
 
             return null;
         }
 
+        private SyntaxisNode Type_Parse_Level1() //убираем указатели type_unsafe
+        {
+            var Node = Type_Parse_Level2();
+            Token token = analyzer.GetToken();
+            //условия
+            if (token == null)
+            {
+                analyzer.StepBack();
+                return Node;
+            }
 
-        //private SyntaxisNode ParseFactor() //factor - Пуcть будет методом получения нода узла
-        //{
-        //    Token t = analyzer.GetToken();
+            //+++++nullable_type
+            if (token.GetTokenType() == TokenType.Operator && token.value.Equals(Operators.OP.opQuestionMark))
+                return new NullableTypeNode() { token = token, children = new List<SyntaxisNode>() { Node } };
+            //-----nullable_type
 
-        //    if (t == null) return new EmptyNode();
+            //+++++Array_type
+            //реализуем многомерные массивы !?
+            if (token.GetTokenType() == TokenType.Operator && token.value.Equals(Operators.OP.opLeftSquareBracket))
+            {
+                List<SyntaxisNode> node = new List<SyntaxisNode>();
+                Token coma = analyzer.GetToken();
 
-        //    switch (t.GetTokenType())
-        //    {
-        //        case TokenType.Identificator:
-        //            return new NodeIdentificator() { token = t };
-        //        case TokenType.KeyWord:
-        //            return new NodeIdentificator() { token = t };
-        //        //?case TokenType.Operator: ?-Unary or Binary operations
-        //        case TokenType.CharData:
-        //            return new NodeChar() { token = t };
-        //        case TokenType.DoubleData:
-        //            return new NodeDouble() { token = t };
-        //        case TokenType.IntData:
-        //            return new NodeInt() { token = t };
-        //        case TokenType.StringData:
-        //            return new NodeString() { token = t };
-        //        default:
-        //            throw SynException.ShowException(EXType.IncorrectToken,t.ToString());
-        //    }
-        //}
+                while (coma != null && coma.GetTokenType() == TokenType.Operator
+                    && coma.value.Equals(Operators.OP.opComma))
+                {
+                    node.Add(new OperatorNode() { token = coma });
+                    coma = analyzer.GetToken();
+                }
+                //analyzer.StepBack();
+
+                Token rightSquareBR = coma;//analyzer.GetToken();
+                if (rightSquareBR == null || rightSquareBR.GetTokenType() != TokenType.Operator
+                    || !rightSquareBR.value.Equals(Operators.OP.opRightSquareBracket))
+                    throw SynException.ShowException(EXType.IncorrectToken, (rightSquareBR == null) ?
+                        "Null reference exeption" : "Expected \"]\", but get " + rightSquareBR.GetText());
+
+                return new ArrayTypeNode() { token = token, children = node };//
+            }
+            //-----Array_type
+
+            analyzer.StepBack();
+            return Node;
+        }
+
+        private SyntaxisNode Type_Parse_Level2() //убираем указатели type_unsafe
+        {
+            Token token = analyzer.GetToken();
+
+            if (token == null || token.GetTokenType() != TokenType.KeyWord && token.GetTokenType() != TokenType.Identificator)
+                throw SynException.ShowException(EXType.IncorrectToken,
+                    (token == null) ? "Null reference Exception" : "TokenType = " + token.GetTokenType());
+
+            //в случае KyeWord
+            if (token.GetTokenType() != TokenType.KeyWord)
+                switch ((KeyWords.KW)token.value)
+                {
+                    case KeyWords.KW.kwBool: //реализую здесь
+                    case KeyWords.KW.kwInt:
+                    case KeyWords.KW.kwDouble:
+                    case KeyWords.KW.kwString:
+                    case KeyWords.KW.kwChar:
+                        return new SimpleTypeNode() { token = token };
+                }
+
+            //+++++type_parameter
+            ///return Parse_Identificator(token);  //аналог Parse_Identificator
+            //type_parameter совмещаю с type_name, так как в обоих случаях используют identificator
+            return Type_Name(token);
+        }
+
+        private NodeIdentificator Parse_Identificator(Token tokenRef = null)
+        {
+            Token token = (tokenRef == null) ? analyzer.GetToken() : tokenRef;
+
+            if (token == null || token.GetTokenType() != TokenType.Identificator)
+                throw SynException.ShowException(EXType.IncorrectToken,
+                    (token == null) ? "Null reference Exception" : "TokenType = " + token.GetTokenType());
+            return new NodeIdentificator() { token = token };
+        }
+
+        private SyntaxisNode Type_Name(Token tokenRef = null) => Namespace_Name(tokenRef);
 
 
-        #region Print
+        private SyntaxisNode Namespace_Name(Token tokenRef = null) => Namespace_Or_Type_Name(tokenRef);
 
-        //public string PrintTree(SyntaxisNode node)
-        //{
-        //    int treeLength = GetTreeLength(node, 1);
-        //    for (int i = 0; i < treeLength; i++) LengthOfStrLevel.Add(0);
+        /// <summary>
+        /// Without type_argument_list
+        /// </summary>
+        /// <param name="tokenRef"></param>
+        /// <returns></returns>
+        private SyntaxisNode Namespace_Or_Type_Name(Token tokenRef = null)
+        {
+            Token token = (tokenRef == null) ? analyzer.GetToken() : tokenRef;
 
-        //    SetMaxLevelStrLength(node, 0);
-        //    for (int i = 0; i < SummLength(); i++) StrLines.Add("");
+            if (token == null || token.GetTokenType() != TokenType.Identificator)
+                throw SynException.ShowException(EXType.IncorrectToken,
+                    (token == null) ? "Null reference Exception" : "TokenType = " + token.GetTokenType());
+            Token dot = analyzer.GetToken();
 
-        //    PrintTreeLines(node, 0);
-        //    string OutStr="";
-        //    foreach (string item in StrLines) OutStr += item + "\r\n";
+            if (dot != null && dot.GetTokenType() == TokenType.Operator && dot.value.Equals(Operators.OP.opDot))
+                return new OperatorNode() { token = dot, children = new List<SyntaxisNode> { new NodeIdentificator() { token = token }, Namespace_Or_Type_Name() } };
 
-        //    StrLines.Clear();
-        //    LengthOfStrLevel.Clear();
-        //    return OutStr;
-        //}
+            analyzer.StepBack();
+            return new NodeIdentificator() { token = token };
+        }
 
-        //private int GetTreeLength(SyntaxisNode node, int startPos)
-        //{
-        //    int length = startPos;
+        /// <summary>
+        /// without: %= ,&= ,|= ,^= ,<<= ,right_shift_assignment
+        /// </summary>
+        /// <returns></returns>
+        private ExpressionNode Assignment_Parse()
+        {
+            ExpressionNode node = Unary_Expression_Primary_Part();
+            Token assigmentToken = analyzer.GetToken();
 
-        //    if (node == null) return 0; //пустое дерево имеет 0-ю длину
+            if (assigmentToken == null || assigmentToken.GetTokenType() != TokenType.Operator)
+                throw SynException.ShowException(EXType.IncorrectToken);
 
-        //    //предполагается, что вдереве не содержится некорректных узлов
-        //    if (node.GetType() == typeof(NodeBinaryOp))
-        //    {
-        //        var newNode = node as NodeBinaryOp;
-        //        //length = newNode.token.GetText().Length;
+            switch ((Operators.OP)assigmentToken.value)
+            {
+                case Operators.OP.opEquals:
+                    return new AssignmentNode()
+                    {
+                        token = assigmentToken,
+                        children = new List<SyntaxisNode>
+                                        {
+                                            node,
+                                            ParseExpression()
+                                         }
+                    };
+                case Operators.OP.opPlus:
+                case Operators.OP.opMinus:
+                case Operators.OP.opAsterisk:
+                case Operators.OP.opRightSlash:
+                    Token equals = analyzer.GetToken();
+                    if (equals == null || equals.GetTokenType() != TokenType.Operator && equals.value.Equals(Operators.OP.opEquals))
+                        throw SynException.ShowException(EXType.IncorrectToken);
+                    return new AssignmentNode()
+                    {
+                        token = assigmentToken,
+                        children = new List<SyntaxisNode>
+                                        {
+                                            new OperatorNode(){ token=equals},
+                                            node,
+                                            ParseExpression()
+                                         }
+                    };
+                default: throw SynException.ShowException(EXType.IncorrectToken);
+            }
+        }
 
-        //        int leftLength = GetTreeLength(newNode.LeftNode, startPos+1);
-        //        length = (leftLength > length) ? leftLength :length;
+        private SyntaxisNode ParseObjectOrCollectionInitializer()
+        {
+            int lastStepBackCount = analyzer.stepBackCount;
 
-        //        int rightLength = GetTreeLength(newNode.RightNode, startPos + 1);
-        //        length = (rightLength > length) ? rightLength : length;
+            try
+            {
+                return Object_Initializer();
+            }
+            catch
+            {
+                for (int i = analyzer.stepBackCount; i > lastStepBackCount)
+                    analyzer.StepBack();
+                return Collection_Initializer();
+            }
+        }
 
-        //        return length;
-        //    }
+        private SyntaxisNode Object_Initializer()
+        {
+            Token leftFiqureBR = analyzer.GetToken();
+            if (leftFiqureBR == null || leftFiqureBR.GetTokenType() != TokenType.Operator ||
+                !leftFiqureBR.value.Equals(Operators.OP.opLeftCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected \"{\"");
 
-        //    if (node.GetType() == typeof(NodeUnaryOp))
-        //    {
-        //        var newNode = node as NodeUnaryOp;
+            //can be a null!!!
+            List<SyntaxisNode> node = Member_Initializer_List();
+            Token rightFiqureBR = analyzer.GetToken();
+            if (rightFiqureBR == null || rightFiqureBR.GetTokenType() != TokenType.Operator ||
+                !rightFiqureBR.value.Equals(Operators.OP.opRightCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected \"}\"");
 
-        //        int argLength = GetTreeLength(newNode.arg, startPos + 1);
-        //        length = (argLength > length) ? argLength : length;
-        //    }
+            if (node == null || node.Count==0)
+                return new ObjectInitializerNode() { token = leftFiqureBR };
 
-        //    return length;
-        //}
+            return new ObjectInitializerNode() { token = leftFiqureBR, children = node };
+        }
 
-        ///// <summary>
-        ///// устанавливает максимальное значение длины строки на каждом уровне дерева
-        ///// в уже проинициализированный глобальный список
-        ///// </summary>
-        ///// <param name="node">Корневой узел дерева</param>
-        ///// <param name="startPos">Стартовый уровень</param>
-        //private void SetMaxLevelStrLength(SyntaxisNode node, int startPos)
-        //{
-        //    if (node == null) return;
+        /// <summary>
+        /// совокупность MemberInitializerNode и OperatorsNode
+        /// </summary>
+        /// <returns></returns>
+        private List<SyntaxisNode> Member_Initializer_List()
+        {
+            List<SyntaxisNode> listOfNode = new List<SyntaxisNode>();
 
-        //    int length = node.token.GetText().Length;
+            while (true) //псевдо-бесконечный цикл
+            {
+                MemberInitializerNode memberInitializer = Member_Initializer();
+                if (memberInitializer == null) break;
 
-        //    if (node.GetType() == typeof(NodeBinaryOp))
-        //    {
-        //        var newToken = node as NodeBinaryOp;
-        //        SetMaxLevelStrLength(newToken.LeftNode, startPos + 1);
-        //        SetMaxLevelStrLength(newToken.RightNode, startPos + 1);
-        //    }
+                listOfNode.Add(memberInitializer);
+                Token comma = analyzer.GetToken();
 
-        //    if (node.GetType() == typeof(NodeUnaryOp))
-        //    {
-        //        var newToken = node as NodeUnaryOp;
-        //        SetMaxLevelStrLength(newToken.arg, startPos + 1);
-        //    }
+                if (comma == null || comma.GetTokenType() != TokenType.Operator || !comma.value.Equals(Operators.OP.opComma))
+                {
+                    analyzer.StepBack();
+                    break;
+                }
 
-        //    if (LengthOfStrLevel[startPos] < length) LengthOfStrLevel[startPos] = length;
+                listOfNode.Add(new OperatorNode() { token = comma });
+            }
 
-        //    return;
-        //}
+            return listOfNode;
+            //can be a null !!!
+        }
 
-        ////суммирует общее число символов, требующихся для построения дерева
-        //private int SummLength()
-        //{
-        //    int length = 0;
+        private MemberInitializerNode Member_Initializer()
+        {
+            NodeIdentificator identificator = Parse_Identificator();
+            Token equals = analyzer.GetToken();
 
-        //    foreach (int item in LengthOfStrLevel)
-        //        length += item;
+            if (equals == null || equals.GetTokenType() != TokenType.Operator || !equals.value.Equals(Operators.OP.opEquals))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected \"=\", but get " + ((equals == null) ? "Null reference Exception" : equals.ToString()));
 
-        //    return length;
-        //}
+            return new MemberInitializerNode() { token = equals, children = new List<SyntaxisNode>() { identificator, Initializer_Value() } };
+        }
 
-        ///// <summary>
-        ///// Возвращает начальную позицию в массиве строк
-        ///// </summary>
-        ///// <param name="level">от 1 до N</param>
-        ///// <returns></returns>
-        //private int GetStrLevelPos(int level)
-        //{
-        //    if (level == null || level <= 0) throw new Exception("Level value can not be less a one!\nЗначение уровня не может быть меньше чем 1!");
+        /// <summary>
+        /// Проделываем небольшой трюк по предопределению символа {, который
+        /// влияет на выбор инициализатора!!!
+        /// </summary>
+        /// <returns></returns>
+        private SyntaxisNode Initializer_Value()
+        {
+            Token tok = analyzer.GetToken();
+            analyzer.StepBack();
 
-        //    int pos = 0;
-        //    for (int i = 0; i < level-1; i++)
-        //        pos += LengthOfStrLevel[i];
+            if (tok != null && tok.GetTokenType() == TokenType.Operator && tok.value.Equals(Operators.OP.opLeftCurlyBracket))
+                return ParseObjectOrCollectionInitializer();
 
-        //    return pos;
-        //}
+            return ParseExpression();
+        }
 
-        ///// <summary>
-        ///// Подсчитывает количество отступов, требуемых для построения узла дерева
-        ///// </summary>
-        ///// <param name="maxLevel">от 1 до N</param>
-        ///// <param name="currentLevel">от 1 до N</param>
-        ///// <returns></returns>
-        //private int GetLevelOffset(int maxLevel, int currentLevel)
-        //{
-        //    if (maxLevel <= 0 || currentLevel <= 0 || currentLevel > maxLevel) throw new Exception("Неправильно задан диапазон значений");
+        private SyntaxisNode Collection_Initializer()
+        {
 
-        //    int iterationValue = maxLevel - currentLevel;
-        //    int value = 0;
-
-        //    for (int i = 0; i < iterationValue; i++) value = value * 2 + 1;
-
-        //    return value;
-        //}
-
-        //private void SetSimilarSymbolsFromEndStr(ref string str, char symbol, int value)
-        //{
-        //    for (int i = 0; i < value; i++) str += symbol;
-        //}
-
-        //private void PrintTreeLines(SyntaxisNode node, int startPos)
-        //{
-        //    int offset = GetLevelOffset(LengthOfStrLevel.Count, startPos + 1); //+1 т.к. отсчитываем от 0-ля
-        //    int startStrPosition = GetStrLevelPos(startPos+1);//????????????????????????????????????????????????????????????????
-        //    //normalize? или 1 раз спуститься вниз c вставкой от 1 до N количества пробелов?
-
-        //    string str = node.token.GetText();
-
-        //    for (int i = 0; i < LengthOfStrLevel[startPos]; i++)//str.Length; i++)
-        //    {
-        //        string strOfList = StrLines[startStrPosition + i];
-        //        SetSimilarSymbolsFromEndStr(ref strOfList, '▓', offset);///////' ', offset);//до символа /
-
-        //        strOfList += (i + 1 == LengthOfStrLevel[startPos] && node.GetType() == typeof(NodeUnaryOp) ||
-        //            i + 1 == LengthOfStrLevel[startPos] && node.GetType() == typeof(NodeBinaryOp)) ? "/" : "▓";//" ";
-
-        //        if(i+1 != LengthOfStrLevel[startPos])
-        //            SetSimilarSymbolsFromEndStr(ref strOfList, '▓', offset);//' ', offset);//до символа текста
-        //        else
-        //            SetSimilarSymbolsFromEndStr(ref strOfList, ' ', offset);
-
-        //        strOfList += (i + 1 <= str.Length) ? str.Substring(i, 1) : " "; //символ текста или " " вместо него
-
-        //        if (i + 1 != LengthOfStrLevel[startPos])
-        //            SetSimilarSymbolsFromEndStr(ref strOfList, '▓', offset); //' ', offset);//до символа "\"
-        //        else
-        //            SetSimilarSymbolsFromEndStr(ref strOfList, ' ', offset);
-
-        //        strOfList += (LengthOfStrLevel[startPos] == i + 1 && node.GetType() == typeof(NodeBinaryOp)) ? "\\" : "▓";//" ";
-        //        SetSimilarSymbolsFromEndStr(ref strOfList, '▓', offset);//////' ', offset);//до конца
-
-        //        StrLines[startStrPosition + i] = strOfList;
-        //    }
-
-        //    if (node.GetType() == typeof(NodeUnaryOp))
-        //    {
-        //        var newNode = node as NodeUnaryOp;
-        //        PrintTreeLines(newNode.arg, startPos + 1);
-        //        NormalizeStrList(StrLines[startStrPosition].Length, GetStrLevelPos(startPos + 2)); //сразу все заполнит
-        //    }
-
-        //    if (node.GetType() == typeof(NodeBinaryOp))
-        //    {
-        //        var newNode = node as NodeBinaryOp;
-        //        PrintTreeLines(newNode.LeftNode, startPos + 1);
-        //        NormalizeStrList(StrLines[startStrPosition].Length - 2 * offset - 1, GetStrLevelPos(startPos + 2));
-        //        PrintTreeLines(newNode.RightNode, startPos + 1);
-        //        NormalizeStrList(StrLines[startStrPosition].Length, GetStrLevelPos(startPos + 2));
-        //    }
-        //}
-
-        //private void NormalizeStrList(int maxStrLength, int startPos)
-        //{
-        //    for (int i = startPos; i < StrLines.Count; i++)
-        //    {
-        //        int insertValue = maxStrLength - StrLines[i].Length;
-
-        //        for (int i2 = 0; i2 < insertValue; i2++)
-        //           StrLines[i] += "▓";//" ";
-        //    }
-        //}
+        }
         #endregion
+
     }
 }

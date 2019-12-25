@@ -21,6 +21,8 @@ namespace Compilator.AnalyzerModule
 
         private List<AnalyzerStatus> previousStatus;
         private List<CharPosition> previousPos;
+
+        public int stepBackCount { get { return previousStatus.Count; } }
         public Analyzer(StreamReader reader)
         {
             this.reader = reader;
