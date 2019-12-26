@@ -7,6 +7,8 @@ using System.Collections.Generic;
 
 namespace Compilator.SyntaxisModule
 {
+    public enum ExpressionType { Assigment, Non_Assigment_Expression, Both }
+    public enum ObjectOrCollectionType { ObjectInitializer, CollectionInitializer, Both }
     public class SyntaxisAnalyzer
     {
         private Analyzer analyzer;
@@ -35,21 +37,81 @@ namespace Compilator.SyntaxisModule
                 return new NodeLiteral() { token = new Token("", 0, 0, TokenType.Null) };
 
             analyzer.StepBack();
-            return DoubleParsePlusMinus();
-            int i = (int)10.1 ^ (int)2.1;
+            return Compilation_Unit();
         }
 
-        private SyntaxisNode Compilation_Unit()
+        /// <summary>
+        /// Делаем Using directives без using_alias_directive
+        /// После вызываем namespace_member_declaration
+        //// Базовый Node не имеет начального значения
+        /// </summary>
+        /// <returns></returns>
+        private GlobalNode Compilation_Unit()
         {
-            while (true) {
-                var left = ParseFactor();
-                if ()
-                    UsingDirectives();
+            //can be a null or have count equals zero
+            List<SyntaxisNode> nodes = Using_Directives();
+
+            if (nodes == null || nodes.Count == 0)
+                return new GlobalNode()
+                    { children =  Namespace_Member_Declarations()};
+
+            var node = new GlobalNode() { children = nodes };
+            node.children.AddRange(Namespace_Member_Declarations());
+
+            return node;
+        }
+
+        private List<SyntaxisNode> Using_Directives()
+        {
+            List<SyntaxisNode> nodes = new List<SyntaxisNode>();
+
+            while (true)
+            {
+                var node = Using_Directive();
+                if (node == null) break;
+
+                nodes.Add(node);
             }
 
-
+            return nodes;
         }
 
+        /// <summary>
+        /// без using_alias_directive
+        /// </summary>
+        /// <returns></returns>
+        private UsingNode Using_Directive()
+        {
+            Token usingTok = analyzer.GetToken();
+            if (usingTok == null || usingTok.GetTokenType() != TokenType.KeyWord
+                || !usingTok.value.Equals(KeyWords.KW.kwUsing))
+            {
+                analyzer.StepBack();
+                return null;
+            }
+
+            //продолжаем если все-таки используем using
+            var node = Namespace_Name();
+
+            Token commaDot = analyzer.GetToken();
+            if (commaDot == null || commaDot.GetTokenType() != TokenType.Operator || !commaDot.value.Equals(Operators.OP.opSemicolon))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected \";\", but get " +
+                    ((commaDot==null)?"Null reference exception" : commaDot.ToString()));
+
+            return new UsingNode() { token = usingTok, children = new List<SyntaxisNode>() { node } };
+        }
+
+        private List<SyntaxisNode> Namespace_Member_Declarations() => Namespace_Member_Declaration();
+
+        private List<SyntaxisNode> Namespace_Member_Declaration()
+        {
+            //can be a null !!!
+            //В цикле
+            NameSpaceNode node = Namespace_Declaration();
+
+            //в зависимости от того, что получаем вызываем namespace_declaration 
+            //или type_declaration
+        }
 
         #region Primary_Expression
         private SyntaxisNode ParsePimaryExpression() //without array_creation_expression
@@ -177,20 +239,44 @@ namespace Compilator.SyntaxisModule
             throw SynException.ShowException(EXType.IncorrectToken, t.ToString());
         }
 
-        private ExpressionNode ParseExpression() //without lambda and query and assigmentExpression
+        private ExpressionNode ParseExpression(ExpressionType type = ExpressionType.Both) //without lambda and query and assigmentExpression
         {
             int stepBackCount = analyzer.stepBackCount;
+
+            if(type==ExpressionType.Non_Assigment_Expression)//conditional
+                return Parse_Conditional_Expression();
+
+            if (type == ExpressionType.Assigment)
+                return Assignment_Parse();
+
+            //в случае Both
+            int ConditionDepth = analyzer.stepBackCount;
+            string ExceptionMessage = "";
 
             try
             {
                 return Parse_Conditional_Expression();
             }
-            catch
+            catch(Exception ex)
             {
+                ConditionDepth = analyzer.stepBackCount;
+                ExceptionMessage = ex.Message;
+
                 for (int i = analyzer.stepBackCount; i > stepBackCount;)
                     analyzer.StepBack();
+            }
 
+            try
+            {
                 return Assignment_Parse();
+            }
+            catch(Exception ex) //вызываем правильный Exception среди двух обработанных методов!!!
+            {
+                int AssigmentDepth = analyzer.stepBackCount;
+
+                if (AssigmentDepth > ConditionDepth)
+                    throw new Exception("Error of parse Assigment expression.\r\nMessage: "+ex.Message);
+                throw new Exception("Error of parse Conditional expression.\r\nMessage: " + ExceptionMessage);
             }
 
         }
@@ -587,19 +673,44 @@ namespace Compilator.SyntaxisModule
             }
         }
 
-        private SyntaxisNode ParseObjectOrCollectionInitializer()
+        private SyntaxisNode ParseObjectOrCollectionInitializer(ObjectOrCollectionType type = ObjectOrCollectionType.Both)
         {
+            if(type == ObjectOrCollectionType.CollectionInitializer)
+                return Collection_Initializer();
+
+            if(type == ObjectOrCollectionType.ObjectInitializer)
+                return Object_Initializer();
+
+            //both variant
             int lastStepBackCount = analyzer.stepBackCount;
+            int Object_Initializer_depth = analyzer.stepBackCount;
+            string object_initializer_message = "";
 
             try
             {
                 return Object_Initializer();
             }
-            catch
+            catch(Exception ex)
             {
-                for (int i = analyzer.stepBackCount; i > lastStepBackCount)
+                Object_Initializer_depth= analyzer.stepBackCount;
+                object_initializer_message = ex.Message;
+
+                for (int i = analyzer.stepBackCount; i > lastStepBackCount;)
                     analyzer.StepBack();
+                
+            }
+
+            try
+            {
                 return Collection_Initializer();
+            }
+            catch (Exception ex)
+            {
+                int collection_initializer_depth = analyzer.stepBackCount;
+
+                if (collection_initializer_depth > Object_Initializer_depth)
+                    throw new Exception("Error of parse Collection initializer.\r\nMessage: " + ex.Message);
+                throw new Exception("Error of parse Object initializer.\r\nMessage: " + object_initializer_message);
             }
         }
 
@@ -681,9 +792,99 @@ namespace Compilator.SyntaxisModule
 
         private SyntaxisNode Collection_Initializer()
         {
+            Token leftFiqureBR = analyzer.GetToken();
+            if (leftFiqureBR == null || leftFiqureBR.GetTokenType() != TokenType.Operator ||
+                !leftFiqureBR.value.Equals(Operators.OP.opLeftCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected \"{\"");
 
+            //can't be a null and have a count==0!!!
+            List<SyntaxisNode> node = Element_Initializer_List();
+            if (node == null || node.Count == 0)
+                throw new Exception("Expected one ore more element initializing after: " + leftFiqureBR.ToString());
+
+            Token rightFiqureBR = analyzer.GetToken();
+            if (rightFiqureBR == null || rightFiqureBR.GetTokenType() != TokenType.Operator ||
+                !rightFiqureBR.value.Equals(Operators.OP.opRightCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected \"}\"");    
+
+            return new CollectionInitializerNode() { token = leftFiqureBR, children = node };
+        }
+
+        private List<SyntaxisNode> Element_Initializer_List()
+        {
+            List<SyntaxisNode> listOfNode = new List<SyntaxisNode>();
+
+            while (true) //псевдо-бесконечный цикл
+            {
+                SyntaxisNode memberInitializer = Element_Initializer(); //будет зависить от типа полученного
+                if (memberInitializer == null) break;
+
+                listOfNode.Add(memberInitializer);
+                Token comma = analyzer.GetToken();
+
+                if (comma == null || comma.GetTokenType() != TokenType.Operator || !comma.value.Equals(Operators.OP.opComma))
+                {
+                    analyzer.StepBack();
+                    break;
+                }
+
+                listOfNode.Add(new OperatorNode() { token = comma });
+            }
+
+            return listOfNode; //can't be a null !!!
+        }
+
+        /// <summary>
+        /// Трюк с преждевременным просмотром токена
+        /// </summary>
+        /// <returns></returns>
+        private SyntaxisNode Element_Initializer()
+        {
+            Token leftCyrkleBR = analyzer.GetToken();
+            if (leftCyrkleBR != null && leftCyrkleBR.GetTokenType() == TokenType.Operator &&
+                leftCyrkleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
+            {
+                List<SyntaxisNode> expressionList = Expression_List();
+                if (expressionList == null || expressionList.Count == 0)
+                    throw new Exception("Expected one ore more expression after: " + leftCyrkleBR.ToString());
+
+                Token rightCyrkleBR = analyzer.GetToken();
+                if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() != TokenType.Operator ||
+                    !rightCyrkleBR.value.Equals(Operators.OP.opRightCurlyBracket))
+                    throw SynException.ShowException(EXType.IncorrectToken, "Expected a \"}\", but get " +
+                        ((rightCyrkleBR == null) ? "Null reference exception" : rightCyrkleBR.ToString()));
+                return new ExpressionListNode() { token = leftCyrkleBR, children = expressionList };
+            }
+
+            analyzer.StepBack();
+            return ParseExpression(ExpressionType.Non_Assigment_Expression);
+        }
+        private List<SyntaxisNode> Expression_List()
+        {
+            List<SyntaxisNode> listOfNode = new List<SyntaxisNode>();
+
+            while (true) //псевдо-бесконечный цикл
+            {
+                ExpressionNode expression = ParseExpression(); //будет зависить от типа полученного
+                if (expression == null) break;
+
+                listOfNode.Add(expression);
+                Token comma = analyzer.GetToken();
+
+                if (comma == null || comma.GetTokenType() != TokenType.Operator || !comma.value.Equals(Operators.OP.opComma))
+                {
+                    analyzer.StepBack();
+                    break;
+                }
+
+                listOfNode.Add(new OperatorNode() { token = comma });
+            }
+
+            if (listOfNode.Count > 0 && listOfNode[listOfNode.Count - 1].token.GetTokenType() == TokenType.Operator)
+                throw new Exception("Unexpected symbol "+ listOfNode[listOfNode.Count - 1].token.GetText());
+
+            return listOfNode;
         }
         #endregion
-
     }
 }

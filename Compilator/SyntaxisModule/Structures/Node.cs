@@ -282,13 +282,6 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "ArrayTypeNode: {}";
     }
 
-    public class MemberInitializerListNode : SyntaxisNode
-    {
-        public MemberInitializerListNode() : base() { }
-
-        public override string NodeText() => "ObjectInitializerNode:" + token.GetText();
-    }
-
     public class MemberInitializerNode : SyntaxisNode
     {
 
@@ -297,11 +290,33 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "MemberInitializerNode:" + token.GetText();
     }
 
+    public class CollectionInitializerNode : SyntaxisNode
+    {
+        public CollectionInitializerNode() : base() { }
+
+        public override string NodeText() => "CollectionInitializerNode: {}";
+    }
+
+    public class ExpressionListNode : ExpressionNode
+    {
+        public ExpressionListNode() : base() { }
+
+        public override string NodeText() => "ExpressionListNode: {}";
+    }
+
+    public class ElementInitializerNode : SyntaxisNode
+    {
+
+        public ElementInitializerNode() : base() { }
+
+        public override string NodeText() => "ElementInitializerNode:" + token.GetText();
+    }
+
     public class GlobalNode : SyntaxisNode //содержит using, class и структуры enum/struct
     {
         public GlobalNode() : base() { }
 
-        public override string NodeText() => " ";
+        public override string NodeText() => "Do not have a value, because it's a Start(base) node!!!";
     }
 
     public class UsingNode : SyntaxisNode
