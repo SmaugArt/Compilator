@@ -53,7 +53,7 @@ namespace Compilator.SyntaxisModule
 
             if (nodes == null || nodes.Count == 0)
                 return new GlobalNode()
-                    { children =  Namespace_Member_Declarations()};
+                { children = Namespace_Member_Declarations() };
 
             var node = new GlobalNode() { children = nodes };
             node.children.AddRange(Namespace_Member_Declarations());
@@ -96,22 +96,304 @@ namespace Compilator.SyntaxisModule
             Token commaDot = analyzer.GetToken();
             if (commaDot == null || commaDot.GetTokenType() != TokenType.Operator || !commaDot.value.Equals(Operators.OP.opSemicolon))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected \";\", but get " +
-                    ((commaDot==null)?"Null reference exception" : commaDot.ToString()));
+                    ((commaDot == null) ? "Null reference exception" : commaDot.ToString()));
 
             return new UsingNode() { token = usingTok, children = new List<SyntaxisNode>() { node } };
         }
 
-        private List<SyntaxisNode> Namespace_Member_Declarations() => Namespace_Member_Declaration();
-
-        private List<SyntaxisNode> Namespace_Member_Declaration()
+        /// <summary>
+        /// Возвращает список нодов пространства имен и всех "внутренностей"
+        /// Внимание! Здесь опущен и переработан метод namespace_member_declaration
+        /// </summary>
+        /// <returns></returns>
+        private List<SyntaxisNode> Namespace_Member_Declarations()
         {
-            //can be a null !!!
-            //В цикле
-            NameSpaceNode node = Namespace_Declaration();
+            List<SyntaxisNode> namespaceDeclar = new List<SyntaxisNode>();
+            while (true)
+            {
+                Token t = analyzer.GetToken();
+                analyzer.StepBack();
+                if (t == null || t.GetTokenType() == TokenType.Null) break; //проверяем на непустые значения
 
-            //в зависимости от того, что получаем вызываем namespace_declaration 
-            //или type_declaration
+                if (t.GetTokenType() == TokenType.KeyWord && t.value.Equals(KeyWords.KW.kwNamespace))
+                    namespaceDeclar.Add(Namespace_Declaration());
+                else
+                    namespaceDeclar.Add(Type_Declaration());
+            }
+
+            return namespaceDeclar; //либо просто пустой список, либо ничего не добавится в случае отсутствия
         }
+
+        /// <summary>
+        /// Здесь Namespace_body приравниваем к Compilation_Unit, т.к. 
+        /// реализуем и там и тут using и namespace
+        /// </summary>
+        /// <returns></returns>
+        private SyntaxisNode Namespace_Declaration()
+        {
+            Token namespaceOp = analyzer.GetToken();
+
+            if (namespaceOp == null || namespaceOp.GetTokenType() != TokenType.KeyWord ||
+                !namespaceOp.value.Equals(KeyWords.KW.kwNamespace))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected keyword \"using\", but get: " +
+                    ((namespaceOp == null) ? "Null reference exeption!" : namespaceOp.ToString()));
+
+            var qualityIdNode = Qualified_Identifier();
+
+            Token leftCyrkleBR = analyzer.GetToken();
+            if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() == TokenType.Operator ||
+                !leftCyrkleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " +
+                    ((leftCyrkleBR == null) ? "Null reference exeption!" : leftCyrkleBR.ToString()));
+            ///Global node конвертируем в NamespaceBodyNode
+            var namespaceBodyNode = Compilation_Unit();//Namespace_Body();
+
+            Token rightCyrkleBR = analyzer.GetToken();
+            if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() == TokenType.Operator ||
+                !rightCyrkleBR.value.Equals(Operators.OP.opRightCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " +
+                    ((rightCyrkleBR == null) ? "Null reference exeption!" : rightCyrkleBR.ToString()));
+
+            NamespaceBodyNode node = new NamespaceBodyNode() { token = rightCyrkleBR, children = namespaceBodyNode.children };
+
+            //возможна запятая после фигурных скобок
+            Token commaDot = analyzer.GetToken();
+            if (commaDot == null || commaDot.GetTokenType() != TokenType.Operator ||
+                !commaDot.value.Equals(Operators.OP.opSemicolon))
+                analyzer.StepBack();
+
+            return new NamespaceDeclarationNode() { token = namespaceOp, children = new List<SyntaxisNode>() { qualityIdNode, node } };
+        }
+
+        private SyntaxisNode Qualified_Identifier()
+        {
+            var node = Parse_Identificator();
+            Token dot = analyzer.GetToken();
+
+            if (dot == null || dot.GetTokenType() != TokenType.Operator ||
+                !dot.value.Equals(Operators.OP.opDot))
+                return node;
+            return new QualifiedIdentifierNode() { token = dot, children =
+                new List<SyntaxisNode>() { node, Qualified_Identifier() } };
+        }
+
+        /// <summary>
+        /// реализуем без: атрибутов
+        /// Только Class, enum и structure
+        /// [type] modificator + [type] + identificator + [type body]
+        /// </summary>
+        /// <returns></returns>
+        private SyntaxisNode Type_Declaration()
+        {
+            Token modifier = analyzer.GetToken();
+            if (modifier == null || modifier.GetTokenType() != TokenType.KeyWord)
+                throw SynException.ShowException(EXType.IncorrectToken,
+                    "Expected a [type] modifier!\r\nMessage: " + ((modifier == null) ? "Null reference exeption!" : modifier.ToString()));
+
+            Token type = analyzer.GetToken();
+            if (type == null || type.GetTokenType() != TokenType.KeyWord)
+                throw SynException.ShowException(EXType.IncorrectToken,
+                    "Expected a [type] name!\r\nMessage: " + ((type == null) ? "Null reference exeption!" : type.ToString()));
+            switch ((KeyWords.KW)type.value)
+            {
+                case KeyWords.KW.kwClass: return new ClassNode()
+                {
+                    token = type,
+                    children = new List<SyntaxisNode>()
+                    {
+                        ParseClassComponents(modifier),
+                        Class_Body()
+                    }
+                };
+
+                case KeyWords.KW.kwEnum: return new EnumNode()
+                {
+                    token = type,
+                    children = new List<SyntaxisNode>()
+                    {
+                        ParseEnumComponents(modifier),
+                        Enum_Body()
+                    }
+                };
+
+                case KeyWords.KW.kwStruct: return new StructNode()
+                {
+                    token = type,
+                    children = new List<SyntaxisNode>()
+                    {
+                        ParseStructComponents(modifier),
+                        Struct_Body()
+                    }
+                };
+
+                default: throw new Exception("Unexpected Type name!\n\rMessage: " + type.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Парсит компоненты класса.
+        /// Передаются все токены, стоящие перед TypeName токеном!!!
+        /// Без sealed, internal, 
+        /// </summary>
+        /// <param name="modifier">Обязательно нужно передать токен</param>
+        /// <param name="identificator"></param>
+        /// <returns></returns>
+        private TypeComponentsNode ParseClassComponents(Token modifier, Token identificator = null)
+        {
+            if (modifier == null || modifier.GetTokenType() != TokenType.KeyWord)
+                throw SynException.ShowException(EXType.IncorrectToken,
+                    "Expected a Class modifier!\r\nMessage: " + ((modifier == null) ? "Null reference exeption!" : modifier.ToString()));
+
+            switch ((KeyWords.KW)modifier.value)
+            {
+                case KeyWords.KW.kwNew:
+                case KeyWords.KW.kwPublic:
+                case KeyWords.KW.kwProtected:
+                case KeyWords.KW.kwPrivate:
+                case KeyWords.KW.kwAbstract://?
+                    break;
+                default: throw SynException.ShowException(EXType.IncorrectToken,
+                    "Unexpected Class modifier!\r\nMessage: " + modifier.ToString());
+            }
+
+            Token ident = identificator;
+            if (ident == null)
+                ident = Parse_Identificator().token;
+            else
+            {
+                if (ident.GetTokenType() != TokenType.Identificator)
+                    throw SynException.ShowException(EXType.IncorrectToken,
+                        "Unexpected identificator! \r\nMessage: " + ident.ToString());
+
+            }
+
+            //Код с дополнительными компонентами
+
+            return new TypeComponentsNode()
+            {
+                token = ident,
+                children = new List<SyntaxisNode>()
+                {
+                    new TypeModificatorNode(){token=modifier}
+                }
+            };
+        }
+
+        private TypeComponentsNode ParseEnumComponents(Token modifier, Token identificator = null)
+        {
+            if (modifier == null || modifier.GetTokenType() != TokenType.KeyWord)
+                throw SynException.ShowException(EXType.IncorrectToken,
+                    "Expected a Enum modifier!\r\nMessage: " + ((modifier == null) ? "Null reference exeption!" : modifier.ToString()));
+
+            switch ((KeyWords.KW)modifier.value)
+            {
+                case KeyWords.KW.kwNew:
+                case KeyWords.KW.kwPublic:
+                case KeyWords.KW.kwProtected:
+                case KeyWords.KW.kwPrivate:
+                    break;
+                default:
+                    throw SynException.ShowException(EXType.IncorrectToken,
+               "Unexpected Enum modifier!\r\nMessage: " + modifier.ToString());
+            }
+
+            Token ident = identificator;
+            if (ident == null)
+                ident = Parse_Identificator().token;
+            else
+            {
+                if (ident.GetTokenType() != TokenType.Identificator)
+                    throw SynException.ShowException(EXType.IncorrectToken,
+                        "Unexpected identificator! \r\nMessage: " + ident.ToString());
+
+            }
+
+            //Код с дополнительными компонентами
+
+            return new TypeComponentsNode()
+            {
+                token = ident,
+                children = new List<SyntaxisNode>()
+                {
+                    new TypeModificatorNode(){token=modifier}
+                }
+            };
+        }
+
+        private TypeComponentsNode ParseStructComponents(Token modifier, Token identificator = null)
+        {
+            if (modifier == null || modifier.GetTokenType() != TokenType.KeyWord)
+                throw SynException.ShowException(EXType.IncorrectToken,
+                    "Expected a Struct modifier!\r\nMessage: " + ((modifier == null) ? "Null reference exeption!" : modifier.ToString()));
+
+            switch ((KeyWords.KW)modifier.value)
+            {
+                case KeyWords.KW.kwNew:
+                case KeyWords.KW.kwPublic:
+                case KeyWords.KW.kwProtected:
+                case KeyWords.KW.kwPrivate:
+                    break;
+                default:
+                    throw SynException.ShowException(EXType.IncorrectToken,
+               "Unexpected Struct modifier!\r\nMessage: " + modifier.ToString());
+            }
+
+            Token ident = identificator;
+            if (ident == null)
+                ident = Parse_Identificator().token;
+            else
+            {
+                if (ident.GetTokenType() != TokenType.Identificator)
+                    throw SynException.ShowException(EXType.IncorrectToken,
+                        "Unexpected identificator! \r\nMessage: " + ident.ToString());
+
+            }
+
+            //Код с дополнительными компонентами
+
+            return new TypeComponentsNode()
+            {
+                token = ident,
+                children = new List<SyntaxisNode>()
+                {
+                    new TypeModificatorNode(){token=modifier}
+                }
+            };
+        }
+
+        #region Class
+        private ClassBodyNode Class_Body()
+        {
+            Token leftCyrkleBR = analyzer.GetToken();
+            if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() == TokenType.Operator ||
+                !leftCyrkleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " +
+                    ((leftCyrkleBR == null) ? "Null reference exeption!" : leftCyrkleBR.ToString()));
+
+            var classMember = Class_Member_Declarations();
+
+            Token rightCyrkleBR = analyzer.GetToken();
+            if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() == TokenType.Operator ||
+                !rightCyrkleBR.value.Equals(Operators.OP.opRightCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"}\", but get: " +
+                    ((rightCyrkleBR == null) ? "Null reference exeption!" : rightCyrkleBR.ToString()));
+
+            Token commaDot = analyzer.GetToken();
+            if (commaDot == null || commaDot.GetTokenType() != TokenType.Operator ||
+                !commaDot.value.Equals(Operators.OP.opSemicolon))
+                analyzer.StepBack();
+            return new ClassBodyNode()
+            {
+                token = leftCyrkleBR,
+                children = new List<SyntaxisNode>() { classMember }
+            };
+        }
+
+        private List<DeclarationNode> Class_Member_Declarations()
+        {
+            //пизда
+        }
+        #endregion
 
         #region Primary_Expression
         private SyntaxisNode ParsePimaryExpression() //without array_creation_expression

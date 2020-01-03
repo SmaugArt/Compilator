@@ -42,33 +42,11 @@ namespace Compilator.SyntaxisModule.Structures
         
     }
 
-    //public class NodeBinaryOp : SyntaxisNode
-    //{
-    //    public NodeBinaryOp() : base() { }
-    //    //public SyntaxisNode LeftNode;
-    //    //public SyntaxisNode RightNode;
-    //    public override string NodeText() => "BinaryOperat: " + token.GetText();
-    //}
-
-    //public class NodeUnaryOp : SyntaxisNode
-    //{
-    //    public NodeUnaryOp() : base() { }
-    //    //public SyntaxisNode arg; //аргумент унарных операций
-    //    public override string NodeText() => "UnaryOperat:  " + token.GetText();
-    //}
-
     public class NodeIdentificator : ExpressionNode
     {
         public NodeIdentificator():base() { }
         public override string NodeText() => "Identificator:" + token.GetText();
-    } //: base("IdentificatorNode") { } }
-
-    ////public class NamespaceNode : ExpressionNode
-    ////{
-    ////    public NamespaceNode() : base() { }
-
-    ////    public override string NodeText() => "NamespaceNode:" + token.GetText();
-    ////}
+    } 
         
     public class NodeChar : NodeLiteral
     {
@@ -319,24 +297,79 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "Do not have a value, because it's a Start(base) node!!!";
     }
 
+    public class NamespaceBodyNode : SyntaxisNode
+    {
+        public NamespaceBodyNode() : base() { }
+
+        public override string NodeText() => "NamespaceBodyNode: {}";
+    }
+
+    public class NamespaceDeclarationNode : SyntaxisNode
+    {
+        public NamespaceDeclarationNode() : base() { }
+
+        public override string NodeText() => "NamespaceDeclarationNode:"+token.GetText();
+    }
+    
+
     public class UsingNode : SyntaxisNode
     {
         public UsingNode() : base() { }
         public override string NodeText() => "UsingNode";
     }
 
+    public class QualifiedIdentifierNode : SyntaxisNode
+    {
+        public QualifiedIdentifierNode() : base() { }
+        public override string NodeText() => "QualifiedIdentifierNode:"+token.GetText();
+    }
 
 
 
+    #region AtributesAndParameters
+    /// <summary>
+    /// Базовый класс для описания всевозможных атрибут,
+    /// модификаторов и т.д., входящих в задекларированную форму записи
+    /// класса, структуры и перечисления
+    /// Type - базовый токен для [Type]+Node
+    /// </summary>
+    public class TypeComponentsNode : SyntaxisNode
+    {
+        public TypeComponentsNode() : base() { }
+        public override string NodeText() => "Компонента типа:" + token.GetText();
+    }
 
-    //public class EnumNode : SyntaxisNode { }
+    public class TypeModificatorNode : TypeComponentsNode { public TypeModificatorNode() : base() { }}
 
-    //public class StructureNode : SyntaxisNode { }
+    //возможно расширение и добавление атрибутов и т.д.
+    #endregion
 
-    //public class ClassNode : SyntaxisNode { }
+    #region Class
+    public class ClassNode : SyntaxisNode
+    {
+        public ClassNode() : base() { }
+        public override string NodeText() => "ClassNode:" + token.GetText();
+    }
 
-    //public class IntegerPeremNode : SyntaxisNode { }  //содержит имя переменной, где слева - modificator(public, static, private) //without overide/abstract/virtual /// + int
+    public class ClassBodyNode : ClassNode
+    {
+        public ClassBodyNode() : base() { }
+        public override string NodeText() => "ClassBody: {}";
+    }
+    #endregion
 
-    //public class IntegerPeremNode : SyntaxisNode { }
+    #region MemberDeclaration
+    public class DeclarationNode : SyntaxisNode
+    {
+        public DeclarationNode() : base() { }
+        public override string NodeText() => "DeclarationNode:" + token.GetText();
+    }
+    public class ConstantDeclarationNode : DeclarationNode
+    {
+        public ConstantDeclarationNode() : base() { }
+        public override string NodeText() => "ConstantDeclarationNode:" + token.GetText();
+    }
+    //etc
+    #endregion
 
 }
