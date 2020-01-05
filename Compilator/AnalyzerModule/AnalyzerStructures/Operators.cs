@@ -37,6 +37,7 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
             opRightSquareBracket,//]
 			opQuestionMark, //?
             opDoubleDot, //:
+            opTilda,//~
 
         }
 
@@ -76,6 +77,7 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
                 {"]", OP.opDecrementExpression },
 				{"?", OP.opQuestionMark },
                 {":", OP.opDoubleDot},
+                {"~", OP.opTilda},
 			};
         }
 

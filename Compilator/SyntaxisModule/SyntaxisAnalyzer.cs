@@ -235,26 +235,34 @@ namespace Compilator.SyntaxisModule
         /// Передаются все токены, стоящие перед TypeName токеном!!!
         /// Без sealed, internal, 
         /// </summary>
-        /// <param name="modifier">Обязательно нужно передать токен</param>
+        /// <param name="modifier">Обязательно нужно передать токен.
+        /// Если null, то значит не было модификатора. Так может быть.</param>
         /// <param name="identificator"></param>
         /// <returns></returns>
         private TypeComponentsNode ParseClassComponents(Token modifier, Token identificator = null)
         {
-            if (modifier == null || modifier.GetTokenType() != TokenType.KeyWord)
-                throw SynException.ShowException(EXType.IncorrectToken,
-                    "Expected a Class modifier!\r\nMessage: " + ((modifier == null) ? "Null reference exeption!" : modifier.ToString()));
+            var mod = modifier;
 
-            switch ((KeyWords.KW)modifier.value)
+            if (mod == null)
             {
-                case KeyWords.KW.kwNew:
-                case KeyWords.KW.kwPublic:
-                case KeyWords.KW.kwProtected:
-                case KeyWords.KW.kwPrivate:
-                case KeyWords.KW.kwAbstract://?
-                    break;
-                default: throw SynException.ShowException(EXType.IncorrectToken,
-                    "Unexpected Class modifier!\r\nMessage: " + modifier.ToString());
+                if (mod.GetTokenType() != TokenType.KeyWord)
+                    throw SynException.ShowException(EXType.IncorrectToken,
+                        "Expected a Class modifier!\r\nMessage: " + ((mod == null) ? "Null reference exeption!" : mod.ToString()));
+
+                switch ((KeyWords.KW)mod.value)
+                {
+                    case KeyWords.KW.kwNew:
+                    case KeyWords.KW.kwPublic:
+                    case KeyWords.KW.kwProtected:
+                    case KeyWords.KW.kwPrivate:
+                    case KeyWords.KW.kwAbstract://?
+                        break;
+                    default:
+                        throw SynException.ShowException(EXType.IncorrectToken,
+                   "Unexpected Class modifier!\r\nMessage: " + mod.ToString());
+                }
             }
+
 
             Token ident = identificator;
             if (ident == null)
@@ -274,27 +282,32 @@ namespace Compilator.SyntaxisModule
                 token = ident,
                 children = new List<SyntaxisNode>()
                 {
-                    new TypeModificatorNode(){token=modifier}
+                    new TypeModificatorNode(){token=mod}
                 }
             };
         }
 
         private TypeComponentsNode ParseEnumComponents(Token modifier, Token identificator = null)
         {
-            if (modifier == null || modifier.GetTokenType() != TokenType.KeyWord)
-                throw SynException.ShowException(EXType.IncorrectToken,
-                    "Expected a Enum modifier!\r\nMessage: " + ((modifier == null) ? "Null reference exeption!" : modifier.ToString()));
+            var mod = modifier;
 
-            switch ((KeyWords.KW)modifier.value)
+            if (mod == null)
             {
-                case KeyWords.KW.kwNew:
-                case KeyWords.KW.kwPublic:
-                case KeyWords.KW.kwProtected:
-                case KeyWords.KW.kwPrivate:
-                    break;
-                default:
+                if (mod.GetTokenType() != TokenType.KeyWord)
                     throw SynException.ShowException(EXType.IncorrectToken,
-               "Unexpected Enum modifier!\r\nMessage: " + modifier.ToString());
+                        "Expected a Class modifier!\r\nMessage: " + ((mod == null) ? "Null reference exeption!" : mod.ToString()));
+
+                switch ((KeyWords.KW)mod.value)
+                {
+                    case KeyWords.KW.kwNew:
+                    case KeyWords.KW.kwPublic:
+                    case KeyWords.KW.kwProtected:
+                    case KeyWords.KW.kwPrivate:
+                        break;
+                    default:
+                        throw SynException.ShowException(EXType.IncorrectToken,
+                   "Unexpected Enum modifier!\r\nMessage: " + modifier.ToString());
+                }
             }
 
             Token ident = identificator;
@@ -322,20 +335,25 @@ namespace Compilator.SyntaxisModule
 
         private TypeComponentsNode ParseStructComponents(Token modifier, Token identificator = null)
         {
-            if (modifier == null || modifier.GetTokenType() != TokenType.KeyWord)
-                throw SynException.ShowException(EXType.IncorrectToken,
-                    "Expected a Struct modifier!\r\nMessage: " + ((modifier == null) ? "Null reference exeption!" : modifier.ToString()));
+            var mod = modifier;
 
-            switch ((KeyWords.KW)modifier.value)
+            if (mod == null)
             {
-                case KeyWords.KW.kwNew:
-                case KeyWords.KW.kwPublic:
-                case KeyWords.KW.kwProtected:
-                case KeyWords.KW.kwPrivate:
-                    break;
-                default:
+                if (mod.GetTokenType() != TokenType.KeyWord)
                     throw SynException.ShowException(EXType.IncorrectToken,
-               "Unexpected Struct modifier!\r\nMessage: " + modifier.ToString());
+                        "Expected a Class modifier!\r\nMessage: " + ((mod == null) ? "Null reference exeption!" : mod.ToString()));
+
+                switch ((KeyWords.KW)mod.value)
+                {
+                    case KeyWords.KW.kwNew:
+                    case KeyWords.KW.kwPublic:
+                    case KeyWords.KW.kwProtected:
+                    case KeyWords.KW.kwPrivate:
+                        break;
+                    default:
+                        throw SynException.ShowException(EXType.IncorrectToken,
+                   "Unexpected Struct modifier!\r\nMessage: " + modifier.ToString());
+                }
             }
 
             Token ident = identificator;
@@ -370,7 +388,7 @@ namespace Compilator.SyntaxisModule
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " +
                     ((leftCyrkleBR == null) ? "Null reference exeption!" : leftCyrkleBR.ToString()));
 
-            var classMember = Class_Member_Declarations();
+            List<SyntaxisNode> classMember = Class_Member_Declarations();
 
             Token rightCyrkleBR = analyzer.GetToken();
             if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() == TokenType.Operator ||
@@ -382,16 +400,129 @@ namespace Compilator.SyntaxisModule
             if (commaDot == null || commaDot.GetTokenType() != TokenType.Operator ||
                 !commaDot.value.Equals(Operators.OP.opSemicolon))
                 analyzer.StepBack();
-            return new ClassBodyNode()
+
+            ClassBodyNode BN = new ClassBodyNode()
             {
-                token = leftCyrkleBR,
-                children = new List<SyntaxisNode>() { classMember }
+                token = leftCyrkleBR
             };
+            BN.children.AddRange(classMember);
+            return BN;
         }
 
-        private List<DeclarationNode> Class_Member_Declarations()
+        /// <summary>
+        /// Переработан и осмыслено поведение
+        /// Не использую: property_declaration, 
+        /// event_declaration,
+        /// indexer_declaration,
+        /// operator_declaration,
+        /// static_constructor_declaration.
+        /// Приравниваю method_declaration к constructor_declaration
+        /// </summary>
+        /// <returns></returns>
+        private List<SyntaxisNode> Class_Member_Declarations()
         {
-            //пизда
+            List<SyntaxisNode> nodes = new List<SyntaxisNode>();
+
+            while (true)
+            {
+                int analyzerStartPos = analyzer.stepBackCount;
+                //int Class_Member_Declaration = analyzer.stepBackCount;
+
+                try
+                {
+                    nodes.Add(Class_Member_Declaration());
+                    continue;
+                }
+                catch
+                {
+                    // Class_Member_Declaration = analyzer.stepBackCount;
+
+                    for (int i = analyzer.stepBackCount; i > analyzerStartPos;)
+                        analyzer.StepBack();
+                }
+
+                try
+                {
+                    nodes.Add(Type_Declaration());
+                }
+                catch
+                {
+                    for (int i = analyzer.stepBackCount; i > analyzerStartPos;)
+                        analyzer.StepBack();
+                    break;
+                }
+            }
+
+            return nodes;
+        }
+
+        private DeclarationNode Class_Member_Declaration()
+        {
+            Token tilda = analyzer.GetToken();
+
+            //+++++destructor
+            if (tilda != null && tilda.GetTokenType() == TokenType.Operator
+                && tilda.Equals(Operators.OP.opTilda))
+            {
+                return Destructor_Declaration(tilda);
+            }
+            analyzer.StepBack();
+            //-----destructor
+
+            //парсим модификатор
+            //Dictionary<string, bool> 
+            var dic = Class_Member_Declaration_Modifier();
+
+            ///+++++const
+            Token _const = analyzer.GetToken();
+            if (_const != null && _const.GetTokenType() == TokenType.KeyWord &&
+                _const.value.Equals(KeyWords.KW.kwConst))
+            {
+                return 
+            }
+            analyzer.StepBack();
+            ///-----const
+            
+        }
+
+        //private Dictionary<string, bool> Class_Member_Declaration_Modifier()
+        private object[] Class_Member_Declaration_Modifier()
+        {
+            Token tok = analyzer.GetToken();
+            if (tok == null || tok.GetTokenType() != TokenType.KeyWord)
+            {
+                analyzer.StepBack();
+                return new object[] { null, Class_Member_Modifier_Constructor_Rules() };
+            }
+
+
+            switch ((KeyWords.KW)tok.value)
+            {
+                case KeyWords.KW.kwPrivate:
+                    return new object[] { tok, Class_Member_Modifier_Constructor_Rules() };
+                case KeyWords.KW.kwPublic:
+                    return new object[] { tok, Class_Member_Modifier_Constructor_Rules() };
+                case KeyWords.KW.kwAbstract:
+                    return new object[] { tok, Class_Member_Modifier_Constructor_Rules(false, false, false) };
+                case KeyWords.KW.kwOverride:
+                    return new object[] { tok, Class_Member_Modifier_Constructor_Rules(false, false, false) };
+                case KeyWords.KW.kwNew:
+                    return new object[] { tok, Class_Member_Modifier_Constructor_Rules(false) };
+                default:
+                    analyzer.StepBack();
+                    return new object[] { null, Class_Member_Modifier_Constructor_Rules() };
+            }
+        }
+
+        private Dictionary<string, bool> Class_Member_Modifier_Constructor_Rules(bool constructor=true, bool constant=true, bool field=true, bool method=true)
+        {
+            return new Dictionary<string, bool>()
+            {
+                {"Constructor", constructor},
+                {"Constant", constant },
+                {"Field", field },
+                {"Method", method },
+            };
         }
         #endregion
 

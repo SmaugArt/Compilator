@@ -23,6 +23,7 @@ namespace Compilator.AnalyzerModule.AnalyzerStructures
                 new SymToken { startSym = '<', endSym = '<', status = StatusKey.LeftAngleBracket },
 				new SymToken { startSym = '?', endSym = '?', status = StatusKey.Complete },
                 new SymToken { startSym = ':', endSym = ':', status = StatusKey.Complete },
+                new SymToken { startSym = '~', endSym = '~', status = StatusKey.Complete },
 
                 new SymToken { startSym = '/', endSym = '/', status = StatusKey.SlashStatus }, //деление или коментарий
                 new SymToken { startSym = '-', endSym = '-', status = StatusKey.DoubleMinus },//just check:Can be a complete
