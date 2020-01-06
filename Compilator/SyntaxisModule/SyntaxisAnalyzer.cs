@@ -178,6 +178,7 @@ namespace Compilator.SyntaxisModule
         }
 
         /// <summary>
+        /// Все структуры и типы, описываемые в КЛАССЕ!
         /// реализуем без: атрибутов
         /// Только Class, enum и structure
         /// [type] modificator + [type] + identificator + [type body]
@@ -186,9 +187,15 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Type_Declaration()
         {
             Token modifier = analyzer.GetToken();
-            if (modifier == null || modifier.GetTokenType() != TokenType.KeyWord)
-                throw SynException.ShowException(EXType.IncorrectToken,
-                    "Expected a [type] modifier!\r\nMessage: " + ((modifier == null) ? "Null reference exeption!" : modifier.ToString()));
+            ////if (modifier == null || modifier.GetTokenType() != TokenType.KeyWord)
+            ////    throw SynException.ShowException(EXType.IncorrectToken,
+            ////        "Expected a [type] modifier!\r\nMessage: " + ((modifier == null) ? "Null reference exeption!" : modifier.ToString()));
+            if (modifier == null || modifier.GetTokenType() != TokenType.KeyWord || !CheckModify(modifier))
+            {
+                analyzer.StepBack();
+                modifier = null;
+            }
+
 
             Token type = analyzer.GetToken();
             if (type == null || type.GetTokenType() != TokenType.KeyWord)
@@ -196,35 +203,74 @@ namespace Compilator.SyntaxisModule
                     "Expected a [type] name!\r\nMessage: " + ((type == null) ? "Null reference exeption!" : type.ToString()));
             switch ((KeyWords.KW)type.value)
             {
-                case KeyWords.KW.kwClass: return new ClassNode()
-                {
-                    token = type,
-                    children = new List<SyntaxisNode>()
+                case KeyWords.KW.kwClass:
+                    var CN = ParseClassComponents(modifier);
+                    if(CN.children[0] != null)
+                        return new ClassNode()
+                        {
+                            token = type,
+                            children = new List<SyntaxisNode>()
+                            {
+                                CN.children[0],
+                                new NodeIdentificator(){ token=CN.token },
+                                Class_Body()
+                            }
+                        };
+                    return new ClassNode()
                     {
-                        ParseClassComponents(modifier),
-                        Class_Body()
-                    }
-                };
+                        token = type,
+                        children = new List<SyntaxisNode>()
+                            {
+                                new NodeIdentificator(){ token=CN.token },
+                                Class_Body()
+                            }
+                    };
 
-                case KeyWords.KW.kwEnum: return new EnumNode()
-                {
-                    token = type,
-                    children = new List<SyntaxisNode>()
+                case KeyWords.KW.kwEnum:
+                    var CN2 = ParseEnumComponents(modifier);
+                    if (CN2.children[0] != null)
+                        return new EnumNode()
+                        {
+                            token = type,
+                            children = new List<SyntaxisNode>()
+                            {
+                                CN2.children[0],
+                                new NodeIdentificator(){ token=CN2.token },
+                                Enum_Body()
+                            }
+                        };
+                    return new EnumNode()
                     {
-                        ParseEnumComponents(modifier),
-                        Enum_Body()
-                    }
-                };
+                        token = type,
+                        children = new List<SyntaxisNode>()
+                            {
+                                new NodeIdentificator(){ token=CN2.token },
+                                Enum_Body()
+                            }
+                    };
 
-                case KeyWords.KW.kwStruct: return new StructNode()
-                {
-                    token = type,
-                    children = new List<SyntaxisNode>()
+                case KeyWords.KW.kwStruct:
+                    var CN3 = ParseStructComponents(modifier);
+                    if(CN3.children[0] != null)
+                        return new StructNode()
+                        {
+                            token = type,
+                            children = new List<SyntaxisNode>()
+                            {
+                                CN3.children[0],
+                                new NodeIdentificator(){ token=CN3.token },
+                                Struct_Body()
+                            }
+                        };
+                    return new StructNode()
                     {
-                        ParseStructComponents(modifier),
-                        Struct_Body()
-                    }
-                };
+                        token = type,
+                        children = new List<SyntaxisNode>()
+                            {
+                                new NodeIdentificator(){ token=CN3.token },
+                                Struct_Body()
+                            }
+                    };
 
                 default: throw new Exception("Unexpected Type name!\n\rMessage: " + type.ToString());
             }
@@ -243,7 +289,7 @@ namespace Compilator.SyntaxisModule
         {
             var mod = modifier;
 
-            if (mod == null)
+            if (mod != null)
             {
                 if (mod.GetTokenType() != TokenType.KeyWord)
                     throw SynException.ShowException(EXType.IncorrectToken,
@@ -291,7 +337,7 @@ namespace Compilator.SyntaxisModule
         {
             var mod = modifier;
 
-            if (mod == null)
+            if (mod != null)
             {
                 if (mod.GetTokenType() != TokenType.KeyWord)
                     throw SynException.ShowException(EXType.IncorrectToken,
@@ -337,7 +383,7 @@ namespace Compilator.SyntaxisModule
         {
             var mod = modifier;
 
-            if (mod == null)
+            if (mod != null)
             {
                 if (mod.GetTokenType() != TokenType.KeyWord)
                     throw SynException.ShowException(EXType.IncorrectToken,
@@ -379,7 +425,7 @@ namespace Compilator.SyntaxisModule
             };
         }
 
-        #region Class
+#region Class
         private ClassBodyNode Class_Body()
         {
             Token leftCyrkleBR = analyzer.GetToken();
@@ -458,6 +504,7 @@ namespace Compilator.SyntaxisModule
 
         private DeclarationNode Class_Member_Declaration()
         {
+            bool access;
             Token tilda = analyzer.GetToken();
 
             //+++++destructor
@@ -475,14 +522,55 @@ namespace Compilator.SyntaxisModule
 
             ///+++++const
             Token _const = analyzer.GetToken();
+            analyzer.StepBack();
             if (_const != null && _const.GetTokenType() == TokenType.KeyWord &&
                 _const.value.Equals(KeyWords.KW.kwConst))
             {
-                return 
+                ((Dictionary<string, bool>)dic[1]).TryGetValue("Constant", out access);
+                if (!access)
+                    throw SynException.ShowException(EXType.IncorrectNode,
+                        "Incorrect Constant modifier: " + ((Token)dic[0]).ToString());
+
+                return Constant_Declaration((Token)dic[0]);
             }
-            analyzer.StepBack();
             ///-----const
-            
+            ///
+            //+++++проверка на void -> проверка на method
+            Token _void = analyzer.GetToken();
+            if (_void != null && _void.GetTokenType() == TokenType.KeyWord &&
+                _void.value.Equals(KeyWords.KW.kwVoid))
+            {
+                ((Dictionary<string, bool>)dic[1]).TryGetValue("Method", out access);
+                if (!access)
+                    throw SynException.ShowException(EXType.IncorrectNode,
+                        "Incorrect method modifier: " + ((Token)dic[0]).ToString());
+
+                return Method_Declaration((Token)dic[0], new VoidTypeNode() { token = _void });
+            }
+
+            analyzer.StepBack();
+            //-----
+            var type = Type_Parse_Level1();
+
+            //+++++Method
+            Token leftBR = analyzer.GetToken();
+            analyzer.StepBack();
+            if (leftBR != null && leftBR.GetTokenType() == TokenType.Operator &&
+                leftBR.value.Equals(Operators.OP.opLeftParenthesis))
+            {
+                ((Dictionary<string, bool>)dic[1]).TryGetValue("Method",out access);
+                if (!access)
+                    throw SynException.ShowException(EXType.IncorrectNode,
+                        "Incorrect method modifier: " + ((Token)dic[0]).ToString());
+
+                return Method_Declaration((Token)dic[0], type);
+            }
+
+            ((Dictionary<string, bool>)dic[1]).TryGetValue("Field", out access);
+            if (!access)
+                throw SynException.ShowException(EXType.IncorrectNode,
+                    "Incorrect Field modifier: " + ((Token)dic[0]).ToString());
+            return Field_Declaration((Token)dic[0], type);   
         }
 
         //private Dictionary<string, bool> Class_Member_Declaration_Modifier()
@@ -524,7 +612,255 @@ namespace Compilator.SyntaxisModule
                 {"Method", method },
             };
         }
+
+        private ConstantDeclarationNode Constant_Declaration(Token modifier)
+        {
+            Token _const = analyzer.GetToken();
+            if (_const == null || _const.GetTokenType() != TokenType.KeyWord ||
+                !_const.value.Equals(KeyWords.KW.kwConst))
+                throw SynException.ShowException(EXType.IncorrectToken, 
+                    "Expected KeyWord \"Const\"! But get " + ((_const == null) ? 
+                    "Null reference exception" : _const.ToString()));
+
+            var type = Type_Parse_Level1();
+            var CD = Constant_Declarators();
+
+            //не добавляю semilicon в node!!!
+            Token semilicon = analyzer.GetToken();
+            if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
+                 !semilicon.value.Equals(Operators.OP.opSemicolon))
+                throw SynException.ShowException(EXType.IncorrectToken,
+                    "Expected Operator \";\"! But get " + ((semilicon == null) ?
+                    "Null reference exception" : semilicon.ToString()));
+
+            ConstantDeclarationNode node = new ConstantDeclarationNode() { token = _const };
+            if (modifier != null)
+                node.children.Add(new TypeModificatorNode() { token = modifier });
+
+            node.children.Add(type);
+            node.children.AddRange(CD);
+            return node;
+        }
+
+        private List<SyntaxisNode> Constant_Declarators()
+        {
+            List<SyntaxisNode> list = new List<SyntaxisNode>();
+            while (true)
+            {
+                //проверка на запятую
+                if (list.Count > 0)
+                {
+                    Token comma = analyzer.GetToken();
+
+                    if (comma == null || comma.GetTokenType() != TokenType.Operator ||
+                        !comma.value.Equals(Operators.OP.opComma))
+                    {
+                        analyzer.StepBack();
+                        break;
+                    }
+                }
+
+                NodeIdentificator identify = Parse_Identificator();
+                Token equals = analyzer.GetToken();
+
+                if (equals == null || equals.GetTokenType() != TokenType.Operator ||
+                    !equals.value.Equals(Operators.OP.opEquals))
+                    throw SynException.ShowException(EXType.IncorrectToken,
+                        "Expected Operator \"=\"! But get " + ((equals == null) ?
+                        "Null reference exception" : equals.ToString()));
+
+                var expression = ParsePimaryExpression();
+                list.Add(new ConstantDeclaratorNode() { token= equals, children=new List<SyntaxisNode>() { identify, expression } });
+            }
+
+            return list;
+        }
+
+        private FieldDeclarationNode Field_Declaration(Token modifier, SyntaxisNode type)
+        {
+            if (type == null)
+                throw new Exception("Type of field declaration can not have a null value!");
+
+            var VD = Variable_Declarators();
+
+            //не добавляю semilicon в node!!!
+            Token semilicon = analyzer.GetToken();
+            if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
+                 !semilicon.value.Equals(Operators.OP.opSemicolon))
+                throw SynException.ShowException(EXType.IncorrectToken,
+                    "Expected Operator \";\"! But get " + ((semilicon == null) ?
+                    "Null reference exception" : semilicon.ToString()));
+
+            FieldDeclarationNode node = new FieldDeclarationNode() { };
+
+            if (modifier != null)
+                node.children.Add(new NodeIdentificator() { token = modifier });
+
+            node.children.Add(type);
+            node.children.AddRange(VD);
+            return node;
+        }
+
+        private List<SyntaxisNode> Variable_Declarators()
+        {
+            List<SyntaxisNode> list = new List<SyntaxisNode>();
+
+            while (true)
+            {
+                //проверка на запятую
+                if (list.Count > 0)
+                {
+                    Token comma = analyzer.GetToken();
+
+                    if (comma == null || comma.GetTokenType() != TokenType.Operator ||
+                        !comma.value.Equals(Operators.OP.opComma))
+                    {
+                        analyzer.StepBack();
+                        break;
+                    }
+                }
+
+                int lastPos = analyzer.stepBackCount;
+                SyntaxisNode variable_initializer;
+
+                try
+                {
+                    variable_initializer = Variable_Initializer();
+                    list.Add(variable_initializer);
+                }
+                catch
+                {
+                    while (lastPos < analyzer.stepBackCount)
+                        analyzer.StepBack();
+                    break;
+                }
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Проверяем на {, т.к. должно однозначно идентифицировать операцию
+        /// </summary>
+        /// <returns></returns>
+        private SyntaxisNode Variable_Initializer()
+        {
+            Token leftCyrcleBR = analyzer.GetToken();
+            analyzer.StepBack();
+
+            if (leftCyrcleBR != null && leftCyrcleBR.GetTokenType() == TokenType.Operator &&
+                leftCyrcleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
+                return Array_Initializer();
+
+            return ParsePimaryExpression();
+
+        }
+
+        /// <summary>
+        /// Without formal_parameter_list, attributes,
+        /// type_parameter_constraints_clauses and particles
+        /// </summary>
+        /// <param name="modify">Модификатор</param>
+        /// <param name="type">Тип</param>
+        /// <returns></returns>
+        private MethodDeclarationNode Method_Declaration(Token modify, SyntaxisNode type)
+        {
+            var returnType = type;
+            if (returnType == null)
+                throw new Exception("Type of method declaration can not have a null value!");
+
+            var memberName = Parse_Identificator();
+            Token leftCyrcleBR = analyzer.GetToken();
+            if (leftCyrcleBR == null || leftCyrcleBR.GetTokenType() != TokenType.Operator ||
+                !leftCyrcleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " +
+                    ((leftCyrcleBR == null) ? "Null reference exeption!" : leftCyrcleBR.ToString()));
+            Token rightCyrcleBR = analyzer.GetToken();
+            if (rightCyrcleBR == null || rightCyrcleBR.GetTokenType() != TokenType.Operator ||
+                !rightCyrcleBR.value.Equals(Operators.OP.opRightCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"}\", but get: " +
+                    ((rightCyrcleBR == null) ? "Null reference exeption!" : rightCyrcleBR.ToString()));
+            var MB = Method_Body();
+
+            MethodDeclarationNode node = new MethodDeclarationNode();
+
+            if (modify != null)
+                node.children.Add(new TypeModificatorNode() { token = modify });
+
+            node.children.Add(returnType);
+            node.children.Add(memberName);
+            if (MB.GetType() != typeof(EmptyNode))
+                node.children.Add(MB);
+
+            return node;
+        }
+
+        private SyntaxisNode Method_Body()
+        {
+            Token semilicon = analyzer.GetToken();
+            if (semilicon != null && semilicon.GetTokenType() == TokenType.Operator &&
+                semilicon.value.Equals(Operators.OP.opSemicolon))
+                return new EmptyNode();
+
+            analyzer.StepBack();
+            return Block_Parse();
+        }
+
+        /// <summary>
+        /// tilda can not have a null value!
+        /// без attributes и extern
+        /// </summary>
+        /// <param name="tilda"></param>
+        /// <returns></returns>
+        private SyntaxisNode Destructor_Declaration(Token tilda)
+        {
+            
+        }
         #endregion
+
+        private SyntaxisNode Array_Initializer()
+        {
+            Token leftCyrcleBR = analyzer.GetToken();
+            if (leftCyrcleBR == null || leftCyrcleBR.GetTokenType() != TokenType.Operator ||
+                !leftCyrcleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " +
+                    ((leftCyrcleBR == null) ? "Null reference exeption!" : leftCyrcleBR.ToString()));
+
+            var VIL = Variable_Initializer_List();
+
+            Token rightCyrcleBR = analyzer.GetToken();
+            if (rightCyrcleBR == null || rightCyrcleBR.GetTokenType() != TokenType.Operator ||
+                !rightCyrcleBR.value.Equals(Operators.OP.opRightCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"}\", but get: " +
+                    ((rightCyrcleBR == null) ? "Null reference exeption!" : rightCyrcleBR.ToString()));
+
+            return new ArrayInitializerNode() { token = leftCyrcleBR, children = VIL };
+        }
+
+        private List<SyntaxisNode> Variable_Initializer_List()
+        {
+            List<SyntaxisNode> list = new List<SyntaxisNode>();
+
+            while (true)
+            {
+                if (list.Count > 0)
+                {
+                    Token comma = analyzer.GetToken();
+
+                    if (comma == null || comma.GetTokenType() != TokenType.Operator ||
+                        !comma.value.Equals(Operators.OP.opComma))
+                    {
+                        analyzer.StepBack();
+                        break;
+                    }
+                }
+
+
+            }
+
+            return list;
+        }
+
 
         #region Primary_Expression
         private SyntaxisNode ParsePimaryExpression() //without array_creation_expression
@@ -1298,6 +1634,27 @@ namespace Compilator.SyntaxisModule
 
             return listOfNode;
         }
-        #endregion
+#endregion
+
+        /// <summary>
+        /// Проверяет принадлежность токена к ключевому слову
+        /// </summary>
+        /// <param name="tok">Токен</param>
+        /// <returns></returns>
+        private bool CheckModify(Token tok)
+        {
+            if (tok == null || tok.GetTokenType() != TokenType.KeyWord) return false;
+
+            switch ((KeyWords.KW)tok.value)
+            {
+                case KeyWords.KW.kwPrivate:
+                case KeyWords.KW.kwPublic:
+                case KeyWords.KW.kwAbstract:
+                case KeyWords.KW.kwProtected:
+                case KeyWords.KW.kwInternal:
+                case KeyWords.KW.kwNew: return true;
+                default: return false;
+            }
+        }
     }
 }

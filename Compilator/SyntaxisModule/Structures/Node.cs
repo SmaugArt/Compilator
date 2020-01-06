@@ -83,6 +83,13 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "SimpleTypeNode:   " + token.GetText();
     }
 
+    public class VoidTypeNode : SyntaxisNode
+    {
+        public VoidTypeNode() : base() { }
+
+        public override string NodeText() => "VoidTypeNode:   " + token.GetText();
+    }
+
     public class NullableTypeNode : SimpleTypeNode
     {
         public NullableTypeNode() : base() { }
@@ -358,6 +365,13 @@ namespace Compilator.SyntaxisModule.Structures
     }
     #endregion
 
+    public class ArrayInitializerNode : SyntaxisNode
+    {
+        public ArrayInitializerNode() : base() { }
+        public override string NodeText() => "ArrayInitializerNode: {}";
+    }
+    
+
     #region MemberDeclaration
     public class DeclarationNode : SyntaxisNode
     {
@@ -369,6 +383,27 @@ namespace Compilator.SyntaxisModule.Structures
         public ConstantDeclarationNode() : base() { }
         public override string NodeText() => "ConstantDeclarationNode:" + token.GetText();
     }
+
+    public class ConstantDeclaratorNode : DeclarationNode
+    {
+        public ConstantDeclaratorNode() : base() { }
+        public override string NodeText() => "ConstantDeclaratorNode:" + token.GetText();
+    }
+
+    public class FieldDeclarationNode : DeclarationNode
+    {
+        public FieldDeclarationNode() : base() { }
+        public override string NodeText() => 
+            "Not have a any token because this node\r\na container for any Field Declaration Nodes";
+    }
+
+    public class MethodDeclarationNode : DeclarationNode
+    {
+        public MethodDeclarationNode() : base() { }
+        public override string NodeText() => "Not have a any token because this node\r\na container for any Method Declaration Nodes";
+    }
+    
+
     //etc
     #endregion
 
