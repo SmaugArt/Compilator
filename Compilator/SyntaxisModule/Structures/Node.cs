@@ -76,26 +76,49 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "BoolNode:   " + token.GetText();
     }
 
-    public class SimpleTypeNode : SyntaxisNode
+    #region TypeNode
+    public class TypeNode : SyntaxisNode
+    {
+        public TypeNode() : base() { }
+
+        public override string NodeText() => "Base type node for all types:   " + token.GetText();
+    }
+
+    public class SimpleTypeNode : TypeNode
     {
         public SimpleTypeNode() : base() { }
 
         public override string NodeText() => "SimpleTypeNode:   " + token.GetText();
     }
 
-    public class VoidTypeNode : SyntaxisNode
+    public class VoidTypeNode : TypeNode
     {
         public VoidTypeNode() : base() { }
 
         public override string NodeText() => "VoidTypeNode:   " + token.GetText();
     }
 
-    public class NullableTypeNode : SimpleTypeNode
+    public class VarTypeNode : TypeNode
+    {
+        public VarTypeNode() : base() { }
+
+        public override string NodeText() => "VarTypeNode:   " + token.GetText();
+    }
+
+    public class NullableTypeNode : TypeNode
     {
         public NullableTypeNode() : base() { }
 
         public override string NodeText() => "NullableTypeNode:   " + token.GetText();
     }
+
+    public class ArrayTypeNode : TypeNode
+    {
+        public ArrayTypeNode() : base() { }
+
+        public override string NodeText() => "ArrayTypeNode: []";
+    }
+    #endregion
 
     public class NullNode : NodeLiteral
     {
@@ -253,18 +276,12 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "InvocationExpressionNode: ()";
     }
 
-    public class ArrayTypeNode : SyntaxisNode
-    {
-        public ArrayTypeNode() : base() { }
-
-        public override string NodeText() => "ArrayTypeNode: []";
-    }
 
     public class ObjectInitializerNode : SyntaxisNode
     {
         public ObjectInitializerNode() : base() { }
 
-        public override string NodeText() => "ArrayTypeNode: {}";
+        public override string NodeText() => "ObjectInitializerNode: {}";
     }
 
     public class MemberInitializerNode : SyntaxisNode
@@ -397,14 +414,49 @@ namespace Compilator.SyntaxisModule.Structures
             "Not have a any token because this node\r\na container for any Field Declaration Nodes";
     }
 
+    public class VariableDeclaratorNode : FieldDeclarationNode
+    {
+        public VariableDeclaratorNode() : base() { }
+        public override string NodeText() => "VariableDeclaratorNode " + token.GetText();
+    }
+
     public class MethodDeclarationNode : DeclarationNode
     {
         public MethodDeclarationNode() : base() { }
         public override string NodeText() => "Not have a any token because this node\r\na container for any Method Declaration Nodes";
     }
-    
+
+    public class DestructorDeclarationNode : DeclarationNode
+    {
+        public DestructorDeclarationNode() : base() { }
+        public override string NodeText() => "DestructorDeclarationNode: "+token.GetText();
+    }
 
     //etc
+    #endregion
+
+    #region ProgrammBlockNodes_And_Statements
+    public class ProgrammBlockNode : SyntaxisNode
+    {
+        public ProgrammBlockNode() : base() { }
+
+        public override string NodeText() => "ProgrammBlockNode: {}";
+    }
+
+    public class DeclarationStatementNode : ProgrammBlockNode
+    {
+        public DeclarationStatementNode() : base() { }
+
+        public override string NodeText() => "Not have a any token because this node\r\na container for any Method Declaration Nodes";
+    }
+    public class LocalVariableDeclaratorNode : DeclarationStatementNode
+    {
+        public LocalVariableDeclaratorNode() : base() { }
+
+        public override string NodeText() => "LocalVariableDeclaratorNode " + token.ToString();
+    }
+        
+    //Все наследуемые statements
     #endregion
 
 }

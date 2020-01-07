@@ -205,7 +205,7 @@ namespace Compilator.SyntaxisModule
             {
                 case KeyWords.KW.kwClass:
                     var CN = ParseClassComponents(modifier);
-                    if(CN.children[0] != null)
+                    if (CN.children[0] != null)
                         return new ClassNode()
                         {
                             token = type,
@@ -251,7 +251,7 @@ namespace Compilator.SyntaxisModule
 
                 case KeyWords.KW.kwStruct:
                     var CN3 = ParseStructComponents(modifier);
-                    if(CN3.children[0] != null)
+                    if (CN3.children[0] != null)
                         return new StructNode()
                         {
                             token = type,
@@ -425,7 +425,7 @@ namespace Compilator.SyntaxisModule
             };
         }
 
-#region Class
+        #region Class
         private ClassBodyNode Class_Body()
         {
             Token leftCyrkleBR = analyzer.GetToken();
@@ -558,7 +558,7 @@ namespace Compilator.SyntaxisModule
             if (leftBR != null && leftBR.GetTokenType() == TokenType.Operator &&
                 leftBR.value.Equals(Operators.OP.opLeftParenthesis))
             {
-                ((Dictionary<string, bool>)dic[1]).TryGetValue("Method",out access);
+                ((Dictionary<string, bool>)dic[1]).TryGetValue("Method", out access);
                 if (!access)
                     throw SynException.ShowException(EXType.IncorrectNode,
                         "Incorrect method modifier: " + ((Token)dic[0]).ToString());
@@ -570,7 +570,7 @@ namespace Compilator.SyntaxisModule
             if (!access)
                 throw SynException.ShowException(EXType.IncorrectNode,
                     "Incorrect Field modifier: " + ((Token)dic[0]).ToString());
-            return Field_Declaration((Token)dic[0], type);   
+            return Field_Declaration((Token)dic[0], type);
         }
 
         //private Dictionary<string, bool> Class_Member_Declaration_Modifier()
@@ -602,7 +602,7 @@ namespace Compilator.SyntaxisModule
             }
         }
 
-        private Dictionary<string, bool> Class_Member_Modifier_Constructor_Rules(bool constructor=true, bool constant=true, bool field=true, bool method=true)
+        private Dictionary<string, bool> Class_Member_Modifier_Constructor_Rules(bool constructor = true, bool constant = true, bool field = true, bool method = true)
         {
             return new Dictionary<string, bool>()
             {
@@ -618,8 +618,8 @@ namespace Compilator.SyntaxisModule
             Token _const = analyzer.GetToken();
             if (_const == null || _const.GetTokenType() != TokenType.KeyWord ||
                 !_const.value.Equals(KeyWords.KW.kwConst))
-                throw SynException.ShowException(EXType.IncorrectToken, 
-                    "Expected KeyWord \"Const\"! But get " + ((_const == null) ? 
+                throw SynException.ShowException(EXType.IncorrectToken,
+                    "Expected KeyWord \"Const\"! But get " + ((_const == null) ?
                     "Null reference exception" : _const.ToString()));
 
             var type = Type_Parse_Level1();
@@ -670,7 +670,7 @@ namespace Compilator.SyntaxisModule
                         "Null reference exception" : equals.ToString()));
 
                 var expression = ParsePimaryExpression();
-                list.Add(new ConstantDeclaratorNode() { token= equals, children=new List<SyntaxisNode>() { identify, expression } });
+                list.Add(new ConstantDeclaratorNode() { token = equals, children = new List<SyntaxisNode>() { identify, expression } });
             }
 
             return list;
@@ -694,7 +694,7 @@ namespace Compilator.SyntaxisModule
             FieldDeclarationNode node = new FieldDeclarationNode() { };
 
             if (modifier != null)
-                node.children.Add(new NodeIdentificator() { token = modifier });
+                node.children.Add(new TypeModificatorNode() { token = modifier });
 
             node.children.Add(type);
             node.children.AddRange(VD);
@@ -720,20 +720,37 @@ namespace Compilator.SyntaxisModule
                     }
                 }
 
-                int lastPos = analyzer.stepBackCount;
-                SyntaxisNode variable_initializer;
+                var iden = Parse_Identificator();
+                Token equals = analyzer.GetToken();
+                if (equals == null || equals.GetTokenType() != TokenType.Operator ||
+                    !equals.value.Equals(Operators.OP.opEquals))
+                    throw SynException.ShowException(EXType.IncorrectToken, "Expected a Operator \"=\", but get " +
+                        ((equals == null) ? "Null reference exeption!" : equals.ToString()));
 
-                try
+                SyntaxisNode variable_initializer= Variable_Initializer();
+                list.Add(new VariableDeclaratorNode()
                 {
-                    variable_initializer = Variable_Initializer();
-                    list.Add(variable_initializer);
-                }
-                catch
-                {
-                    while (lastPos < analyzer.stepBackCount)
-                        analyzer.StepBack();
-                    break;
-                }
+                    token = equals,
+                    children = new List<SyntaxisNode>()
+                    {
+                        iden,
+                        variable_initializer
+                    }
+                });
+                //int lastPos = analyzer.stepBackCount;
+                //SyntaxisNode variable_initializer;
+
+                //try
+                //{
+                //    variable_initializer = Variable_Initializer();
+                //    list.Add(variable_initializer);
+                //}
+                //catch
+                //{
+                //    while (lastPos < analyzer.stepBackCount)
+                //        analyzer.StepBack();
+                //    break;
+                //}
             }
 
             return list;
@@ -770,16 +787,16 @@ namespace Compilator.SyntaxisModule
                 throw new Exception("Type of method declaration can not have a null value!");
 
             var memberName = Parse_Identificator();
-            Token leftCyrcleBR = analyzer.GetToken();
-            if (leftCyrcleBR == null || leftCyrcleBR.GetTokenType() != TokenType.Operator ||
-                !leftCyrcleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
-                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " +
-                    ((leftCyrcleBR == null) ? "Null reference exeption!" : leftCyrcleBR.ToString()));
-            Token rightCyrcleBR = analyzer.GetToken();
-            if (rightCyrcleBR == null || rightCyrcleBR.GetTokenType() != TokenType.Operator ||
-                !rightCyrcleBR.value.Equals(Operators.OP.opRightCurlyBracket))
-                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"}\", but get: " +
-                    ((rightCyrcleBR == null) ? "Null reference exeption!" : rightCyrcleBR.ToString()));
+            Token leftBR = analyzer.GetToken();
+            if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
+                !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"(\", but get: " +
+                    ((leftBR == null) ? "Null reference exeption!" : leftBR.ToString()));
+            Token rightBR = analyzer.GetToken();
+            if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
+                !rightBR.value.Equals(Operators.OP.opRightParenthesis))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \")\", but get: " +
+                    ((rightBR == null) ? "Null reference exeption!" : rightBR.ToString()));
             var MB = Method_Body();
 
             MethodDeclarationNode node = new MethodDeclarationNode();
@@ -809,12 +826,36 @@ namespace Compilator.SyntaxisModule
         /// <summary>
         /// tilda can not have a null value!
         /// без attributes и extern
+        /// Destructor_Body -> приравниваем к Method_Body
         /// </summary>
         /// <param name="tilda"></param>
         /// <returns></returns>
-        private SyntaxisNode Destructor_Declaration(Token tilda)
+        private DestructorDeclarationNode Destructor_Declaration(Token tilda)
         {
-            
+            if (tilda == null)
+                throw new Exception("Destructor_Declaration can not have a null parameter!");
+
+            var identifier = Parse_Identificator();
+
+            Token leftBR = analyzer.GetToken();
+            if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
+                !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"(\", but get: " +
+                    ((leftBR == null) ? "Null reference exeption!" : leftBR.ToString()));
+            Token rightBR = analyzer.GetToken();
+            if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
+                !rightBR.value.Equals(Operators.OP.opRightParenthesis))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \")\", but get: " +
+                    ((rightBR == null) ? "Null reference exeption!" : rightBR.ToString()));
+
+            var MB = Method_Body(); //==Destructor_Body
+            DestructorDeclarationNode node = new DestructorDeclarationNode() { token = tilda };
+            node.children.Add(identifier);
+            if (MB.GetType() != typeof(EmptyNode))
+                node.children.Add(MB);
+
+            return node;
+
         }
         #endregion
 
@@ -992,7 +1033,7 @@ namespace Compilator.SyntaxisModule
         {
             int stepBackCount = analyzer.stepBackCount;
 
-            if(type==ExpressionType.Non_Assigment_Expression)//conditional
+            if (type == ExpressionType.Non_Assigment_Expression)//conditional
                 return Parse_Conditional_Expression();
 
             if (type == ExpressionType.Assigment)
@@ -1006,7 +1047,7 @@ namespace Compilator.SyntaxisModule
             {
                 return Parse_Conditional_Expression();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ConditionDepth = analyzer.stepBackCount;
                 ExceptionMessage = ex.Message;
@@ -1019,12 +1060,12 @@ namespace Compilator.SyntaxisModule
             {
                 return Assignment_Parse();
             }
-            catch(Exception ex) //вызываем правильный Exception среди двух обработанных методов!!!
+            catch (Exception ex) //вызываем правильный Exception среди двух обработанных методов!!!
             {
                 int AssigmentDepth = analyzer.stepBackCount;
 
                 if (AssigmentDepth > ConditionDepth)
-                    throw new Exception("Error of parse Assigment expression.\r\nMessage: "+ex.Message);
+                    throw new Exception("Error of parse Assigment expression.\r\nMessage: " + ex.Message);
                 throw new Exception("Error of parse Conditional expression.\r\nMessage: " + ExceptionMessage);
             }
 
@@ -1424,10 +1465,10 @@ namespace Compilator.SyntaxisModule
 
         private SyntaxisNode ParseObjectOrCollectionInitializer(ObjectOrCollectionType type = ObjectOrCollectionType.Both)
         {
-            if(type == ObjectOrCollectionType.CollectionInitializer)
+            if (type == ObjectOrCollectionType.CollectionInitializer)
                 return Collection_Initializer();
 
-            if(type == ObjectOrCollectionType.ObjectInitializer)
+            if (type == ObjectOrCollectionType.ObjectInitializer)
                 return Object_Initializer();
 
             //both variant
@@ -1439,14 +1480,14 @@ namespace Compilator.SyntaxisModule
             {
                 return Object_Initializer();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Object_Initializer_depth= analyzer.stepBackCount;
+                Object_Initializer_depth = analyzer.stepBackCount;
                 object_initializer_message = ex.Message;
 
                 for (int i = analyzer.stepBackCount; i > lastStepBackCount;)
                     analyzer.StepBack();
-                
+
             }
 
             try
@@ -1477,7 +1518,7 @@ namespace Compilator.SyntaxisModule
                 !rightFiqureBR.value.Equals(Operators.OP.opRightCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected \"}\"");
 
-            if (node == null || node.Count==0)
+            if (node == null || node.Count == 0)
                 return new ObjectInitializerNode() { token = leftFiqureBR };
 
             return new ObjectInitializerNode() { token = leftFiqureBR, children = node };
@@ -1554,7 +1595,7 @@ namespace Compilator.SyntaxisModule
             Token rightFiqureBR = analyzer.GetToken();
             if (rightFiqureBR == null || rightFiqureBR.GetTokenType() != TokenType.Operator ||
                 !rightFiqureBR.value.Equals(Operators.OP.opRightCurlyBracket))
-                throw SynException.ShowException(EXType.IncorrectToken, "Expected \"}\"");    
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected \"}\"");
 
             return new CollectionInitializerNode() { token = leftFiqureBR, children = node };
         }
@@ -1630,11 +1671,164 @@ namespace Compilator.SyntaxisModule
             }
 
             if (listOfNode.Count > 0 && listOfNode[listOfNode.Count - 1].token.GetTokenType() == TokenType.Operator)
-                throw new Exception("Unexpected symbol "+ listOfNode[listOfNode.Count - 1].token.GetText());
+                throw new Exception("Unexpected symbol " + listOfNode[listOfNode.Count - 1].token.GetText());
 
             return listOfNode;
         }
-#endregion
+        #endregion
+
+        #region Programm Block
+        private SyntaxisNode Block_Parse()
+        {
+            Token leftCyrcleBR = analyzer.GetToken();
+            if (leftCyrcleBR == null || leftCyrcleBR.GetTokenType() != TokenType.Operator ||
+                !leftCyrcleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " +
+                    ((leftCyrcleBR == null) ? "Null reference exeption!" : leftCyrcleBR.ToString()));
+
+            var SL = Statement_List();
+
+            Token rightCyrcleBR = analyzer.GetToken();
+            if (rightCyrcleBR == null || rightCyrcleBR.GetTokenType() != TokenType.Operator ||
+                !rightCyrcleBR.value.Equals(Operators.OP.opRightCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"}\", but get: " +
+                    ((rightCyrcleBR == null) ? "Null reference exeption!" : rightCyrcleBR.ToString()));
+
+            return new ProgrammBlockNode() { token = leftCyrcleBR, children = SL };
+        }
+
+        /// <summary>
+        /// labeled_statement == Метка (Не используем)
+        /// declaration_statement == Переменная (Используем)
+        /// embedded_statement == состояния для работы тела программы (Используем):
+        /// ///Block (Use)
+        /// ///empty_statement (Use)
+        /// ///expression_statement (USe ALL !!!) --> начинай с тех, что без PrimaryExpression
+        /// ///selection_statement (use)
+        /// ///iteration_statement (While and for)
+        /// ///jump_statement (break, continue, return)
+        /// -------------------------------------------
+        /// ///try_statement (non usable)
+        /// ///checked_statement (non usable)
+        /// ///unchecked_statement (non usable)
+        /// ///lock_statement  (non usable)
+        /// ///using_statement (non usable)
+        /// ///yield_statement (non usable)
+        /// ///embedded_statement_unsafe (non usable)
+        /// </summary>
+        /// <returns></returns>
+        private List<SyntaxisNode> Statement_List()
+        {
+            List<SyntaxisNode> list = new List<SyntaxisNode>();
+
+            ///Пусть будет declaration_statement, если получили
+            ///Local variable_statement
+            while (true)
+            {
+                //некая хитрость : )
+                Token RightCyrcleBR = analyzer.GetToken();
+                analyzer.StepBack();
+                if (RightCyrcleBR != null && RightCyrcleBR.GetTokenType() == TokenType.Operator
+                    && RightCyrcleBR.value.Equals(Operators.OP.opRightCurlyBracket))
+                    break;
+
+                SyntaxisNode LVT = null;
+                int startAnPos = analyzer.stepBackCount;
+
+                try
+                {
+                    LVT = Local_Variable_Type();
+                }
+                catch
+                {
+                    while (startAnPos < analyzer.stepBackCount)
+                        analyzer.StepBack();
+                }
+
+                if (LVT != null)
+                {
+                    list.Add(Declaration_Statement(LVT));
+                }
+
+                list.Add(Embedded_Statement());
+
+            }
+
+            return list;
+        }
+
+        private SyntaxisNode Local_Variable_Type()
+        {
+            Token _var = analyzer.GetToken();
+            if (_var != null && _var.GetTokenType() == TokenType.KeyWord &&
+                _var.value.Equals(KeyWords.KW.kwVar))
+                return new VarTypeNode() { token = _var };
+
+            analyzer.StepBack();
+            return Type_Parse_Level1();
+        }
+
+        private SyntaxisNode Declaration_Statement(SyntaxisNode type)
+        {
+            if (type == null)
+                throw new Exception("Destructor_Declaration can not have a null parameter!");
+
+            List<SyntaxisNode> list = Local_Variable_Declarators();
+
+            DeclarationStatementNode node = new DeclarationStatementNode();
+            node.children.Add(type);
+            node.children.AddRange(list);
+            return node;
+        }
+
+        /// <summary>
+        /// Содержит в себе local_variable_declarator
+        /// </summary>
+        /// <returns></returns>
+        private List<SyntaxisNode> Local_Variable_Declarators()
+        {
+            List<SyntaxisNode> list = new List<SyntaxisNode>();
+
+            while (true)
+            {
+                SyntaxisNode identify = Parse_Identificator();
+                Token equals = analyzer.GetToken();
+                if (equals == null || equals.GetTokenType() != TokenType.Operator ||
+                    !equals.value.Equals(Operators.OP.opEquals))
+                    throw SynException.ShowException(EXType.IncorrectToken,"Expected a Operator \"=\", but get "+
+                        ((equals==null)? "Null reference exeption!":equals.ToString()));
+
+                var LVI = Local_Variable_Initializer();
+                list.Add(new LocalVariableDeclaratorNode()
+                {
+                    token = equals,
+                    children = new List<SyntaxisNode>()
+                    {
+                        identify,
+                        LVI
+                    }
+                });
+
+                Token comma = analyzer.GetToken();
+
+                if (comma == null || comma.GetTokenType() != TokenType.Operator ||
+                    !comma.value.Equals(Operators.OP.opComma))
+                {
+                    analyzer.StepBack();
+                    break;
+                }
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Не используем local_variable_initializer_unsafe,
+        /// Поэтому приравниваем к  Variable_Initializer
+        /// </summary>
+        /// <returns></returns>
+        private SyntaxisNode Local_Variable_Initializer() => Variable_Initializer();
+        #endregion
 
         /// <summary>
         /// Проверяет принадлежность токена к ключевому слову
@@ -1655,6 +1849,12 @@ namespace Compilator.SyntaxisModule
                 case KeyWords.KW.kwNew: return true;
                 default: return false;
             }
+        }
+
+        private SyntaxisNode Embedded_Statement()
+        {
+            //смотрим на то, что идет первым символом
+            //если ничего не подходит (try type parse для переменных, иначе primaryExpression); 
         }
     }
 }
