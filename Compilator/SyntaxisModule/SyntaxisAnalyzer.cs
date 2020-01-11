@@ -727,7 +727,7 @@ namespace Compilator.SyntaxisModule
                     throw SynException.ShowException(EXType.IncorrectToken, "Expected a Operator \"=\", but get " +
                         ((equals == null) ? "Null reference exeption!" : equals.ToString()));
 
-                SyntaxisNode variable_initializer= Variable_Initializer();
+                SyntaxisNode variable_initializer = Variable_Initializer();
                 list.Add(new VariableDeclaratorNode()
                 {
                     token = equals,
@@ -1795,8 +1795,8 @@ namespace Compilator.SyntaxisModule
                 Token equals = analyzer.GetToken();
                 if (equals == null || equals.GetTokenType() != TokenType.Operator ||
                     !equals.value.Equals(Operators.OP.opEquals))
-                    throw SynException.ShowException(EXType.IncorrectToken,"Expected a Operator \"=\", but get "+
-                        ((equals==null)? "Null reference exeption!":equals.ToString()));
+                    throw SynException.ShowException(EXType.IncorrectToken, "Expected a Operator \"=\", but get " +
+                        ((equals == null) ? "Null reference exeption!" : equals.ToString()));
 
                 var LVI = Local_Variable_Initializer();
                 list.Add(new LocalVariableDeclaratorNode()
@@ -1828,6 +1828,215 @@ namespace Compilator.SyntaxisModule
         /// </summary>
         /// <returns></returns>
         private SyntaxisNode Local_Variable_Initializer() => Variable_Initializer();
+
+        private SyntaxisNode Embedded_Statement()
+        {
+            //смотрим на то, что идет первым символом
+            //если ничего не подходит (try type parse для переменных, иначе primaryExpression); 
+            Token tok = analyzer.GetToken();
+            analyzer.StepBack();
+
+            if (tok != null && tok.GetTokenType() == TokenType.Operator)
+                switch ((Operators.OP)tok.value)
+                {
+                    case Operators.OP.opLeftCurlyBracket:
+                        return Block_Parse();
+                    case Operators.OP.opSemicolon:
+                        //analyzer.GetToken();
+                        return Empty_Statement();//важно записать для if и т.д.
+                }
+
+            if (tok != null && tok.GetTokenType() == TokenType.KeyWord)
+                switch ((KeyWords.KW)tok.value)
+                {
+                    //selection_statement
+                    case KeyWords.KW.kwIf:
+                        return If_Statement();
+                    case KeyWords.KW.kwSwitch:
+                        return Switch_Statement();
+
+                    //iteration_statement
+                    case KeyWords.KW.kwWhile:
+                        return While_Statement();
+                    case KeyWords.KW.kwDo:
+                        return Do_Statement();
+                    case KeyWords.KW.kwFor:
+                        return For_Statement();
+
+                    //jump_statement
+                    case KeyWords.KW.kwBreak:
+                        return Break_Statement();
+                    case KeyWords.KW.kwContinue:
+                        return Continue_Statement;
+                    case KeyWords.KW.kwReturn:
+                        return Return_Statement();
+                }
+
+            return Expression_Statement();
+        }
+
+        private SyntaxisNode Empty_Statement()
+        {
+            Token tok = analyzer.GetToken();
+
+            if (tok == null || tok.GetTokenType() != TokenType.Operator ||
+                !tok.value.Equals(Operators.OP.opSemicolon))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get"+
+                    ((tok == null) ? "Null reference exeption!" : tok.ToString()));
+
+            return new EmptyStatementNode() { token = tok };
+        }
+
+        private SyntaxisNode If_Statement()
+        {
+            Token tok = analyzer.GetToken();
+            if (tok == null || tok.GetTokenType() != TokenType.KeyWord ||
+                !tok.value.Equals(KeyWords.KW.kwIf))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"if\", but get" +
+                    ((tok == null) ? "Null reference exeption!" : tok.ToString()));
+
+            Token leftBR = analyzer.GetToken();
+            if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
+                !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"(\", but get" +
+                    ((leftBR == null) ? "Null reference exeption!" : leftBR.ToString()));
+
+            var boolean_expression = Boolean_Expression();
+
+            Token rightBR = analyzer.GetToken();
+            if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
+                !rightBR.value.Equals(Operators.OP.opRightParenthesis))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \")\", but get" +
+                    ((rightBR == null) ? "Null reference exeption!" : rightBR.ToString()));
+
+            var EmbExpression1 = Embedded_Statement();
+
+            Token _ifTok = analyzer.GetToken();
+            if (_ifTok == null || _ifTok.GetTokenType() != TokenType.KeyWord ||
+                !_ifTok.value.Equals(KeyWords.KW.kwElse))
+            {
+                analyzer.StepBack();
+                return new IfStatementNode()
+                {
+                    token = tok,
+                    children = new List<SyntaxisNode>()
+                    {
+                        boolean_expression,
+                        EmbExpression1
+                    }
+                };
+            }
+
+            var EmbExpression2 = Embedded_Statement();
+
+            return new IfStatementNode()
+            {
+                token = tok,
+                children = new List<SyntaxisNode>()
+                    {
+                        boolean_expression,
+                        EmbExpression1,
+                        EmbExpression2
+                    }
+            };
+        }
+
+        private SyntaxisNode Boolean_Expression() => ParsePimaryExpression();
+
+        private SyntaxisNode Switch_Statement()
+        {
+            Token tok = analyzer.GetToken();
+            if (tok == null || tok.GetTokenType() != TokenType.KeyWord ||
+                !tok.value.Equals(KeyWords.KW.kwSwitch))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"switch\", but get" +
+                    ((tok == null) ? "Null reference exeption!" : tok.ToString()));
+
+            Token leftBR = analyzer.GetToken();
+            if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
+                !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"(\", but get" +
+                    ((leftBR == null) ? "Null reference exeption!" : leftBR.ToString()));
+
+            var expression = ParsePimaryExpression();
+
+            Token rightBR = analyzer.GetToken();
+            if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
+                !rightBR.value.Equals(Operators.OP.opRightParenthesis))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \")\", but get" +
+                    ((rightBR == null) ? "Null reference exeption!" : rightBR.ToString()));           
+
+            var switch_block = Switch_Block();
+
+            if (switch_block.children.Count > 0)
+                return new SwitchStatementNode()
+                {
+                    token = tok,
+                    children = new List<SyntaxisNode>()
+                    {
+                        expression,
+                        switch_block
+                    }
+                };
+
+            return new SwitchStatementNode()
+            {
+                token = tok,
+                children = new List<SyntaxisNode>()
+                    {
+                        expression
+                    }
+            };
+        }
+
+        private SyntaxisNode Switch_Block()
+        {
+            List<SyntaxisNode> list = new List<SyntaxisNode>();
+
+            Token leftCyrcleBR = analyzer.GetToken();
+            if (leftCyrcleBR == null || leftCyrcleBR.GetTokenType() != TokenType.Operator ||
+                !leftCyrcleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"{\", but get" +
+                    ((leftCyrcleBR == null) ? "Null reference exeption!" : leftCyrcleBR.ToString()));
+
+            while (true)
+            {
+                Token keyWord = analyzer.GetToken();
+                if (keyWord == null || keyWord.GetTokenType() != TokenType.KeyWord ||
+                    !(keyWord.value.Equals(KeyWords.KW.kwCase) || keyWord.value.Equals(KeyWords.KW.kwDefault)))
+                //throw SynException.ShowException(EXType.IncorrectToken, "Expected keyword \"case or defauld\", but get" +
+                //    ((keyWord == null) ? "Null reference exeption!" : keyWord.ToString()));
+                {
+                    analyzer.StepBack();
+                    break;
+                }
+
+                var constant_expression = (keyWord.value.Equals(KeyWords.KW.kwCase)) ?
+                    Constant_Expression() : null;
+
+                Token dotDot = analyzer.GetToken();
+                if (dotDot == null || dotDot.GetTokenType() != TokenType.Operator ||
+                    !dotDot.value.Equals(Operators.OP.opDoubleDot))
+                    throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \":\", but get"+
+                        ((dotDot == null) ? "Null reference exeption!" : dotDot.ToString()));
+
+                var statement_list = Statement_List();
+
+                list.Add(new SwitchLlabelNode() { token= keyWord });
+                if (keyWord.value.Equals(KeyWords.KW.kwCase))
+                    list[list.Count - 1].children.Add(constant_expression);
+                list[list.Count - 1].children.AddRange(statement_list);
+            }
+
+            Token rightCyrcleBR = analyzer.GetToken();
+            if (rightCyrcleBR == null || rightCyrcleBR.GetTokenType() != TokenType.Operator ||
+                !rightCyrcleBR.value.Equals(Operators.OP.opRightCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"}\", but get" +
+                    ((rightCyrcleBR == null) ? "Null reference exeption!" : rightCyrcleBR.ToString()));
+
+            return new SwitchBlockNode() { token = leftCyrcleBR, children = list };
+        }
+
+        private SyntaxisNode Constant_Expression() => ParsePimaryExpression();
         #endregion
 
         /// <summary>
@@ -1851,10 +2060,6 @@ namespace Compilator.SyntaxisModule
             }
         }
 
-        private SyntaxisNode Embedded_Statement()
-        {
-            //смотрим на то, что идет первым символом
-            //если ничего не подходит (try type parse для переменных, иначе primaryExpression); 
-        }
+        
     }
 }

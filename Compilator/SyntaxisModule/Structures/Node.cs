@@ -8,7 +8,7 @@ namespace Compilator.SyntaxisModule.Structures
         public Token token;
         //public SyntaxisNode parent;
         public List<SyntaxisNode> children;
-        public SyntaxisNode() { children = new List<SyntaxisNode>();}
+        public SyntaxisNode() { children = new List<SyntaxisNode>(); }
 
         public override string ToString() => PrintMethod(0, this, true);//=> token.GetText();
         public abstract string NodeText();
@@ -18,10 +18,10 @@ namespace Compilator.SyntaxisModule.Structures
             SetOffset(ref newStr, level, '▓');
 
             newStr += (endLevelElement) ? '˪' : '˫';
-            newStr += node.NodeText()+ "\r\n";//node.token.GetText()+"\r\n";
+            newStr += node.NodeText() + "\r\n";//node.token.GetText()+"\r\n";
             for (int i = 0; i < node.children.Count; i++)
             {
-                newStr += (i + 1 == node.children.Count) ? PrintMethod(level + 1, node.children[i], true) : 
+                newStr += (i + 1 == node.children.Count) ? PrintMethod(level + 1, node.children[i], true) :
                     PrintMethod(level + 1, node.children[i], false);
             }
 
@@ -30,24 +30,24 @@ namespace Compilator.SyntaxisModule.Structures
 
         private void SetOffset(ref string str, int valOffset, char sym)
         {
-            for (int i = 0; i < valOffset;i++)
+            for (int i = 0; i < valOffset; i++)
                 str += sym;
         }
     }
 
     public class NodeLiteral : ExpressionNode
     {
-        public NodeLiteral():base() { }
-        public override string NodeText() => "LiteralNode: "+token.GetText();
-        
+        public NodeLiteral() : base() { }
+        public override string NodeText() => "LiteralNode: " + token.GetText();
+
     }
 
     public class NodeIdentificator : ExpressionNode
     {
-        public NodeIdentificator():base() { }
+        public NodeIdentificator() : base() { }
         public override string NodeText() => "Identificator:" + token.GetText();
-    } 
-        
+    }
+
     public class NodeChar : NodeLiteral
     {
         public NodeChar() : base() { }
@@ -140,7 +140,7 @@ namespace Compilator.SyntaxisModule.Structures
     {
         public OperatorNode() : base() { }
 
-        public override string NodeText() => "OperatorNode: "+token.GetText();
+        public override string NodeText() => "OperatorNode: " + token.GetText();
     }
 
     public class ExpressionNode : SyntaxisNode
@@ -177,7 +177,7 @@ namespace Compilator.SyntaxisModule.Structures
 
         public override string NodeText() => "InclusiveOrExpressionNode:" + token.GetText();
     }
-    
+
     public class ExclusiveOrExpressionNode : ExpressionNode //^
     {
         public ExclusiveOrExpressionNode() : base() { }
@@ -198,7 +198,7 @@ namespace Compilator.SyntaxisModule.Structures
 
         public override string NodeText() => "EqualityExpressionNode:" + token.GetText();
     }
-    
+
     public class RelationalExpressionNode : ExpressionNode //Is,As, >=, <=, >, <
     {
         public RelationalExpressionNode() : base() { }
@@ -332,9 +332,9 @@ namespace Compilator.SyntaxisModule.Structures
     {
         public NamespaceDeclarationNode() : base() { }
 
-        public override string NodeText() => "NamespaceDeclarationNode:"+token.GetText();
+        public override string NodeText() => "NamespaceDeclarationNode:" + token.GetText();
     }
-    
+
 
     public class UsingNode : SyntaxisNode
     {
@@ -345,7 +345,7 @@ namespace Compilator.SyntaxisModule.Structures
     public class QualifiedIdentifierNode : SyntaxisNode
     {
         public QualifiedIdentifierNode() : base() { }
-        public override string NodeText() => "QualifiedIdentifierNode:"+token.GetText();
+        public override string NodeText() => "QualifiedIdentifierNode:" + token.GetText();
     }
 
 
@@ -363,7 +363,7 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "Компонента типа:" + token.GetText();
     }
 
-    public class TypeModificatorNode : TypeComponentsNode { public TypeModificatorNode() : base() { }}
+    public class TypeModificatorNode : TypeComponentsNode { public TypeModificatorNode() : base() { } }
 
     //возможно расширение и добавление атрибутов и т.д.
     #endregion
@@ -387,7 +387,7 @@ namespace Compilator.SyntaxisModule.Structures
         public ArrayInitializerNode() : base() { }
         public override string NodeText() => "ArrayInitializerNode: {}";
     }
-    
+
 
     #region MemberDeclaration
     public class DeclarationNode : SyntaxisNode
@@ -410,7 +410,7 @@ namespace Compilator.SyntaxisModule.Structures
     public class FieldDeclarationNode : DeclarationNode
     {
         public FieldDeclarationNode() : base() { }
-        public override string NodeText() => 
+        public override string NodeText() =>
             "Not have a any token because this node\r\na container for any Field Declaration Nodes";
     }
 
@@ -429,7 +429,7 @@ namespace Compilator.SyntaxisModule.Structures
     public class DestructorDeclarationNode : DeclarationNode
     {
         public DestructorDeclarationNode() : base() { }
-        public override string NodeText() => "DestructorDeclarationNode: "+token.GetText();
+        public override string NodeText() => "DestructorDeclarationNode: " + token.GetText();
     }
 
     //etc
@@ -455,7 +455,49 @@ namespace Compilator.SyntaxisModule.Structures
 
         public override string NodeText() => "LocalVariableDeclaratorNode " + token.ToString();
     }
-        
+
+    public class EmbededDeclaratorNode : DeclarationStatementNode
+    {
+        public EmbededDeclaratorNode() : base() { }
+
+        public override string NodeText() => "Not have a any token because this node\r\na container for any Embeded Declarator Nodes";
+    }
+    
+    public class EmptyStatementNode : EmbededDeclaratorNode
+    {
+        public EmptyStatementNode() : base() { }
+
+        public override string NodeText() => "EmptyStatementNode " + token.ToString();
+    }
+    public class IfStatementNode : EmbededDeclaratorNode
+    {
+        public IfStatementNode() : base() { }
+
+        public override string NodeText() => "IfStatementNode " + token.ToString();
+    }
+
+    public class SwitchStatementNode: EmbededDeclaratorNode
+    {
+        public SwitchStatementNode() : base() { }
+
+        public override string NodeText() => "SwitchStatementNode " + token.ToString();
+    }
+
+    public class SwitchBlockNode : SwitchStatementNode
+    {
+        public SwitchBlockNode() : base() { }
+
+        public override string NodeText() => "SwitchBlockNode: {}";
+    }
+
+    public class SwitchLlabelNode : SwitchStatementNode
+    {
+        public SwitchLlabelNode() : base() { }
+
+        public override string NodeText() => "SwitchLlabelNode:" + token.GetText();
+    }
+    
+
     //Все наследуемые statements
     #endregion
 
