@@ -214,7 +214,9 @@ namespace Tester
             }
 
             resultButton = true;
-            HIIGLIGHTText();
+
+            //подсвечиваем синтаксис
+            if (LexerCheckBox.Checked) HIIGLIGHTText();
         }
 
         /// <summary>
@@ -294,14 +296,11 @@ namespace Tester
 
                         byte[] bytes = Encoding.Default.GetBytes(e.Data);
                         textBox1.Text += Encoding.UTF8.GetString(bytes) + "\r\n";
-                        HIIGLIGHTText();
+
+                        //подсвечиваем синтаксис
+                        if (LexerCheckBox.Checked) HIIGLIGHTText();
                     }));
                 }
-
-                //void ExitEvent(object sender, EventArgs e)
-                //{
-                //    HIIGLIGHTText();
-                //}
             }
             catch (Exception e)
             {
@@ -345,6 +344,7 @@ namespace Tester
             }
         }
 
+        #region LexerLight
         /// <summary>
         /// Подсветка синтаксиса
         /// </summary>
@@ -424,5 +424,7 @@ namespace Tester
             tb.Select(startIndex, endIndex-startIndex);
             tb.SelectionColor = col;
         }
+
+        #endregion
     }
 }

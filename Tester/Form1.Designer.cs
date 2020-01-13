@@ -42,6 +42,7 @@
             this.ProgrammBox = new System.Windows.Forms.TextBox();
             this.AnswerBox = new System.Windows.Forms.TextBox();
             this.textBox1 = new System.Windows.Forms.RichTextBox();
+            this.LexerCheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // FilePath2Box
@@ -148,41 +149,52 @@
             // ProgrammBox
             // 
             this.ProgrammBox.Font = new System.Drawing.Font("Calibri", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.ProgrammBox.Location = new System.Drawing.Point(12, 66);
+            this.ProgrammBox.Location = new System.Drawing.Point(12, 93);
             this.ProgrammBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ProgrammBox.Multiline = true;
             this.ProgrammBox.Name = "ProgrammBox";
             this.ProgrammBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.ProgrammBox.Size = new System.Drawing.Size(429, 482);
+            this.ProgrammBox.Size = new System.Drawing.Size(429, 455);
             this.ProgrammBox.TabIndex = 12;
             // 
             // AnswerBox
             // 
             this.AnswerBox.Font = new System.Drawing.Font("Calibri", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.AnswerBox.Location = new System.Drawing.Point(884, 66);
+            this.AnswerBox.Location = new System.Drawing.Point(884, 93);
             this.AnswerBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.AnswerBox.Multiline = true;
             this.AnswerBox.Name = "AnswerBox";
             this.AnswerBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.AnswerBox.Size = new System.Drawing.Size(429, 481);
+            this.AnswerBox.Size = new System.Drawing.Size(429, 454);
             this.AnswerBox.TabIndex = 13;
             // 
             // textBox1
             // 
             this.textBox1.Font = new System.Drawing.Font("Calibri", 13.8F);
-            this.textBox1.Location = new System.Drawing.Point(447, 66);
+            this.textBox1.Location = new System.Drawing.Point(447, 93);
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(431, 481);
+            this.textBox1.Size = new System.Drawing.Size(431, 454);
             this.textBox1.TabIndex = 14;
             this.textBox1.Text = "";
+            // 
+            // LexerCheckBox
+            // 
+            this.LexerCheckBox.AutoSize = true;
+            this.LexerCheckBox.Location = new System.Drawing.Point(13, 68);
+            this.LexerCheckBox.Name = "LexerCheckBox";
+            this.LexerCheckBox.Size = new System.Drawing.Size(256, 21);
+            this.LexerCheckBox.TabIndex = 15;
+            this.LexerCheckBox.Text = "Включить подсветку вывода Lexer";
+            this.LexerCheckBox.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(1322, 559);
+            this.ClientSize = new System.Drawing.Size(1284, 559);
+            this.Controls.Add(this.LexerCheckBox);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.AnswerBox);
             this.Controls.Add(this.ProgrammBox);
@@ -217,6 +229,7 @@
         private System.Windows.Forms.TextBox ProgrammBox;
         private System.Windows.Forms.TextBox AnswerBox;
         private System.Windows.Forms.RichTextBox textBox1;
+        private System.Windows.Forms.CheckBox LexerCheckBox;
     }
 }
 
