@@ -143,6 +143,7 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "OperatorNode: " + token.GetText();
     }
 
+    #region Expression
     public class ExpressionNode : SyntaxisNode
     {
         public ExpressionNode() : base() { }
@@ -305,6 +306,14 @@ namespace Compilator.SyntaxisModule.Structures
 
         public override string NodeText() => "ExpressionListNode: {}";
     }
+
+    public class Statement_Expression_List : ExpressionNode
+    {
+        public Statement_Expression_List() : base() { }
+
+        public override string NodeText() => "Statement_Expression_List is container and don't have token!";
+    }
+    #endregion
 
     public class ElementInitializerNode : SyntaxisNode
     {
@@ -494,7 +503,29 @@ namespace Compilator.SyntaxisModule.Structures
     {
         public SwitchLlabelNode() : base() { }
 
-        public override string NodeText() => "SwitchLlabelNode:" + token.GetText();
+        public override string NodeText() => "SwitchLlabelNode: " + token.GetText();
+    }
+
+    public class WhileStatementNode : EmbededDeclaratorNode
+    {
+        public WhileStatementNode() : base() { }
+
+        public override string NodeText() => "WhileStatementNode: " + token.GetText();
+    }
+    
+
+    public class DoStatementNode : EmbededDeclaratorNode
+    {
+        public DoStatementNode() : base() { }
+
+        public override string NodeText() => "DoStatementNode: " + token.GetText();
+    }
+
+    public class ForStatementNode : EmbededDeclaratorNode
+    {
+        public ForStatementNode() : base() { }
+
+        public override string NodeText() => "ForStatementNode: " + token.GetText();
     }
     
 

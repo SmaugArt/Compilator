@@ -1731,6 +1731,7 @@ namespace Compilator.SyntaxisModule
                 if (RightCyrcleBR != null && RightCyrcleBR.GetTokenType() == TokenType.Operator
                     && RightCyrcleBR.value.Equals(Operators.OP.opRightCurlyBracket))
                     break;
+                analyzer.GetToken();
 
                 SyntaxisNode LVT = null;
                 int startAnPos = analyzer.stepBackCount;
@@ -2037,6 +2038,221 @@ namespace Compilator.SyntaxisModule
         }
 
         private SyntaxisNode Constant_Expression() => ParsePimaryExpression();
+
+        private SyntaxisNode While_Statement()
+        {
+            Token whileTok = analyzer.GetToken();
+            if (whileTok == null || whileTok.GetTokenType() != TokenType.KeyWord ||
+                !whileTok.value.Equals(KeyWords.KW.kwWhile))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"while\", but get" +
+                    ((whileTok == null) ? "Null reference exeption!" : whileTok.ToString()));
+
+            Token leftBR = analyzer.GetToken();
+            if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
+                !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"(\", but get" +
+                    ((leftBR == null) ? "Null reference exeption!" : leftBR.ToString()));
+
+            var expression = Boolean_Expression();
+
+            Token rightBR = analyzer.GetToken();
+            if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
+                !rightBR.value.Equals(Operators.OP.opRightParenthesis))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \")\", but get" +
+                    ((rightBR == null) ? "Null reference exeption!" : rightBR.ToString()));
+
+            var embededStatement = Embedded_Statement();
+
+            return new WhileStatementNode()
+            {
+                token = whileTok,
+                children = new List<SyntaxisNode>()
+                {
+                    expression,
+                    embededStatement
+                }
+            };
+        }
+
+        private SyntaxisNode Do_Statement()
+        {
+            Token doTok = analyzer.GetToken();
+            if (doTok == null || doTok.GetTokenType() != TokenType.KeyWord ||
+                !doTok.value.Equals(KeyWords.KW.kwDo))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"do\", but get" +
+                    ((doTok == null) ? "Null reference exeption!" : doTok.ToString()));
+
+            var embededStatement = Embedded_Statement();
+
+            //while
+            Token whileTok = analyzer.GetToken();
+            if(whileTok == null || whileTok.GetTokenType() != TokenType.KeyWord ||
+                !whileTok.value.Equals(KeyWords.KW.kwWhile))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"while\", but get" +
+                    ((whileTok == null) ? "Null reference exeption!" : whileTok.ToString()));
+            //---while
+
+            Token leftBR = analyzer.GetToken();
+            if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
+                !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"(\", but get" +
+                    ((leftBR == null) ? "Null reference exeption!" : leftBR.ToString()));
+
+            var expression = Boolean_Expression();
+
+            Token rightBR = analyzer.GetToken();
+            if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
+                !rightBR.value.Equals(Operators.OP.opRightParenthesis))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \")\", but get" +
+                    ((rightBR == null) ? "Null reference exeption!" : rightBR.ToString()));
+
+            Token tokSemilikon = analyzer.GetToken();
+            if(tokSemilikon == null || tokSemilikon.GetTokenType() != TokenType.Operator ||
+                !tokSemilikon.value.Equals(Operators.OP.opSemicolon))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get" +
+                    ((tokSemilikon == null) ? "Null reference exeption!" : tokSemilikon.ToString()));
+
+            return new DoStatementNode()
+            {
+                token = doTok,
+                children = new List<SyntaxisNode>()
+                {
+                    embededStatement,
+                    expression
+                }
+            };
+        }
+
+        /// <summary>
+        /// for( инициализация? ; состояние? ; Итератор?) embedded_statement
+        /// </summary>
+        /// <returns></returns>
+        private SyntaxisNode For_Statement()
+        {
+            bool initialize = false;
+            SyntaxisNode initializerNode = null;
+            bool conditional = false;
+            SyntaxisNode conditionalNode = null;
+            bool iterator = false;
+            SyntaxisNode iteratorNode = null;
+
+            Token forTok = analyzer.GetToken();
+            if (forTok == null || forTok.GetTokenType() != TokenType.KeyWord ||
+                !forTok.value.Equals(KeyWords.KW.kwFor))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"for\", but get" +
+                    ((forTok == null) ? "Null reference exeption!" : forTok.ToString()));
+
+            Token leftBR = analyzer.GetToken();
+            if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
+                !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"(\", but get" +
+                    ((leftBR == null) ? "Null reference exeption!" : leftBR.ToString()));
+
+            Token semilikon1 = analyzer.GetToken();
+            if (semilikon1 == null || semilikon1.GetTokenType() != TokenType.Operator ||
+                !semilikon1.value.Equals(Operators.OP.opSemicolon))
+            {
+                analyzer.StepBack();
+                initialize = true;
+                initializerNode = For_Initializer();
+
+                semilikon1 = analyzer.GetToken();
+                if (semilikon1 == null || semilikon1.GetTokenType() != TokenType.Operator ||
+                !semilikon1.value.Equals(Operators.OP.opSemicolon))
+                    throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get" +
+                    ((semilikon1 == null) ? "Null reference exeption!" : semilikon1.ToString()));
+            }
+
+            Token semilikon2 = analyzer.GetToken();
+            if (semilikon2 == null || semilikon2.GetTokenType() != TokenType.Operator ||
+                !semilikon2.value.Equals(Operators.OP.opSemicolon))
+            {
+                analyzer.StepBack();
+                conditional = true;
+                conditionalNode = For_Condition();
+
+                semilikon2 = analyzer.GetToken();
+                if (semilikon2 == null || semilikon2.GetTokenType() != TokenType.Operator ||
+                !semilikon2.value.Equals(Operators.OP.opSemicolon))
+                    throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get" +
+                    ((semilikon2 == null) ? "Null reference exeption!" : semilikon2.ToString()));
+            }
+
+            Token rightBR = analyzer.GetToken();
+            if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
+                !rightBR.value.Equals(Operators.OP.opRightParenthesis))
+            {
+                analyzer.StepBack();
+                iterator = true;
+                iteratorNode = For_Iterator();
+
+                rightBR = analyzer.GetToken();
+                if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
+                !rightBR.value.Equals(Operators.OP.opRightParenthesis))
+                    throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get" +
+                    ((rightBR == null) ? "Null reference exeption!" : rightBR.ToString()));
+            }
+
+            var embededStatement = Embedded_Statement();
+
+            //return part
+            ForStatementNode node = new ForStatementNode() { token = forTok };
+
+            if (initialize) node.children.Add(initializerNode);
+            if (conditional) node.children.Add(conditionalNode);
+            if (iterator) node.children.Add(iteratorNode);
+
+            node.children.Add(embededStatement);
+            return node;
+        }
+
+        /// <summary>
+        /// Сейчпс без Statement_Expression_List
+        /// </summary>
+        /// <returns></returns>
+        private SyntaxisNode For_Initializer()
+        {
+            var type = Local_Variable_Type();
+
+            return Declaration_Statement(type);
+        }
+
+        private SyntaxisNode For_Condition() => Boolean_Expression();
+
+        private SyntaxisNode For_Iterator() =>
+            new Statement_Expression_List() { children = Statement_Expression_List() };
+
+        private List<SyntaxisNode> Statement_Expression_List()
+        {
+            List<SyntaxisNode> list = new List<SyntaxisNode>();
+
+            while (true)
+            {
+                list.Add(Statement_Expression());
+
+                Token comma = analyzer.GetToken();
+                if (comma == null || comma.GetTokenType() != TokenType.Operator ||
+                    !comma.value.Equals(Operators.OP.opComma))
+                {
+                    analyzer.StepBack();
+                    break;
+                }
+            }
+
+            return list;
+        }
+        private ExpressionNode  Statement_Expression()
+        {
+            //ExpressionNode return!
+            //++
+            //--
+            //new 
+            //try parse assigment -> ParseExpression(Assigment type)
+            //try parse PrimaryExpression:
+            ///++
+            ///--
+            ///()
+        }
         #endregion
 
         /// <summary>
