@@ -1,0 +1,7 @@
+public class classik
+   {
+	private class wood
+	{
+	   public void GetWood(){}
+	}
+   }

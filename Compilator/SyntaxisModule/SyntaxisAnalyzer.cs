@@ -121,7 +121,7 @@ namespace Compilator.SyntaxisModule
                 {
                     var typeDeclaration = Type_Declaration();
                     if (typeDeclaration.GetType() != typeof(EmptyNode))
-                        namespaceDeclar.Add(Type_Declaration());
+                        namespaceDeclar.Add(typeDeclaration);
                     else
                         break;
                 }
@@ -510,13 +510,13 @@ namespace Compilator.SyntaxisModule
                 {
                     var typeDeclaration = Type_Declaration();
                     if (typeDeclaration.GetType() != typeof(EmptyNode))
-                        nodes.Add(Type_Declaration());
+                        nodes.Add(typeDeclaration);
                     else
                         break;
                 }
                 catch
                 {
-                    for (int i = analyzer.stepBackCount; i > analyzerStartPos;)
+                    while(analyzer.stepBackCount > analyzerStartPos)
                         analyzer.StepBack();
                     break;
                 }
@@ -532,7 +532,7 @@ namespace Compilator.SyntaxisModule
 
             //+++++destructor
             if (tilda != null && tilda.GetTokenType() == TokenType.Operator
-                && tilda.Equals(Operators.OP.opTilda))
+                && tilda.value.Equals(Operators.OP.opTilda))
             {
                 return Destructor_Declaration(tilda);
             }
@@ -557,7 +557,20 @@ namespace Compilator.SyntaxisModule
                 return Constant_Declaration((Token)dic[0]);
             }
             ///-----const
-            ///
+
+            //++++Constructor
+            Token identify = analyzer.GetToken();
+            analyzer.StepBack();
+            if (identify != null && identify.GetTokenType() == TokenType.Identificator)
+            {
+                ((Dictionary<string, bool>)dic[1]).TryGetValue("Constructor", out access);
+                if(!access)
+                    throw SynException.ShowException(EXType.IncorrectNode,
+                        "Incorrect constructor modifier: " + ((Token)dic[0]).ToString());
+                return Constructor_Declaration((Token)dic[0]);
+            }
+            //----Constructor
+
             //+++++проверка на void -> проверка на method
             Token _void = analyzer.GetToken();
             if (_void != null && _void.GetTokenType() == TokenType.KeyWord &&
@@ -794,6 +807,47 @@ namespace Compilator.SyntaxisModule
 
             return ParsePimaryExpression();
 
+        }
+
+        private ConstructorDeclarationNode Constructor_Declaration(Token modify)
+        {
+            var memberName = Parse_Identificator();
+
+            Token leftBR = analyzer.GetToken();
+            if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
+                !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"(\", but get: " +
+                    ((leftBR == null) ? "Null reference exeption!" : leftBR.ToString()));
+
+            Token rightBR = analyzer.GetToken();
+            if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
+                !rightBR.value.Equals(Operators.OP.opRightParenthesis))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \")\", but get: " +
+                    ((rightBR == null) ? "Null reference exeption!" : rightBR.ToString()));
+
+            var MB = Constructor_Body();
+
+            ConstructorDeclarationNode node = new ConstructorDeclarationNode();
+
+            if (modify != null)
+                node.children.Add(new TypeModificatorNode() { token = modify });
+
+            node.children.Add(memberName);
+            if (MB.GetType() != typeof(EmptyNode))
+                node.children.Add(MB);
+
+            return node;
+        }
+
+        private SyntaxisNode Constructor_Body()
+        {
+            Token semilicon = analyzer.GetToken();
+            if (semilicon != null && semilicon.GetTokenType() == TokenType.Operator &&
+                semilicon.value.Equals(Operators.OP.opSemicolon))
+                return new EmptyNode();
+
+            analyzer.StepBack();
+            return Block_Parse();
         }
 
         /// <summary>

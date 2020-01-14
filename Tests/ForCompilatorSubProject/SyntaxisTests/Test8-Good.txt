@@ -1,0 +1,19 @@
+using NLOG.hub;
+using System.Collection.Generic;
+
+namespace ggg
+{
+   public class classik
+   {
+	//constructor
+	public classik()
+	{
+		
+	}
+
+	//destructor
+	~classik()
+	{
+	}
+   }
+}

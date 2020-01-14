@@ -461,7 +461,7 @@ namespace Compilator.SyntaxisModule.Structures
     {
         public FieldDeclarationNode() : base() { }
         public override string NodeText() =>
-            "Not have a any token because this node\r\na container for any Field Declaration Nodes";
+            "Not have a any token because this node a container for any Field Declaration Nodes";
     }
 
     public class VariableDeclaratorNode : FieldDeclarationNode
@@ -470,10 +470,16 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "VariableDeclaratorNode " + token.GetText();
     }
 
+    public class ConstructorDeclarationNode : DeclarationNode
+    {
+        public ConstructorDeclarationNode() : base() { }
+        public override string NodeText() => "Not have a any token because this node a container for any Constructor Declaration Nodes";
+    }
+
     public class MethodDeclarationNode : DeclarationNode
     {
         public MethodDeclarationNode() : base() { }
-        public override string NodeText() => "Not have a any token because this node\r\na container for any Method Declaration Nodes";
+        public override string NodeText() => "Not have a any token because this node na container for any Method Declaration Nodes";
     }
 
     public class DestructorDeclarationNode : DeclarationNode
@@ -514,7 +520,7 @@ namespace Compilator.SyntaxisModule.Structures
     {
         public DeclarationStatementNode() : base() { }
 
-        public override string NodeText() => "Not have a any token because this node\r\na container for any Method Declaration Nodes";
+        public override string NodeText() => "Not have a any token because this node a container for any Method Declaration Nodes";
     }
     public class LocalVariableDeclaratorNode : DeclarationStatementNode
     {
