@@ -118,7 +118,14 @@ namespace Compilator.SyntaxisModule
                 if (t.GetTokenType() == TokenType.KeyWord && t.value.Equals(KeyWords.KW.kwNamespace))
                     namespaceDeclar.Add(Namespace_Declaration());
                 else
-                    namespaceDeclar.Add(Type_Declaration());
+                {
+                    var typeDeclaration = Type_Declaration();
+                    if (typeDeclaration.GetType() != typeof(EmptyNode))
+                        namespaceDeclar.Add(Type_Declaration());
+                    else
+                        break;
+                }
+                    
             }
 
             return namespaceDeclar; //либо просто пустой список, либо ничего не добавится в случае отсутствия
@@ -141,7 +148,7 @@ namespace Compilator.SyntaxisModule
             var qualityIdNode = Qualified_Identifier();
 
             Token leftCyrkleBR = analyzer.GetToken();
-            if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() == TokenType.Operator ||
+            if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() != TokenType.Operator ||
                 !leftCyrkleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " +
                     ((leftCyrkleBR == null) ? "Null reference exeption!" : leftCyrkleBR.ToString()));
@@ -149,7 +156,7 @@ namespace Compilator.SyntaxisModule
             var namespaceBodyNode = Compilation_Unit();//Namespace_Body();
 
             Token rightCyrkleBR = analyzer.GetToken();
-            if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() == TokenType.Operator ||
+            if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() != TokenType.Operator ||
                 !rightCyrkleBR.value.Equals(Operators.OP.opRightCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " +
                     ((rightCyrkleBR == null) ? "Null reference exeption!" : rightCyrkleBR.ToString()));
@@ -172,7 +179,11 @@ namespace Compilator.SyntaxisModule
 
             if (dot == null || dot.GetTokenType() != TokenType.Operator ||
                 !dot.value.Equals(Operators.OP.opDot))
+            {
+                analyzer.StepBack();
                 return node;
+            }
+
             return new QualifiedIdentifierNode() { token = dot, children =
                 new List<SyntaxisNode>() { node, Qualified_Identifier() } };
         }
@@ -199,8 +210,15 @@ namespace Compilator.SyntaxisModule
 
             Token type = analyzer.GetToken();
             if (type == null || type.GetTokenType() != TokenType.KeyWord)
-                throw SynException.ShowException(EXType.IncorrectToken,
+            {
+                if(type == null || type.GetTokenType() != TokenType.Operator ||
+                    !type.value.Equals(Operators.OP.opRightCurlyBracket))
+                    throw SynException.ShowException(EXType.IncorrectToken,
                     "Expected a [type] name!\r\nMessage: " + ((type == null) ? "Null reference exeption!" : type.ToString()));
+                analyzer.StepBack();
+                return new EmptyNode();
+            }
+                
             switch ((KeyWords.KW)type.value)
             {
                 case KeyWords.KW.kwClass:
@@ -429,7 +447,7 @@ namespace Compilator.SyntaxisModule
         private ClassBodyNode Class_Body()
         {
             Token leftCyrkleBR = analyzer.GetToken();
-            if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() == TokenType.Operator ||
+            if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() != TokenType.Operator ||
                 !leftCyrkleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " +
                     ((leftCyrkleBR == null) ? "Null reference exeption!" : leftCyrkleBR.ToString()));
@@ -437,7 +455,7 @@ namespace Compilator.SyntaxisModule
             List<SyntaxisNode> classMember = Class_Member_Declarations();
 
             Token rightCyrkleBR = analyzer.GetToken();
-            if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() == TokenType.Operator ||
+            if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() != TokenType.Operator ||
                 !rightCyrkleBR.value.Equals(Operators.OP.opRightCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"}\", but get: " +
                     ((rightCyrkleBR == null) ? "Null reference exeption!" : rightCyrkleBR.ToString()));
@@ -483,13 +501,18 @@ namespace Compilator.SyntaxisModule
                 {
                     // Class_Member_Declaration = analyzer.stepBackCount;
 
-                    for (int i = analyzer.stepBackCount; i > analyzerStartPos;)
+                    //for (int i = analyzer.stepBackCount; i > analyzerStartPos;)
+                    while(analyzer.stepBackCount> analyzerStartPos)
                         analyzer.StepBack();
                 }
 
                 try
                 {
-                    nodes.Add(Type_Declaration());
+                    var typeDeclaration = Type_Declaration();
+                    if (typeDeclaration.GetType() != typeof(EmptyNode))
+                        nodes.Add(Type_Declaration());
+                    else
+                        break;
                 }
                 catch
                 {
