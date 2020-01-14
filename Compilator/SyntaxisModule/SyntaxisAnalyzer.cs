@@ -252,7 +252,7 @@ namespace Compilator.SyntaxisModule
                 case KeyWords.KW.kwStruct:
                     var CN3 = ParseStructComponents(modifier);
                     if (CN3.children[0] != null)
-                        return new StructNode()
+                        return new StructureNode()
                         {
                             token = type,
                             children = new List<SyntaxisNode>()
@@ -262,7 +262,7 @@ namespace Compilator.SyntaxisModule
                                 Struct_Body()
                             }
                         };
-                    return new StructNode()
+                    return new StructureNode()
                     {
                         token = type,
                         children = new List<SyntaxisNode>()
@@ -859,6 +859,12 @@ namespace Compilator.SyntaxisModule
         }
         #endregion
 
+        #region Structure
+        private ClassBodyNode Struct_Body()
+        {
+
+        }
+        #endregion
         private SyntaxisNode Array_Initializer()
         {
             Token leftCyrcleBR = analyzer.GetToken();
@@ -978,7 +984,8 @@ namespace Compilator.SyntaxisModule
                         return new NodeBool() { token = t };
                     if ((KeyWords.KW)t.value == KeyWords.KW.kwNull)
                         return new NullNode() { token = t };
-                    //++++object_creation_expression ///Делаем без переменных, иначе придется реализовывать деревоы
+                    //++++object_creation_expression = StatementExpression.Object_Creation_Expression 
+                    //Делаем без переменных, иначе придется реализовывать деревоы
                     if ((KeyWords.KW)t.value == KeyWords.KW.kwNew) {
                         SyntaxisNode type = Type_Parse_Level1(); //получаю type (Некий идентификатор или KeyWord)
 
@@ -1868,7 +1875,7 @@ namespace Compilator.SyntaxisModule
                     case KeyWords.KW.kwBreak:
                         return Break_Statement();
                     case KeyWords.KW.kwContinue:
-                        return Continue_Statement;
+                        return Continue_Statement();
                     case KeyWords.KW.kwReturn:
                         return Return_Statement();
                 }
@@ -2212,9 +2219,39 @@ namespace Compilator.SyntaxisModule
         /// <returns></returns>
         private SyntaxisNode For_Initializer()
         {
-            var type = Local_Variable_Type();
+            //var type = Local_Variable_Type();
+            //return Declaration_Statement(type);
 
-            return Declaration_Statement(type);
+            ///+++local Variable Declaration
+            int startPos = analyzer.stepBackCount;
+            int maxPos = startPos;
+            string localVariableMessage = "";
+
+            try
+            {
+                var type = Local_Variable_Type();
+                return Declaration_Statement(type);
+            }
+            catch (Exception ex)
+            {
+                localVariableMessage = ex.Message;
+                maxPos = analyzer.stepBackCount;
+                while (startPos < analyzer.stepBackCount)
+                    analyzer.StepBack();
+            }
+            //---
+            //statement_expression_list
+            try
+            {
+                return new Statement_Expression_List() { children = Statement_Expression_List() };
+            }
+            catch (Exception ex)
+            {
+                if (analyzer.stepBackCount > maxPos)
+                    throw new Exception(ex.Message);
+                else
+                    throw new Exception(localVariableMessage);
+            }
         }
 
         private SyntaxisNode For_Condition() => Boolean_Expression();
@@ -2241,17 +2278,195 @@ namespace Compilator.SyntaxisModule
 
             return list;
         }
-        private ExpressionNode  Statement_Expression()
+        /// <summary>
+        ///ExpressionNode return!
+        ///++
+        ///--
+        ///new 
+        ///try parse assigment -> ParseExpression(Assigment type)
+        ///try parse PrimaryExpression:
+        ///  ++
+        ///  --
+        ///  ()
+        ///
+        ///Проблема в том, что pre операции входят в unaryExpression, который
+        /// относится к assignment операции. Решением будет попытка сразу
+        /// использовать Assigment, а иначе все остальное !!!
+        /// </summary>
+        /// <returns></returns>
+        private SyntaxisNode  Statement_Expression()
         {
-            //ExpressionNode return!
-            //++
-            //--
-            //new 
-            //try parse assigment -> ParseExpression(Assigment type)
-            //try parse PrimaryExpression:
-            ///++
-            ///--
-            ///()
+            //+++Assigment part
+            int startPos = analyzer.stepBackCount;
+            int maxPos = analyzer.stepBackCount;
+
+            try
+            {
+                return ParseExpression(ExpressionType.Assigment);
+            }
+            catch
+            {
+                maxPos = analyzer.stepBackCount;
+                while (startPos < analyzer.stepBackCount)
+                    analyzer.StepBack();
+            }
+            //---
+
+            //+++ pre-expression
+            Token tok = analyzer.GetToken();
+            if (tok != null && tok.GetTokenType() == TokenType.Operator &&
+                (tok.value.Equals(Operators.OP.opIncrementExpression) || tok.value.Equals(Operators.OP.opDecrementExpression)))
+            {
+                if (tok.value.Equals(Operators.OP.opIncrementExpression))//++
+                    return new PreIncrementNode()
+                    {
+                        token = tok,
+                        children = new List<SyntaxisNode>()
+                        {
+                            Unary_Expression_Primary_Part()
+                        }
+                    };
+                else
+                    return new PreDecrementNode()
+                    {
+                        token = tok,
+                        children = new List<SyntaxisNode>()
+                        {
+                            Unary_Expression_Primary_Part()
+                        }
+                    };
+            }
+            //---
+            //+++object_creation_expression
+            if (tok != null && tok.GetTokenType() == TokenType.KeyWord &&
+                tok.value.Equals(KeyWords.KW.kwNew))
+            {
+                SyntaxisNode type = Type_Parse_Level1(); //получаю type (Некий идентификатор или KeyWord)
+
+                Token opLeftParenthesis = analyzer.GetToken();
+                if (opLeftParenthesis.GetTokenType() != TokenType.Operator || (Operators.OP)opLeftParenthesis.value != Operators.OP.opLeftParenthesis)
+                    throw new Exception("Expected \"(\", but get:" + opLeftParenthesis.ToString());
+
+                Token opRightParenthesis = analyzer.GetToken();
+                if (opRightParenthesis.GetTokenType() != TokenType.Operator || (Operators.OP)opRightParenthesis.value != Operators.OP.opRightParenthesis)
+                    throw new Exception("Expected \")\", but get:" + opRightParenthesis.ToString());
+
+                Token LeftCyrkleBrace = analyzer.GetToken();
+                if (LeftCyrkleBrace.GetTokenType() != TokenType.Operator || (Operators.OP)LeftCyrkleBrace.value != Operators.OP.opLeftCurlyBracket)
+                    throw new Exception("Expected \"{\", but get:" + LeftCyrkleBrace.ToString());
+
+                //параметры
+                SyntaxisNode par = ParseObjectOrCollectionInitializer();//ParseArgumentList(); //char data == standart datatype
+
+                Token RightCyrkleBrace = analyzer.GetToken();
+                if (RightCyrkleBrace.GetTokenType() != TokenType.Operator || (Operators.OP)RightCyrkleBrace.value != Operators.OP.opRightCurlyBracket)
+                    throw new Exception("Expected \"{\", but get:" + RightCyrkleBrace.ToString());
+
+                return new ObjectCreationExpressionNode() { token = tok, children = new List<SyntaxisNode>() { par } };
+            }
+            analyzer.StepBack();
+            //---
+            //invocation_expression and post-Expression
+            var pExpression = ParsePimaryExpression();
+            Token tok2 = analyzer.GetToken();
+
+            if (tok2 == null || tok2.GetTokenType() != TokenType.Operator)
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator token, but get"+
+                    ((tok2 == null)? "Null reference exception!":tok2.ToString()));
+
+            switch ((Operators.OP)tok2.value)
+            {
+                case Operators.OP.opIncrementExpression:
+                    return new PostIncrementNode() { token = tok2, children = new List<SyntaxisNode> { pExpression } };
+                case Operators.OP.opDecrementExpression:
+                    return new PostDecrementNode() { token = tok2, children = new List<SyntaxisNode> { pExpression } };
+                case Operators.OP.opLeftParenthesis:
+                    Token rightBR = analyzer.GetToken();
+                    if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
+                        !rightBR.value.Equals(Operators.OP.opRightParenthesis))
+                        throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \")\", but get"+
+                            ((rightBR == null) ? "Null reference exception!" : rightBR.ToString()));
+
+                    return new InvocationExpressionNode() { token = tok2, children = new List<SyntaxisNode>() { pExpression } };
+                default:
+                    throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"(\", \"++\" or \"--\", but get"+
+                        ((tok2 == null) ? "Null reference exception!" : tok2.ToString()));
+            }
+        }
+
+        private SyntaxisNode Break_Statement()
+        {
+            Token breakTok = analyzer.GetToken();
+            if (breakTok == null || breakTok.GetTokenType() != TokenType.KeyWord ||
+                !breakTok.value.Equals(KeyWords.KW.kwBreak))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"break\", but get "+
+                    ((breakTok == null)? "Null reference exception!": breakTok.ToString()));
+
+            Token semilicon = analyzer.GetToken();
+            if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
+                !semilicon.value.Equals(Operators.OP.opSemicolon))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get " +
+                    ((semilicon == null) ? "Null reference exception!" : semilicon.ToString()));
+
+            return new BreakStatementNode() { token = breakTok };
+        }
+
+        private SyntaxisNode Continue_Statement()
+        {
+            Token continueTok = analyzer.GetToken();
+            if (continueTok == null || continueTok.GetTokenType() != TokenType.KeyWord ||
+                !continueTok.value.Equals(KeyWords.KW.kwContinue))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"continue\", but get " +
+                    ((continueTok == null) ? "Null reference exception!" : continueTok.ToString()));
+
+            Token semilicon = analyzer.GetToken();
+            if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
+                !semilicon.value.Equals(Operators.OP.opSemicolon))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get " +
+                    ((semilicon == null) ? "Null reference exception!" : semilicon.ToString()));
+
+            return new ContinueStatementNode() { token = continueTok };
+        }
+
+        private SyntaxisNode Return_Statement()
+        {
+            Token returnTok = analyzer.GetToken();
+            if (returnTok == null || returnTok.GetTokenType() != TokenType.KeyWord ||
+                !returnTok.value.Equals(KeyWords.KW.kwReturn))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"return\", but get " +
+                    ((returnTok == null) ? "Null reference exception!" : returnTok.ToString()));
+
+            Token semilicon = analyzer.GetToken();
+            if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
+                !semilicon.value.Equals(Operators.OP.opSemicolon))
+            {
+                analyzer.StepBack();
+                var expression = ParsePimaryExpression();
+
+                semilicon = analyzer.GetToken();
+                if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
+                    !semilicon.value.Equals(Operators.OP.opSemicolon))
+                    throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get " +
+                    ((semilicon == null) ? "Null reference exception!" : semilicon.ToString()));
+
+                return new ReturnStatementNode() { token = returnTok, children = new List<SyntaxisNode>() { expression } };
+            }
+
+            return new ReturnStatementNode() { token = returnTok };
+
+        }
+
+        private SyntaxisNode Expression_Statement()
+        {
+            var statementExpression = Statement_Expression();
+            Token semilicon = analyzer.GetToken();
+
+            if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
+                !semilicon.value.Equals(Operators.OP.opSemicolon))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get " +
+                ((semilicon == null) ? "Null reference exception!" : semilicon.ToString()));
+
+            return new ExpressionStatementNode() { token = semilicon, children = new List<SyntaxisNode>() { statementExpression } };
         }
         #endregion
 

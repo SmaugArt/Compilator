@@ -263,6 +263,20 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "PostDecrementNode:   " + token.GetText();
     }
 
+    public class PreIncrementNode : SyntaxisNode
+    {
+        public PreIncrementNode() : base() { }
+
+        public override string NodeText() => "PreIncrementNode:   " + token.GetText();
+    }
+
+    public class PreDecrementNode : SyntaxisNode
+    {
+        public PreDecrementNode() : base() { }
+
+        public override string NodeText() => "PreDecrementNode:   " + token.GetText();
+    }
+
     public class ElementAccessNode : SyntaxisNode
     {
         public ElementAccessNode() : base() { }
@@ -391,6 +405,19 @@ namespace Compilator.SyntaxisModule.Structures
     }
     #endregion
 
+    #region Structure
+    public class StructureNode : SyntaxisNode
+    {
+        public StructureNode() : base() { }
+        public override string NodeText() => "StructureNode:" + token.GetText();
+    }
+
+    public class StructureBodyNode : StructureNode
+    {
+        public StructureBodyNode() : base() { }
+        public override string NodeText() => "StructureBodyNode: {}";
+    }
+    #endregion
     public class ArrayInitializerNode : SyntaxisNode
     {
         public ArrayInitializerNode() : base() { }
@@ -527,7 +554,35 @@ namespace Compilator.SyntaxisModule.Structures
 
         public override string NodeText() => "ForStatementNode: " + token.GetText();
     }
-    
+
+    public class BreakStatementNode : EmbededDeclaratorNode
+    {
+        public BreakStatementNode() : base() { }
+
+        public override string NodeText() => "BreakStatementNode: " + token.GetText();
+    }
+
+    public class ContinueStatementNode : EmbededDeclaratorNode
+    {
+        public ContinueStatementNode() : base() { }
+
+        public override string NodeText() => "ContinueStatementNode: " + token.GetText();
+    }
+
+    public class ReturnStatementNode : EmbededDeclaratorNode
+    {
+        public ReturnStatementNode() : base() { }
+
+        public override string NodeText() => "ReturnStatementNode: " + token.GetText();
+    }
+
+    public class ExpressionStatementNode : EmbededDeclaratorNode
+    {
+        public ExpressionStatementNode() : base() { }
+
+        public override string NodeText() => "this node is a container for StatementExpressionNode!";
+    }
+
 
     //Все наследуемые statements
     #endregion
