@@ -860,9 +860,225 @@ namespace Compilator.SyntaxisModule
         #endregion
 
         #region Structure
-        private ClassBodyNode Struct_Body()
+        private StructureBodyNode Struct_Body()
         {
+            Token leftCyrkleBR = analyzer.GetToken();
+            if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() == TokenType.Operator ||
+                !leftCyrkleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " +
+                    ((leftCyrkleBR == null) ? "Null reference exeption!" : leftCyrkleBR.ToString()));
 
+            List<SyntaxisNode> structMember = Struct_Member_Declarations();
+
+            Token rightCyrkleBR = analyzer.GetToken();
+            if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() == TokenType.Operator ||
+                !rightCyrkleBR.value.Equals(Operators.OP.opRightCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"}\", but get: " +
+                    ((rightCyrkleBR == null) ? "Null reference exeption!" : rightCyrkleBR.ToString()));
+
+            Token commaDot = analyzer.GetToken();
+            if (commaDot == null || commaDot.GetTokenType() != TokenType.Operator ||
+                !commaDot.value.Equals(Operators.OP.opSemicolon))
+                analyzer.StepBack();
+
+            StructureBodyNode BN = new StructureBodyNode()
+            {
+                token = leftCyrkleBR
+            };
+            BN.children.AddRange(structMember);
+            return BN;
+        }
+
+        /// <summary>
+        /// Type_Declaration вынес сюда, чтобы не мешался в
+        /// struct_member_declaration
+        /// </summary>
+        /// <returns></returns>
+        private List<SyntaxisNode> Struct_Member_Declarations()
+        {
+            List<SyntaxisNode> nodes = new List<SyntaxisNode>();
+
+            while (true)
+            {
+                int analyzerStartPos = analyzer.stepBackCount;
+
+                try
+                {
+                    nodes.Add(Struct_Member_Declaration());
+                    continue;
+                }
+                catch
+                {
+                    // Class_Member_Declaration = analyzer.stepBackCount;
+
+                    for (int i = analyzer.stepBackCount; i > analyzerStartPos;)
+                        analyzer.StepBack();
+                }
+
+                try
+                {
+                    nodes.Add(Type_Declaration());
+                }
+                catch
+                {
+                    for (int i = analyzer.stepBackCount; i > analyzerStartPos;)
+                        analyzer.StepBack();
+                    break;
+                }
+            }
+
+            return nodes;
+        }
+
+        //Отличием от Class_Member_Declaration является
+        //отсутствие Destructor'a
+        private DeclarationNode Struct_Member_Declaration()
+        {
+            bool access;
+
+            //парсим модификатор
+            //Dictionary<string, bool> 
+            var dic = Class_Member_Declaration_Modifier(); // = Struct_Member_Declaration_Modifier
+
+            ///+++++const
+            Token _const = analyzer.GetToken();
+            analyzer.StepBack();
+            if (_const != null && _const.GetTokenType() == TokenType.KeyWord &&
+                _const.value.Equals(KeyWords.KW.kwConst))
+            {
+                ((Dictionary<string, bool>)dic[1]).TryGetValue("Constant", out access);
+                if (!access)
+                    throw SynException.ShowException(EXType.IncorrectNode,
+                        "Incorrect Constant modifier: " + ((Token)dic[0]).ToString());
+
+                return Constant_Declaration((Token)dic[0]);
+            }
+            ///-----const
+            ///
+            //+++++проверка на void -> проверка на method
+            Token _void = analyzer.GetToken();
+            if (_void != null && _void.GetTokenType() == TokenType.KeyWord &&
+                _void.value.Equals(KeyWords.KW.kwVoid))
+            {
+                ((Dictionary<string, bool>)dic[1]).TryGetValue("Method", out access);
+                if (!access)
+                    throw SynException.ShowException(EXType.IncorrectNode,
+                        "Incorrect method modifier: " + ((Token)dic[0]).ToString());
+
+                return Method_Declaration((Token)dic[0], new VoidTypeNode() { token = _void });
+            }
+
+            analyzer.StepBack();
+            //-----
+            var type = Type_Parse_Level1();
+
+            //+++++Method
+            Token leftBR = analyzer.GetToken();
+            analyzer.StepBack();
+            if (leftBR != null && leftBR.GetTokenType() == TokenType.Operator &&
+                leftBR.value.Equals(Operators.OP.opLeftParenthesis))
+            {
+                ((Dictionary<string, bool>)dic[1]).TryGetValue("Method", out access);
+                if (!access)
+                    throw SynException.ShowException(EXType.IncorrectNode,
+                        "Incorrect method modifier: " + ((Token)dic[0]).ToString());
+
+                return Method_Declaration((Token)dic[0], type);
+            }
+
+            ((Dictionary<string, bool>)dic[1]).TryGetValue("Field", out access);
+            if (!access)
+                throw SynException.ShowException(EXType.IncorrectNode,
+                    "Incorrect Field modifier: " + ((Token)dic[0]).ToString());
+            return Field_Declaration((Token)dic[0], type);
+        }
+        #endregion
+
+        #region Enum
+        private EnumBodyNode Enum_Body()
+        {
+            Token leftCyrkleBR = analyzer.GetToken();
+            if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() == TokenType.Operator ||
+                !leftCyrkleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " +
+                    ((leftCyrkleBR == null) ? "Null reference exeption!" : leftCyrkleBR.ToString()));
+
+            List<SyntaxisNode> enumMember = Enum_Member_Declarations();
+
+            Token rightCyrkleBR = analyzer.GetToken();
+            if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() == TokenType.Operator ||
+                !rightCyrkleBR.value.Equals(Operators.OP.opRightCurlyBracket))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"}\", but get: " +
+                    ((rightCyrkleBR == null) ? "Null reference exeption!" : rightCyrkleBR.ToString()));
+
+            Token commaDot = analyzer.GetToken();
+            if (commaDot == null || commaDot.GetTokenType() != TokenType.Operator ||
+                !commaDot.value.Equals(Operators.OP.opSemicolon))
+                analyzer.StepBack();
+
+            EnumBodyNode BN = new EnumBodyNode()
+            {
+                token = leftCyrkleBR
+            };
+            BN.children.AddRange(enumMember);
+            return BN;
+        }
+
+        private List<SyntaxisNode> Enum_Member_Declarations()
+        {
+            List<SyntaxisNode> nodes = new List<SyntaxisNode>();
+
+            while (true)
+            {
+                int analyzerStartPos = analyzer.stepBackCount;
+
+                try
+                {
+                    nodes.Add(Enum_Member_Declaration());
+                }
+                catch
+                {
+                    // Class_Member_Declaration = analyzer.stepBackCount;
+
+                    for (int i = analyzer.stepBackCount; i > analyzerStartPos;)
+                        analyzer.StepBack();
+                    break;
+                }
+
+                Token comma = analyzer.GetToken();
+                if (comma == null || comma.GetTokenType() != TokenType.Operator ||
+                    !comma.value.Equals(Operators.OP.opComma))
+                {
+                    analyzer.StepBack();
+                    break;
+                }
+            }
+
+            return nodes;
+        }
+
+        private IdentifierDeclarationListNode Enum_Member_Declaration()
+        {
+            var identify = Parse_Identificator();
+            Token equalsTok = analyzer.GetToken();
+            if (equalsTok == null || equalsTok.GetTokenType() != TokenType.Operator ||
+                    !equalsTok.value.Equals(Operators.OP.opEquals))
+            {
+                analyzer.StepBack();
+                return new IdentifierDeclarationNode() { children = new List<SyntaxisNode>() { identify } };
+            }
+
+            var constantExpression = Constant_Expression();
+
+            return new IdentifierDeclarationWithConstantExpressionNode()
+            {
+                token = equalsTok,
+                children = new List<SyntaxisNode>()
+                {
+                    identify,
+                    constantExpression
+                }
+            };
         }
         #endregion
         private SyntaxisNode Array_Initializer()

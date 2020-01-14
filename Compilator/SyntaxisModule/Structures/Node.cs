@@ -418,6 +418,20 @@ namespace Compilator.SyntaxisModule.Structures
         public override string NodeText() => "StructureBodyNode: {}";
     }
     #endregion
+
+    #region Enum
+    public class EnumNode:SyntaxisNode
+    {
+        public EnumNode() : base() { }
+        public override string NodeText() => "EnumNode:" + token.GetText();
+    }
+
+    public class EnumBodyNode : EnumNode
+    {
+        public EnumBodyNode() : base() { }
+        public override string NodeText() => "EnumBodyNode: {}";
+    }
+    #endregion
     public class ArrayInitializerNode : SyntaxisNode
     {
         public ArrayInitializerNode() : base() { }
@@ -466,6 +480,23 @@ namespace Compilator.SyntaxisModule.Structures
     {
         public DestructorDeclarationNode() : base() { }
         public override string NodeText() => "DestructorDeclarationNode: " + token.GetText();
+    }
+
+    public class IdentifierDeclarationListNode : DeclarationNode
+    {
+        public IdentifierDeclarationListNode() : base() { }
+        public override string NodeText() => "IdentifierDeclarationListNode is a container for IdentifierDeclarationNodes!";
+    }
+    public class IdentifierDeclarationNode : IdentifierDeclarationListNode
+    {
+        public IdentifierDeclarationNode() : base() { }
+        public override string NodeText() => "IdentifierDeclarationNode is a container for identificatorNodes!";
+    }
+
+    public class IdentifierDeclarationWithConstantExpressionNode : IdentifierDeclarationListNode
+    {
+        public IdentifierDeclarationWithConstantExpressionNode() : base() { }
+        public override string NodeText() => "IdentifierDeclarationWithConstantExpressionNode: " + token.GetText();
     }
 
     //etc
