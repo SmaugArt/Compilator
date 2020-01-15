@@ -577,14 +577,29 @@ namespace Compilator.SyntaxisModule
 
             //++++Constructor
             Token identify = analyzer.GetToken();
+            Token leftBR = analyzer.GetToken();
+            analyzer.StepBack();
             analyzer.StepBack();
             if (identify != null && identify.GetTokenType() == TokenType.Identificator)
             {
-                ((Dictionary<string, bool>)dic[1]).TryGetValue("Constructor", out access);
-                if(!access)
-                    throw SynException.ShowException(EXType.IncorrectNode,
-                        "Incorrect constructor modifier: " + ((Token)dic[0]).ToString());
-                return Constructor_Declaration((Token)dic[0]);
+                //true = Constructor_Declaration,false = field_declaration
+                if (leftBR != null && leftBR.GetTokenType() == TokenType.Operator &&
+                    leftBR.value.Equals(Operators.OP.opLeftParenthesis))
+                {
+                    ((Dictionary<string, bool>)dic[1]).TryGetValue("Constructor", out access);
+                    if (!access)
+                        throw SynException.ShowException(EXType.IncorrectNode,
+                            "Incorrect constructor modifier: " + ((Token)dic[0]).ToString());
+                    return Constructor_Declaration((Token)dic[0]);
+                }
+                else
+                {
+                    ((Dictionary<string, bool>)dic[1]).TryGetValue("Field", out access);
+                    if (!access)
+                        throw SynException.ShowException(EXType.IncorrectNode,
+                            "Incorrect Field modifier: " + ((Token)dic[0]).ToString());
+                    return Field_Declaration((Token)dic[0], Type_Parse_Level1());
+                }
             }
             //----Constructor
 
@@ -606,7 +621,7 @@ namespace Compilator.SyntaxisModule
             var type = Type_Parse_Level1();
 
             //+++++Method
-            Token leftBR = analyzer.GetToken();
+            leftBR = analyzer.GetToken();//Token leftBR = analyzer.GetToken();
             analyzer.StepBack();
             if (leftBR != null && leftBR.GetTokenType() == TokenType.Operator &&
                 leftBR.value.Equals(Operators.OP.opLeftParenthesis))
@@ -822,7 +837,7 @@ namespace Compilator.SyntaxisModule
                 leftCyrcleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
                 return Array_Initializer();
 
-            return ParsePimaryExpression();
+            return ParseExpression();//ParsePimaryExpression();
 
         }
 
@@ -1212,6 +1227,7 @@ namespace Compilator.SyntaxisModule
                     }
                 }
 
+                list.Add(Variable_Initializer());
 
             }
 
@@ -1228,12 +1244,13 @@ namespace Compilator.SyntaxisModule
             if (token == null) return parsePNACE;
 
             //+++++member_access
-            if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opDot) {
-
-                return new MemberAccessNode() { token = token, children = new List<SyntaxisNode>()
-                                 { parsePNACE, Parse_Identificator() }
-                };
-            }
+            if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opDot)
+                return new MemberAccessNode()
+                {
+                    token = token,
+                    children = new List<SyntaxisNode>()
+                                 { parsePNACE, ParsePimaryExpression() }
+                };//Parse_Identificator() }
             //-----member_access
 
             //+++++post increment expression
@@ -1248,7 +1265,7 @@ namespace Compilator.SyntaxisModule
 
             //+++++element_access
             if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opLeftSquareBracket) {
-                ExpressionNode newNode = ParseExpression();
+                SyntaxisNode newNode = ParseExpression();
 
                 Token token2 = analyzer.GetToken();
                 if (token2 == null || token2.GetTokenType() != TokenType.Operator || (Operators.OP)token2.value != Operators.OP.opRightSquareBracket)
@@ -1273,7 +1290,7 @@ namespace Compilator.SyntaxisModule
             return parsePNACE;
         }
 
-        private ExpressionNode Parse_Primary_No_Array_Creation_Expression() //like a Primary expression
+        private SyntaxisNode Parse_Primary_No_Array_Creation_Expression() //like a Primary expression
         {
             Token t = analyzer.GetToken();
 
@@ -1351,7 +1368,7 @@ namespace Compilator.SyntaxisModule
                 case TokenType.Operator:
                     if ((Operators.OP)t.value == Operators.OP.opLeftParenthesis) //съедаем Expression
                     {
-                        ExpressionNode node = ParseExpression();
+                        SyntaxisNode node = ParseExpression();
                         Token t2 = analyzer.GetToken();
                         if (t2.GetTokenType() == TokenType.Operator && (Operators.OP)t2.value == Operators.OP.opRightParenthesis)
                             return node;
@@ -1364,7 +1381,7 @@ namespace Compilator.SyntaxisModule
             throw SynException.ShowException(EXType.IncorrectToken, t.ToString());
         }
 
-        private ExpressionNode ParseExpression(ExpressionType type = ExpressionType.Both) //without lambda and query and assigmentExpression
+        private SyntaxisNode ParseExpression(ExpressionType type = ExpressionType.Both) //without lambda and query and assigmentExpression
         {
             int stepBackCount = analyzer.stepBackCount;
 
@@ -1387,7 +1404,8 @@ namespace Compilator.SyntaxisModule
                 ConditionDepth = analyzer.stepBackCount;
                 ExceptionMessage = ex.Message;
 
-                for (int i = analyzer.stepBackCount; i > stepBackCount;)
+                //for (int i = analyzer.stepBackCount; i > stepBackCount;)
+                while (analyzer.stepBackCount > stepBackCount)
                     analyzer.StepBack();
             }
 
@@ -1406,7 +1424,7 @@ namespace Compilator.SyntaxisModule
 
         }
 
-        private ExpressionNode Parse_Conditional_Expression()
+        private SyntaxisNode Parse_Conditional_Expression()
         {
             var left = Null_Coalescing_Expression();
 
@@ -1429,9 +1447,9 @@ namespace Compilator.SyntaxisModule
             return left;
         }
 
-        private ExpressionNode Null_Coalescing_Expression() => Conditional_Or_Expression();
+        private SyntaxisNode Null_Coalescing_Expression() => Conditional_Or_Expression();
 
-        private ExpressionNode Conditional_Or_Expression() //||
+        private SyntaxisNode Conditional_Or_Expression() //||
         {
             var left = Conditional_And_Expression();
 
@@ -1446,7 +1464,7 @@ namespace Compilator.SyntaxisModule
             return left;
         }
 
-        private ExpressionNode Conditional_And_Expression() // &&
+        private SyntaxisNode Conditional_And_Expression() // &&
         {
             var left = Inclusive_Or_Expression();
             Token operatorAnd = analyzer.GetToken();
@@ -1460,7 +1478,7 @@ namespace Compilator.SyntaxisModule
             return left;
         }
 
-        private ExpressionNode Inclusive_Or_Expression() //|
+        private SyntaxisNode Inclusive_Or_Expression() //|
         {
             var left = Exclusive_Or_Expression();
             Token opLogicalOr = analyzer.GetToken();
@@ -1474,7 +1492,7 @@ namespace Compilator.SyntaxisModule
             return left;
         }
 
-        private ExpressionNode Exclusive_Or_Expression() //^ = функциональое или (0^0=0,0^1=1,1^0,1^1=0)
+        private SyntaxisNode Exclusive_Or_Expression() //^ = функциональое или (0^0=0,0^1=1,1^0,1^1=0)
         {
             var left = And_Expression();
             Token opExclusiveOr = analyzer.GetToken();
@@ -1488,7 +1506,7 @@ namespace Compilator.SyntaxisModule
             return left;
         }
 
-        private ExpressionNode And_Expression()
+        private SyntaxisNode And_Expression()
         {
             var left = EqualityExpression();
             Token opLogicalAnd = analyzer.GetToken();
@@ -1502,7 +1520,7 @@ namespace Compilator.SyntaxisModule
             return left;
         }
 
-        private ExpressionNode EqualityExpression() // ==, !=
+        private SyntaxisNode EqualityExpression() // ==, !=
         {
             var left = Relational_Expression_IS_AS();
             Token opEqualOrNotEqual = analyzer.GetToken();
@@ -1517,7 +1535,7 @@ namespace Compilator.SyntaxisModule
             return left;
         }
 
-        private ExpressionNode Relational_Expression_IS_AS() //избавление от лево-рекурсивного зацикливания в Relational_Expression
+        private SyntaxisNode Relational_Expression_IS_AS() //избавление от лево-рекурсивного зацикливания в Relational_Expression
         {
             var left = Relational_Expression();
             var kwISorAS = analyzer.GetToken();
@@ -1532,7 +1550,7 @@ namespace Compilator.SyntaxisModule
             return left;
         }
 
-        private ExpressionNode Relational_Expression()
+        private SyntaxisNode Relational_Expression()
         {
             var left = ShiftExpression();
             Token token = analyzer.GetToken();
@@ -1565,9 +1583,9 @@ namespace Compilator.SyntaxisModule
         /// without right_shift additive(>>) and left_shift additive(<<)
         /// </summary>
         /// <returns></returns>
-        private ExpressionNode ShiftExpression() => Additive_Expression();
+        private SyntaxisNode ShiftExpression() => Additive_Expression();
 
-        private ExpressionNode Additive_Expression() //+-
+        private SyntaxisNode Additive_Expression() //+-
         {
             var left = Multiplicative_Expression();
             Token token = analyzer.GetToken();
@@ -1583,7 +1601,7 @@ namespace Compilator.SyntaxisModule
             return left;
         }
 
-        private ExpressionNode Multiplicative_Expression() //*,/ without a %
+        private SyntaxisNode Multiplicative_Expression() //*,/ without a %
         {
             var left = Unary_Expression_Primary_Part();
             Token token = analyzer.GetToken();
@@ -1604,11 +1622,11 @@ namespace Compilator.SyntaxisModule
         /// переходом к Primary_Expression
         /// </summary>
         /// <returns></returns>
-        private ExpressionNode Unary_Expression_Primary_Part()
+        private SyntaxisNode Unary_Expression_Primary_Part()
         {
             var left = Unary_Expression();
 
-            if (left == null) return Parse_Primary_No_Array_Creation_Expression();
+            if (left == null) return ParsePimaryExpression();//Parse_Primary_No_Array_Creation_Expression();
 
             return left;
         }
@@ -1617,34 +1635,47 @@ namespace Compilator.SyntaxisModule
         {
             Token token = analyzer.GetToken();
 
-            switch ((Operators.OP)token.value)
-            {
-                case Operators.OP.opPlus:
-                case Operators.OP.opMinus:
-                case Operators.OP.opIncrementExpression:
-                case Operators.OP.opDecrementExpression:
-                case Operators.OP.opExclamation:
-                    return new UnaryOperationExpressionNode()
-                    {
-                        token = token,
-                        children = new List<SyntaxisNode>()
+            if (token != null && token.GetTokenType() == TokenType.Operator)
+                switch ((Operators.OP)token.value)
+                {
+                    case Operators.OP.opPlus:
+                    case Operators.OP.opMinus:
+                    case Operators.OP.opIncrementExpression:
+                    case Operators.OP.opDecrementExpression:
+                    case Operators.OP.opExclamation:
+                        return new UnaryOperationExpressionNode()
                         {
-                            Unary_Expression_Primary_Part()
+                            token = token,
+                            children = new List<SyntaxisNode>()
+                            {
+                                Unary_Expression_Primary_Part()
+                            }
+                        };
+                    case Operators.OP.opLeftParenthesis:
+                        //+++Чтобы не было противоречий между type_cast и parenthesized_expression
+                        int lastPos = analyzer.stepBackCount;
+                        SyntaxisNode type = null;
+                        try
+                        {
+                            type = Type_Parse_Level1();
                         }
-                    };
-                case Operators.OP.opLeftParenthesis:
-                    var type = Type_Parse_Level1();
-                    Token leftCyrklyBrasket = analyzer.GetToken();
+                        catch
+                        {
+                            while (analyzer.stepBackCount > lastPos)
+                                analyzer.StepBack();
+                            break;
+                        }
+                        //---
+                        
+                        Token leftCyrklyBrasket = analyzer.GetToken();
 
-                    if (leftCyrklyBrasket == null || leftCyrklyBrasket.GetTokenType() != TokenType.Operator ||
-                        !leftCyrklyBrasket.value.Equals(Operators.OP.opRightParenthesis))
-                        throw SynException.ShowException(EXType.IncorrectToken, (leftCyrklyBrasket == null) ? "Expected \")\"" : leftCyrklyBrasket.ToString());
-                    return new CastEspression() { token = token, children = new List<SyntaxisNode>() { type, Unary_Expression_Primary_Part() } };
-                default:
-                    analyzer.StepBack();
-                    break;
-            }
+                        if (leftCyrklyBrasket == null || leftCyrklyBrasket.GetTokenType() != TokenType.Operator ||
+                            !leftCyrklyBrasket.value.Equals(Operators.OP.opRightParenthesis))
+                            throw SynException.ShowException(EXType.IncorrectToken, (leftCyrklyBrasket == null) ? "Expected \")\"" : leftCyrklyBrasket.ToString());
+                        return new CastEspression() { token = token, children = new List<SyntaxisNode>() { type, Unary_Expression_Primary_Part() } };
+                }
 
+            analyzer.StepBack();
             return null;
         }
 
@@ -1685,7 +1716,10 @@ namespace Compilator.SyntaxisModule
                     throw SynException.ShowException(EXType.IncorrectToken, (rightSquareBR == null) ?
                         "Null reference exeption" : "Expected \"]\", but get " + rightSquareBR.GetText());
 
-                return new ArrayTypeNode() { token = token, children = node };//
+                ArrayTypeNode atn = new ArrayTypeNode(){ token = token};
+                atn.children.Add(Node);
+                atn.children.AddRange(node);
+                return atn;
             }
             //-----Array_type
 
@@ -1759,9 +1793,9 @@ namespace Compilator.SyntaxisModule
         /// without: %= ,&= ,|= ,^= ,<<= ,right_shift_assignment
         /// </summary>
         /// <returns></returns>
-        private ExpressionNode Assignment_Parse()
+        private SyntaxisNode Assignment_Parse()
         {
-            ExpressionNode node = Unary_Expression_Primary_Part();
+            SyntaxisNode node = Unary_Expression_Primary_Part();
             Token assigmentToken = analyzer.GetToken();
 
             if (assigmentToken == null || assigmentToken.GetTokenType() != TokenType.Operator)
@@ -1992,7 +2026,7 @@ namespace Compilator.SyntaxisModule
 
             while (true) //псевдо-бесконечный цикл
             {
-                ExpressionNode expression = ParseExpression(); //будет зависить от типа полученного
+                SyntaxisNode expression = ParseExpression(); //будет зависить от типа полученного
                 if (expression == null) break;
 
                 listOfNode.Add(expression);

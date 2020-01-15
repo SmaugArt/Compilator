@@ -1,0 +1,4 @@
+public class classik
+{
+   public double valuev = chtototam.children.ToString();
+}

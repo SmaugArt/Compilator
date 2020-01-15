@@ -182,7 +182,6 @@ namespace Compilator.SyntaxisModule.Structures
     public class ExclusiveOrExpressionNode : ExpressionNode //^
     {
         public ExclusiveOrExpressionNode() : base() { }
-
         public override string NodeText() => "ExclusiveOrExpressionNode:" + token.GetText();
     }
 
@@ -232,7 +231,7 @@ namespace Compilator.SyntaxisModule.Structures
     {
         public CastEspression() : base() { }
 
-        public override string NodeText() => "CastEspression:   " + token.GetText();
+        public override string NodeText() => "CastEspression:  ()"; //+ token.GetText();
     }
 
     public class AssignmentNode : ExpressionNode

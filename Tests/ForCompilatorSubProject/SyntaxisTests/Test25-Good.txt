@@ -1,0 +1,4 @@
+public class classik
+{
+   double valuev = (SomeClass)5;
+}
