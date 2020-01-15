@@ -1,0 +1,6 @@
+public class classik
+{
+   public const Drel be=3;
+
+   private const System.IO.er error = new System.IO.er(){4, new System.IO.er()};
+}

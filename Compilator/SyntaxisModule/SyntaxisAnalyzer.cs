@@ -35,9 +35,16 @@ namespace Compilator.SyntaxisModule
         {
             if (analyzer.GetToken() == null)
                 return new NodeLiteral() { token = new Token("", 0, 0, TokenType.Null) };
-
             analyzer.StepBack();
-            return Compilation_Unit();
+            SyntaxisNode node = Compilation_Unit();
+
+            //Добавляю условие в центральный (главный) узел парсера
+            //Если остались неразобранные значения, то это плохо
+            var nullToken2 = analyzer.GetToken();
+            if (nullToken2 != null && nullToken2.GetTokenType() != TokenType.Null)
+                throw new Exception("Неожиданный токен! Сообщение: " + nullToken2.ToString());
+
+            return node;
         }
 
         /// <summary>
@@ -51,10 +58,10 @@ namespace Compilator.SyntaxisModule
             //can be a null or have count equals zero
             List<SyntaxisNode> nodes = Using_Directives();
 
-            if (nodes == null || nodes.Count == 0)
+            if (nodes == null || nodes.Count == 0)        
                 return new GlobalNode()
-                { children = Namespace_Member_Declarations() };
-
+                    { children = Namespace_Member_Declarations() };
+                
             var node = new GlobalNode() { children = nodes };
             node.children.AddRange(Namespace_Member_Declarations());
 
@@ -489,20 +496,27 @@ namespace Compilator.SyntaxisModule
 
             while (true)
             {
+                Token rghtCurclyBR = analyzer.GetToken();
+                analyzer.StepBack();
+                if (rghtCurclyBR != null && rghtCurclyBR.GetTokenType() == TokenType.Operator &&
+                    rghtCurclyBR.value.Equals(Operators.OP.opRightCurlyBracket))
+                    break;
+
                 int analyzerStartPos = analyzer.stepBackCount;
-                //int Class_Member_Declaration = analyzer.stepBackCount;
+                int classMemberDeclarationPos = analyzer.stepBackCount;
+                string classMemberDeclarationError = "";
 
                 try
                 {
                     nodes.Add(Class_Member_Declaration());
                     continue;
                 }
-                catch
+                catch(Exception ex)
                 {
-                    // Class_Member_Declaration = analyzer.stepBackCount;
-
-                    //for (int i = analyzer.stepBackCount; i > analyzerStartPos;)
-                    while(analyzer.stepBackCount> analyzerStartPos)
+                    classMemberDeclarationPos = analyzer.stepBackCount;
+                    classMemberDeclarationError = ex.Message;
+                    
+                    while (analyzer.stepBackCount> analyzerStartPos)
                         analyzer.StepBack();
                 }
 
@@ -514,11 +528,14 @@ namespace Compilator.SyntaxisModule
                     else
                         break;
                 }
-                catch
+                catch(Exception ex)
                 {
-                    while(analyzer.stepBackCount > analyzerStartPos)
-                        analyzer.StepBack();
-                    break;
+                    //while(analyzer.stepBackCount > analyzerStartPos)
+                    //    analyzer.StepBack();
+                    //break;
+                    if (analyzer.stepBackCount > classMemberDeclarationPos)
+                        throw new Exception(ex.Message);
+                    throw new Exception(classMemberDeclarationError);
                 }
             }
 
@@ -1292,14 +1309,32 @@ namespace Compilator.SyntaxisModule
 
                         Token LeftCyrkleBrace = analyzer.GetToken();
                         if (LeftCyrkleBrace.GetTokenType() != TokenType.Operator || (Operators.OP)LeftCyrkleBrace.value != Operators.OP.opLeftCurlyBracket)
-                            throw new Exception("Expected \"{\", but get:" + LeftCyrkleBrace.ToString());
+                        {
+                            //throw new Exception("Expected \"{\", but get:" + LeftCyrkleBrace.ToString());
+                            analyzer.StepBack();
+                            return new ObjectCreationExpressionNode()
+                            {
+                                token = t
+                            };
+                        }
 
+                        Token RightCyrkleBrace = analyzer.GetToken();
+                        if (RightCyrkleBrace != null && RightCyrkleBrace.GetTokenType() == TokenType.Operator &&
+                            RightCyrkleBrace.value.Equals(Operators.OP.opRightCurlyBracket))
+                        {
+                            return new ObjectCreationExpressionNode()
+                            {
+                                token = t
+                            };
+                        }
+                        analyzer.StepBack();
+                        analyzer.StepBack();
                         //параметры
                         SyntaxisNode par = ParseObjectOrCollectionInitializer();//ParseArgumentList(); //char data == standart datatype
 
-                        Token RightCyrkleBrace = analyzer.GetToken();
-                        if (RightCyrkleBrace.GetTokenType() != TokenType.Operator || (Operators.OP)RightCyrkleBrace.value != Operators.OP.opRightCurlyBracket)
-                            throw new Exception("Expected \"{\", but get:" + RightCyrkleBrace.ToString());
+                        //RightCyrkleBrace = analyzer.GetToken();
+                        //if (RightCyrkleBrace.GetTokenType() != TokenType.Operator || (Operators.OP)RightCyrkleBrace.value != Operators.OP.opRightCurlyBracket)
+                        //    throw new Exception("Expected \"{\", but get:" + RightCyrkleBrace.ToString());
 
                         return new ObjectCreationExpressionNode() { token = t, children = new List<SyntaxisNode>() { par } };
                     }
@@ -1605,7 +1640,9 @@ namespace Compilator.SyntaxisModule
                         !leftCyrklyBrasket.value.Equals(Operators.OP.opRightParenthesis))
                         throw SynException.ShowException(EXType.IncorrectToken, (leftCyrklyBrasket == null) ? "Expected \")\"" : leftCyrklyBrasket.ToString());
                     return new CastEspression() { token = token, children = new List<SyntaxisNode>() { type, Unary_Expression_Primary_Part() } };
-
+                default:
+                    analyzer.StepBack();
+                    break;
             }
 
             return null;
@@ -1665,7 +1702,7 @@ namespace Compilator.SyntaxisModule
                     (token == null) ? "Null reference Exception" : "TokenType = " + token.GetTokenType());
 
             //в случае KyeWord
-            if (token.GetTokenType() != TokenType.KeyWord)
+            if (token.GetTokenType() == TokenType.KeyWord)
                 switch ((KeyWords.KW)token.value)
                 {
                     case KeyWords.KW.kwBool: //реализую здесь
@@ -1785,7 +1822,7 @@ namespace Compilator.SyntaxisModule
                 Object_Initializer_depth = analyzer.stepBackCount;
                 object_initializer_message = ex.Message;
 
-                for (int i = analyzer.stepBackCount; i > lastStepBackCount;)
+                while(analyzer.stepBackCount > lastStepBackCount)
                     analyzer.StepBack();
 
             }

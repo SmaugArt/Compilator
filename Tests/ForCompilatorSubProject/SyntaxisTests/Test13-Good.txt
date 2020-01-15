@@ -1,0 +1,4 @@
+public class classik
+{
+   public const int be=3;
+}

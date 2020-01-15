@@ -52,8 +52,23 @@ namespace Compilator
                 Analyzer analyzer = new AnalyzerWithoutCommentary(reader);
 
                 SyntaxisModule.SyntaxisAnalyzer syn = new SyntaxisModule.SyntaxisAnalyzer(analyzer);
-                var tree = syn.SyntaxisParse();
-                textBox1.Text = tree.ToString();
+
+                if (TryCheck.Checked)
+                    try
+                    {
+                        var tree = syn.SyntaxisParse();
+                        textBox1.Text = tree.ToString();
+                    }
+                    catch (Exception ex)
+                    {
+                        textBox1.Text = ex.Message;
+                    }
+                else
+                {
+                    var tree = syn.SyntaxisParse();
+                    textBox1.Text = tree.ToString();
+                }
+
                 //tree.Print();
 
                 //while (analyzer.GetStatus() == AnalyzerStatus.OK)

@@ -1,0 +1,4 @@
+public class classik
+{
+   public int[,] gg = {{3,4}, {5,6}};
+}
