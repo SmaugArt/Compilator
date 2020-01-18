@@ -979,7 +979,7 @@ namespace Compilator.SyntaxisModule
         private StructureBodyNode Struct_Body()
         {
             Token leftCyrkleBR = analyzer.GetToken();
-            if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() == TokenType.Operator ||
+            if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() != TokenType.Operator ||
                 !leftCyrkleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " +
                     ((leftCyrkleBR == null) ? "Null reference exeption!" : leftCyrkleBR.ToString()));
@@ -987,7 +987,7 @@ namespace Compilator.SyntaxisModule
             List<SyntaxisNode> structMember = Struct_Member_Declarations();
 
             Token rightCyrkleBR = analyzer.GetToken();
-            if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() == TokenType.Operator ||
+            if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() != TokenType.Operator ||
                 !rightCyrkleBR.value.Equals(Operators.OP.opRightCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"}\", but get: " +
                     ((rightCyrkleBR == null) ? "Null reference exeption!" : rightCyrkleBR.ToString()));
@@ -1016,30 +1016,43 @@ namespace Compilator.SyntaxisModule
 
             while (true)
             {
+                Token rghtCurclyBR = analyzer.GetToken();
+                analyzer.StepBack();
+                if (rghtCurclyBR != null && rghtCurclyBR.GetTokenType() == TokenType.Operator &&
+                    rghtCurclyBR.value.Equals(Operators.OP.opRightCurlyBracket))
+                    break;
+
                 int analyzerStartPos = analyzer.stepBackCount;
+                int structMemberDeclarationPos = analyzer.stepBackCount;
+                string structMemberDeclarationError = "";
 
                 try
                 {
                     nodes.Add(Struct_Member_Declaration());
                     continue;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Class_Member_Declaration = analyzer.stepBackCount;
+                    structMemberDeclarationPos = analyzer.stepBackCount;
+                    structMemberDeclarationError = ex.Message;
 
-                    for (int i = analyzer.stepBackCount; i > analyzerStartPos;)
+                    while (analyzer.stepBackCount > analyzerStartPos)
                         analyzer.StepBack();
                 }
 
                 try
                 {
-                    nodes.Add(Type_Declaration());
+                    var typeDeclaration = Type_Declaration();
+                    if (typeDeclaration.GetType() != typeof(EmptyNode))
+                        nodes.Add(typeDeclaration);
+                    else
+                        break;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    for (int i = analyzer.stepBackCount; i > analyzerStartPos;)
-                        analyzer.StepBack();
-                    break;
+                    if (analyzer.stepBackCount > structMemberDeclarationPos)
+                        throw new Exception(ex.Message);
+                    throw new Exception(structMemberDeclarationError);
                 }
             }
 
@@ -1054,7 +1067,7 @@ namespace Compilator.SyntaxisModule
 
             //парсим модификатор
             //Dictionary<string, bool> 
-            var dic = Class_Member_Declaration_Modifier(); // = Struct_Member_Declaration_Modifier
+            var dic = Class_Member_Declaration_Modifier();
 
             ///+++++const
             Token _const = analyzer.GetToken();
@@ -1070,7 +1083,35 @@ namespace Compilator.SyntaxisModule
                 return Constant_Declaration((Token)dic[0]);
             }
             ///-----const
-            ///
+
+            //++++Constructor
+            Token identify = analyzer.GetToken();
+            Token leftBR = analyzer.GetToken();
+            analyzer.StepBack();
+            analyzer.StepBack();
+            if (identify != null && identify.GetTokenType() == TokenType.Identificator)
+            {
+                //true = Constructor_Declaration,false = field_declaration
+                if (leftBR != null && leftBR.GetTokenType() == TokenType.Operator &&
+                    leftBR.value.Equals(Operators.OP.opLeftParenthesis))
+                {
+                    ((Dictionary<string, bool>)dic[1]).TryGetValue("Constructor", out access);
+                    if (!access)
+                        throw SynException.ShowException(EXType.IncorrectNode,
+                            "Incorrect constructor modifier: " + ((Token)dic[0]).ToString());
+                    return Constructor_Declaration((Token)dic[0]);
+                }
+                else
+                {
+                    ((Dictionary<string, bool>)dic[1]).TryGetValue("Field", out access);
+                    if (!access)
+                        throw SynException.ShowException(EXType.IncorrectNode,
+                            "Incorrect Field modifier: " + ((Token)dic[0]).ToString());
+                    return Field_Declaration((Token)dic[0], Type_Parse_Level1());
+                }
+            }
+            //----Constructor
+
             //+++++проверка на void -> проверка на method
             Token _void = analyzer.GetToken();
             if (_void != null && _void.GetTokenType() == TokenType.KeyWord &&
@@ -1089,8 +1130,15 @@ namespace Compilator.SyntaxisModule
             var type = Type_Parse_Level1();
 
             //+++++Method
-            Token leftBR = analyzer.GetToken();
+            var identify2 = analyzer.GetToken();
+            leftBR = analyzer.GetToken();//Token leftBR = analyzer.GetToken();
             analyzer.StepBack();
+            analyzer.StepBack();
+
+            if (identify2 == null || identify2.GetTokenType() != TokenType.Identificator)
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Identificator, bur get " +
+                    ((identify2 == null) ? "Null reference exception!" : identify2.ToString()));
+
             if (leftBR != null && leftBR.GetTokenType() == TokenType.Operator &&
                 leftBR.value.Equals(Operators.OP.opLeftParenthesis))
             {
@@ -1114,7 +1162,7 @@ namespace Compilator.SyntaxisModule
         private EnumBodyNode Enum_Body()
         {
             Token leftCyrkleBR = analyzer.GetToken();
-            if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() == TokenType.Operator ||
+            if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() != TokenType.Operator ||
                 !leftCyrkleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " +
                     ((leftCyrkleBR == null) ? "Null reference exeption!" : leftCyrkleBR.ToString()));
@@ -1122,7 +1170,7 @@ namespace Compilator.SyntaxisModule
             List<SyntaxisNode> enumMember = Enum_Member_Declarations();
 
             Token rightCyrkleBR = analyzer.GetToken();
-            if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() == TokenType.Operator ||
+            if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() != TokenType.Operator ||
                 !rightCyrkleBR.value.Equals(Operators.OP.opRightCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"}\", but get: " +
                     ((rightCyrkleBR == null) ? "Null reference exeption!" : rightCyrkleBR.ToString()));
@@ -1156,7 +1204,7 @@ namespace Compilator.SyntaxisModule
                 {
                     // Class_Member_Declaration = analyzer.stepBackCount;
 
-                    for (int i = analyzer.stepBackCount; i > analyzerStartPos;)
+                    while (analyzer.stepBackCount > analyzerStartPos)
                         analyzer.StepBack();
                     break;
                 }
@@ -1176,6 +1224,7 @@ namespace Compilator.SyntaxisModule
         private IdentifierDeclarationListNode Enum_Member_Declaration()
         {
             var identify = Parse_Identificator();
+
             Token equalsTok = analyzer.GetToken();
             if (equalsTok == null || equalsTok.GetTokenType() != TokenType.Operator ||
                     !equalsTok.value.Equals(Operators.OP.opEquals))
@@ -2895,7 +2944,7 @@ namespace Compilator.SyntaxisModule
                 !semilicon.value.Equals(Operators.OP.opSemicolon))
             {
                 analyzer.StepBack();
-                var expression = ParsePimaryExpression();
+                var expression = ParseExpression();//ParsePimaryExpression();
 
                 semilicon = analyzer.GetToken();
                 if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||

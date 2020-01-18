@@ -1,0 +1,37 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˪StructureNode:struct
+▓▓˫Компонента типа:public
+▓▓˫Identificator:gg
+▓▓˪StructureBodyNode: {}
+▓▓▓˫Not have a any token because this node a container for any Constructor Declaration Nodes
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫Identificator:gg
+▓▓▓▓˪ProgrammBlockNode: {}
+▓▓▓˫ConstantDeclarationNode:const
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫SimpleTypeNode:   int
+▓▓▓▓˪ConstantDeclaratorNode:=
+▓▓▓▓▓˫Identificator:g
+▓▓▓▓▓˪IntegerNode:  3
+▓▓▓˫Not have a any token because this node na container for any Method Declaration Nodes
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫VoidTypeNode:   void
+▓▓▓▓˫Identificator:ToString
+▓▓▓▓˪ProgrammBlockNode: {}
+▓▓▓˫Not have a any token because this node na container for any Method Declaration Nodes
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫SimpleTypeNode:   int
+▓▓▓▓˫Identificator:GetId
+▓▓▓▓˪ProgrammBlockNode: {}
+▓▓▓▓▓˪ReturnStatementNode: return
+▓▓▓▓▓▓˪CastEspression:  ()
+▓▓▓▓▓▓▓˫SimpleTypeNode:   int
+▓▓▓▓▓▓▓˪Identificator:value1
+▓▓▓˪Not have a any token because this node a container for any Field Declaration Nodes
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫SimpleTypeNode:   double
+▓▓▓▓˪VariableDeclaratorNode =
+▓▓▓▓▓˫Identificator:value1
+▓▓▓▓▓˪CastEspression:  ()
+▓▓▓▓▓▓˫SimpleTypeNode:   double
+▓▓▓▓▓▓˪IntegerNode:  4

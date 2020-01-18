@@ -15,4 +15,4 @@ This project have a three sub projects:
 2)AnalyzerCMD - CMD build of latest compilator version and input path to txt file with programm code
 3)Tester - WinForm for testing compilator output and check with answer.
 
-Whatever, root directory have "Tests" directory. This directory save all test's txt files for Compilator and Tester subproject.
+Whatever, root directory have "Tests" directory. This directory save all test's txt files for Compilator and Tester subproject. Test with prefix "-Bad" mean the test must show exeption. If prefix "-Good" than test show programm's output string.

@@ -1,0 +1,38 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˪ClassNode:class
+▓▓˫Компонента типа:public
+▓▓˫Identificator:classik
+▓▓˪ClassBody: {}
+▓▓▓˪Not have a any token because this node na container for any Method Declaration Nodes
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫SimpleTypeNode:   int
+▓▓▓▓˫Identificator:Method
+▓▓▓▓˪ProgrammBlockNode: {}
+▓▓▓▓▓˫Not have a any token because this node a container for any DeclarationStatementNode childrens
+▓▓▓▓▓▓˫SimpleTypeNode:   int
+▓▓▓▓▓▓˪LocalVariableDeclaratorNode 5,8: Operator: =
+▓▓▓▓▓▓▓˫Identificator:s
+▓▓▓▓▓▓▓˪IntegerNode:  1
+▓▓▓▓▓˫ForStatementNode: for
+▓▓▓▓▓▓˫Not have a any token because this node a container for any DeclarationStatementNode childrens
+▓▓▓▓▓▓▓˫SimpleTypeNode:   int
+▓▓▓▓▓▓▓˪LocalVariableDeclaratorNode 7,11: Operator: =
+▓▓▓▓▓▓▓▓˫Identificator:i
+▓▓▓▓▓▓▓▓˪IntegerNode:  0
+▓▓▓▓▓▓˫RelationalExpressionNode:<
+▓▓▓▓▓▓▓˫Identificator:i
+▓▓▓▓▓▓▓˪Identificator:d
+▓▓▓▓▓▓˫Statement_Expression_List is container and don't have token!
+▓▓▓▓▓▓▓˪PostIncrementNode:   ++
+▓▓▓▓▓▓▓▓˪Identificator:i
+▓▓▓▓▓▓˪ProgrammBlockNode: {}
+▓▓▓▓▓▓▓˪this node is a container for StatementExpressionNode!
+▓▓▓▓▓▓▓▓˪AssignmentNode:   =
+▓▓▓▓▓▓▓▓▓˫Identificator:s
+▓▓▓▓▓▓▓▓▓˪BinaryOperationExpressionNode:+
+▓▓▓▓▓▓▓▓▓▓˫Identificator:s
+▓▓▓▓▓▓▓▓▓▓˪BinaryOperationExpressionNode:*
+▓▓▓▓▓▓▓▓▓▓▓˫IntegerNode:  1
+▓▓▓▓▓▓▓▓▓▓▓˪IntegerNode:  4
+▓▓▓▓▓˪ReturnStatementNode: return
+▓▓▓▓▓▓˪Identificator:s

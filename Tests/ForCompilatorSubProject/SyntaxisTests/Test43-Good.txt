@@ -1,0 +1,13 @@
+public enum gg
+{
+   One = 1,
+   Two,
+}
+
+public class MyClass
+{
+   public MyClass()
+   {
+      int g = gg.One;
+   }
+}

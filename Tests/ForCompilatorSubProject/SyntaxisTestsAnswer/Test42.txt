@@ -1,0 +1,10 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˪EnumNode:enum
+▓▓˫Компонента типа:public
+▓▓˫Identificator:gg
+▓▓˪EnumBodyNode: {}
+▓▓▓˫IdentifierDeclarationWithConstantExpressionNode: =
+▓▓▓▓˫Identificator:One
+▓▓▓▓˪IntegerNode:  1
+▓▓▓˪IdentifierDeclarationNode is a container for identificatorNodes!
+▓▓▓▓˪Identificator:Two

@@ -1,0 +1,12 @@
+public struct gg
+{
+	public gg(){}
+
+	public const int g = 3;
+
+	public void ToString(){}
+
+	public int GetId(){return (int)value1 ; }
+
+	public double value1 = (double) 4;
+}

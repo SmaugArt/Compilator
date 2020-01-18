@@ -1,0 +1,5 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˪StructureNode:struct
+▓▓˫Компонента типа:public
+▓▓˫Identificator:gg
+▓▓˪StructureBodyNode: {}
