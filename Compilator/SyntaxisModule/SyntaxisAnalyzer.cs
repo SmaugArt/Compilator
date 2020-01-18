@@ -2190,6 +2190,38 @@ namespace Compilator.SyntaxisModule
             return Type_Parse_Level1();
         }
 
+        private SyntaxisNode Local_Variable_Declaration_Level1(SyntaxisNode type)
+        {
+            if (type == null)
+                throw new Exception("Destructor_Declaration can not have a null parameter!");
+
+            DeclarationStatementNode node = new DeclarationStatementNode();
+            node.children.Add(type);
+            node.children.Add(Local_Variable_Declaration_Level2());
+            return node;
+        }
+
+        private SyntaxisNode Local_Variable_Declaration_Level2()
+        {
+            SyntaxisNode identify = Parse_Identificator();
+            Token equals = analyzer.GetToken();
+            if (equals == null || equals.GetTokenType() != TokenType.Operator ||
+                !equals.value.Equals(Operators.OP.opEquals))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected a Operator \"=\", but get " +
+                    ((equals == null) ? "Null reference exeption!" : equals.ToString()));
+
+            var LVI = Local_Variable_Initializer();
+
+            return new LocalVariableDeclaratorNode()
+            {
+                token = equals,
+                children = new List<SyntaxisNode>()
+                    {
+                        identify,
+                        LVI
+                    }
+            };
+        }
         private SyntaxisNode Declaration_Statement(SyntaxisNode type)
         {
             if (type == null)
@@ -2650,7 +2682,7 @@ namespace Compilator.SyntaxisModule
             try
             {
                 var type = Local_Variable_Type();
-                return Declaration_Statement(type);
+                return Local_Variable_Declaration_Level1(type);//Declaration_Statement(type);
             }
             catch (Exception ex)
             {

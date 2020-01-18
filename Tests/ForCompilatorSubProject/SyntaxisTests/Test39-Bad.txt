@@ -1,0 +1,13 @@
+public class classik
+{
+   public int Method()
+   {
+	int s = 1;
+
+	for(int i=0; i < d; i++)
+	{
+	    s= s+1*4;  
+
+	return s;
+   }
+}

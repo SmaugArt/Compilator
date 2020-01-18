@@ -1,0 +1,11 @@
+public class classik
+{
+   public int Method()
+   {
+	while (x > 3)
+	{
+	   int[] c = new int[]();
+	   int b = c[1];
+	}
+   }
+}

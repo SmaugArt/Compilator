@@ -1,0 +1,28 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˪ClassNode:class
+▓▓˫Компонента типа:public
+▓▓˫Identificator:classik
+▓▓˪ClassBody: {}
+▓▓▓˪Not have a any token because this node na container for any Method Declaration Nodes
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫SimpleTypeNode:   int
+▓▓▓▓˫Identificator:Method
+▓▓▓▓˪ProgrammBlockNode: {}
+▓▓▓▓▓˪WhileStatementNode: while
+▓▓▓▓▓▓˫RelationalExpressionNode:>
+▓▓▓▓▓▓▓˫Identificator:x
+▓▓▓▓▓▓▓˪IntegerNode:  3
+▓▓▓▓▓▓˪ProgrammBlockNode: {}
+▓▓▓▓▓▓▓˫Not have a any token because this node a container for any DeclarationStatementNode childrens
+▓▓▓▓▓▓▓▓˫ArrayTypeNode: []
+▓▓▓▓▓▓▓▓▓˪SimpleTypeNode:   int
+▓▓▓▓▓▓▓▓˪LocalVariableDeclaratorNode 7,13: Operator: =
+▓▓▓▓▓▓▓▓▓˫Identificator:c
+▓▓▓▓▓▓▓▓▓˪OCExpressionNode:   new
+▓▓▓▓▓▓▓˪Not have a any token because this node a container for any DeclarationStatementNode childrens
+▓▓▓▓▓▓▓▓˫SimpleTypeNode:   int
+▓▓▓▓▓▓▓▓˪LocalVariableDeclaratorNode 8,11: Operator: =
+▓▓▓▓▓▓▓▓▓˫Identificator:b
+▓▓▓▓▓▓▓▓▓˪ElementAccessNode:  []
+▓▓▓▓▓▓▓▓▓▓˫Identificator:c
+▓▓▓▓▓▓▓▓▓▓˪IntegerNode:  1
