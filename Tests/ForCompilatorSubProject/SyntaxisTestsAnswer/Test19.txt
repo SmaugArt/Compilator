@@ -1,0 +1,16 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˪ClassNode:class
+▓▓˫Компонента типа:public
+▓▓˫Identificator:classik
+▓▓˪ClassBody: {}
+▓▓▓˪Not have a any token because this node a container for any Field Declaration Nodes
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫SimpleTypeNode:   double
+▓▓▓▓˪VariableDeclaratorNode =
+▓▓▓▓▓˫Identificator:valuev
+▓▓▓▓▓˪MemberAccessNode:   .
+▓▓▓▓▓▓˫Identificator:chtototam
+▓▓▓▓▓▓˪MemberAccessNode:   .
+▓▓▓▓▓▓▓˫Identificator:children
+▓▓▓▓▓▓▓˪InvocationExpressionNode: ()
+▓▓▓▓▓▓▓▓˪Identificator:ToString

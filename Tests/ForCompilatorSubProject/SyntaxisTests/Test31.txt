@@ -1,0 +1,18 @@
+public class classik
+{
+   public int Method()
+   {
+	switch (perem.ToString())
+	{
+	   case (True):
+	      return 3;
+	   case 44.4:
+  	      bird = 4+4;
+	      break;
+	   default:
+   	      return 7;
+	}
+
+	return 5;
+   }
+}

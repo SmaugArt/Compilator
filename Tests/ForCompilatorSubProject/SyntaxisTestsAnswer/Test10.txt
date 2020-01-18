@@ -1,0 +1,14 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˪ClassNode:class
+▓▓˫Компонента типа:public
+▓▓˫Identificator:classik
+▓▓˪ClassBody: {}
+▓▓▓˪ClassNode:class
+▓▓▓▓˫Компонента типа:private
+▓▓▓▓˫Identificator:wood
+▓▓▓▓˪ClassBody: {}
+▓▓▓▓▓˪Not have a any token because this node na container for any Method Declaration Nodes
+▓▓▓▓▓▓˫Компонента типа:public
+▓▓▓▓▓▓˫VoidTypeNode:   void
+▓▓▓▓▓▓˫Identificator:GetWood
+▓▓▓▓▓▓˪ProgrammBlockNode: {}

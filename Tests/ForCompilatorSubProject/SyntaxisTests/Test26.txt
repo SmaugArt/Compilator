@@ -1,0 +1,9 @@
+public class classik
+{
+   public int Method()
+   {
+	int b=4,c=5;
+	double[,] g = {{4},{3}};
+	string d = mm.ToString();
+   }
+}

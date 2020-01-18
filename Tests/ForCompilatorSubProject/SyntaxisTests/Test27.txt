@@ -1,0 +1,9 @@
+public class classik
+{
+   public int Method()
+   {
+	if (bird > 3 && bird< 4 || bird >10 && bird <20)
+		return 3;
+	return 4;
+   }
+}

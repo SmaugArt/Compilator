@@ -85,6 +85,7 @@
             this.FilePatch2Box.ReadOnly = true;
             this.FilePatch2Box.Size = new System.Drawing.Size(876, 22);
             this.FilePatch2Box.TabIndex = 2;
+            this.FilePatch2Box.Visible = false;
             // 
             // openFileDialog2
             // 

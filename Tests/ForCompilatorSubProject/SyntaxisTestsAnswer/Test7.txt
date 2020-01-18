@@ -1,0 +1,26 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˫UsingNode
+▓▓˪OperatorNode: .
+▓▓▓˫Identificator:NLOG
+▓▓▓˪Identificator:hub
+▓˫UsingNode
+▓▓˪OperatorNode: .
+▓▓▓˫Identificator:System
+▓▓▓˪OperatorNode: .
+▓▓▓▓˫Identificator:Collection
+▓▓▓▓˪Identificator:Generic
+▓˪NamespaceDeclarationNode:namespace
+▓▓˫Identificator:ggg
+▓▓˪NamespaceBodyNode: {}
+▓▓▓˫ClassNode:class
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫Identificator:classik
+▓▓▓▓˪ClassBody: {}
+▓▓▓˫ClassNode:class
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫Identificator:classik
+▓▓▓▓˪ClassBody: {}
+▓▓▓˪ClassNode:class
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫Identificator:classik
+▓▓▓▓˪ClassBody: {}

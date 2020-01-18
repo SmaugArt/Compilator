@@ -1,0 +1,25 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˪ClassNode:class
+▓▓˫Компонента типа:public
+▓▓˫Identificator:classik
+▓▓˪ClassBody: {}
+▓▓▓˫ConstantDeclarationNode:const
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫Identificator:Drel
+▓▓▓▓˪ConstantDeclaratorNode:=
+▓▓▓▓▓˫Identificator:be
+▓▓▓▓▓˪IntegerNode:  3
+▓▓▓˪ConstantDeclarationNode:const
+▓▓▓▓˫Компонента типа:private
+▓▓▓▓˫OperatorNode: .
+▓▓▓▓▓˫Identificator:System
+▓▓▓▓▓˪OperatorNode: .
+▓▓▓▓▓▓˫Identificator:IO
+▓▓▓▓▓▓˪Identificator:er
+▓▓▓▓˪ConstantDeclaratorNode:=
+▓▓▓▓▓˫Identificator:error
+▓▓▓▓▓˪OCExpressionNode:   new
+▓▓▓▓▓▓˪CollectionInitializerNode: {}
+▓▓▓▓▓▓▓˫IntegerNode:  4
+▓▓▓▓▓▓▓˫OperatorNode: ,
+▓▓▓▓▓▓▓˪OCExpressionNode:   new

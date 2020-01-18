@@ -519,13 +519,14 @@ namespace Compilator.SyntaxisModule.Structures
     {
         public DeclarationStatementNode() : base() { }
 
-        public override string NodeText() => "Not have a any token because this node a container for any Method Declaration Nodes";
+        public override string NodeText() => "Not have a any token because this node a container for any DeclarationStatementNode childrens";
     }
     public class LocalVariableDeclaratorNode : DeclarationStatementNode
     {
         public LocalVariableDeclaratorNode() : base() { }
 
         public override string NodeText() => "LocalVariableDeclaratorNode " + token.ToString();
+
     }
 
     public class EmbededDeclaratorNode : DeclarationStatementNode

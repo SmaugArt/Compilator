@@ -1,0 +1,12 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˪ClassNode:class
+▓▓˫Компонента типа:public
+▓▓˫Identificator:classik
+▓▓˪ClassBody: {}
+▓▓▓˪Not have a any token because this node a container for any Field Declaration Nodes
+▓▓▓▓˫SimpleTypeNode:   double
+▓▓▓▓˪VariableDeclaratorNode =
+▓▓▓▓▓˫Identificator:valuev
+▓▓▓▓▓˪CastEspression:  ()
+▓▓▓▓▓▓˫Identificator:SomeClass
+▓▓▓▓▓▓˪IntegerNode:  5

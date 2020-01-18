@@ -1,0 +1,25 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˫UsingNode
+▓▓˪OperatorNode: .
+▓▓▓˫Identificator:NLOG
+▓▓▓˪Identificator:hub
+▓˫UsingNode
+▓▓˪OperatorNode: .
+▓▓▓˫Identificator:System
+▓▓▓˪OperatorNode: .
+▓▓▓▓˫Identificator:Collection
+▓▓▓▓˪Identificator:Generic
+▓˪NamespaceDeclarationNode:namespace
+▓▓˫Identificator:ggg
+▓▓˪NamespaceBodyNode: {}
+▓▓▓˪ClassNode:class
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫Identificator:classik
+▓▓▓▓˪ClassBody: {}
+▓▓▓▓▓˫Not have a any token because this node a container for any Constructor Declaration Nodes
+▓▓▓▓▓▓˫Компонента типа:public
+▓▓▓▓▓▓˫Identificator:classik
+▓▓▓▓▓▓˪ProgrammBlockNode: {}
+▓▓▓▓▓˪DestructorDeclarationNode: ~
+▓▓▓▓▓▓˫Identificator:classik
+▓▓▓▓▓▓˪ProgrammBlockNode: {}

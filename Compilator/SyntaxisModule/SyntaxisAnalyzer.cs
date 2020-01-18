@@ -621,8 +621,15 @@ namespace Compilator.SyntaxisModule
             var type = Type_Parse_Level1();
 
             //+++++Method
+            var identify2 = analyzer.GetToken();
             leftBR = analyzer.GetToken();//Token leftBR = analyzer.GetToken();
             analyzer.StepBack();
+            analyzer.StepBack();
+
+            if (identify2 == null || identify2.GetTokenType() != TokenType.Identificator)
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Identificator, bur get " +
+                    ((identify2 == null) ? "Null reference exception!" : identify2.ToString()));
+
             if (leftBR != null && leftBR.GetTokenType() == TokenType.Operator &&
                 leftBR.value.Equals(Operators.OP.opLeftParenthesis))
             {
@@ -1620,15 +1627,41 @@ namespace Compilator.SyntaxisModule
         /// <summary>
         /// Избавление от многократной отмены действий, вызванных
         /// переходом к Primary_Expression
+        /// DLC 17.01.2020!!! Из-за того, что type_cast == parenthesized_expression, если
+        /// встречается идентификатор, то делаем try catch
         /// </summary>
         /// <returns></returns>
         private SyntaxisNode Unary_Expression_Primary_Part()
         {
-            var left = Unary_Expression();
+            int startPos = analyzer.stepBackCount;
+            int lastPos = analyzer.stepBackCount;
+            string messageUnary_Expression = "";
 
-            if (left == null) return ParsePimaryExpression();//Parse_Primary_No_Array_Creation_Expression();
+            try
+            {
+                //return Unary_Expression();
+                var node = Unary_Expression();
+                if (node != null)
+                    return node;
+            }
+            catch (Exception ex)
+            {
+                messageUnary_Expression = ex.Message;
+                lastPos = analyzer.stepBackCount;
+                while (analyzer.stepBackCount > startPos)
+                    analyzer.StepBack();
+            }
 
-            return left;
+            try
+            {
+                return ParsePimaryExpression();
+            }
+            catch(Exception ex)
+            {
+                if (analyzer.stepBackCount > lastPos)
+                    throw new Exception(ex.Message);
+                throw new Exception(messageUnary_Expression);
+            }
         }
 
         private ExpressionNode Unary_Expression()
@@ -2086,6 +2119,10 @@ namespace Compilator.SyntaxisModule
         /// ///using_statement (non usable)
         /// ///yield_statement (non usable)
         /// ///embedded_statement_unsafe (non usable)
+        /// ------------------------------------------------------------------------------
+        /// ///DLC 17.01.2020 - Пришлось сделать через try -catch, т.к.
+        /// ...Embedded_Statement.expression_statement.statement_expression.assignment
+        /// ...схож с Declaration_Statement !!!
         /// </summary>
         /// <returns></returns>
         private List<SyntaxisNode> Statement_List()
@@ -2102,28 +2139,41 @@ namespace Compilator.SyntaxisModule
                 if (RightCyrcleBR != null && RightCyrcleBR.GetTokenType() == TokenType.Operator
                     && RightCyrcleBR.value.Equals(Operators.OP.opRightCurlyBracket))
                     break;
-                analyzer.GetToken();
+
+                if (RightCyrcleBR != null && RightCyrcleBR.GetTokenType() == TokenType.KeyWord
+                    && (RightCyrcleBR.value.Equals(KeyWords.KW.kwCase) || RightCyrcleBR.value.Equals(KeyWords.KW.kwDefault)))
+                    break;
+                //analyzer.GetToken();
 
                 SyntaxisNode LVT = null;
                 int startAnPos = analyzer.stepBackCount;
+                int maxAnPos = startAnPos;
+                string DeclarationStatementError = "";
 
                 try
                 {
                     LVT = Local_Variable_Type();
+                    list.Add(Declaration_Statement(LVT));
+                    continue;
                 }
-                catch
+                catch(Exception ex)
                 {
+                    maxAnPos = analyzer.stepBackCount;
+                    DeclarationStatementError = ex.Message;
                     while (startAnPos < analyzer.stepBackCount)
                         analyzer.StepBack();
                 }
 
-                if (LVT != null)
+                try
                 {
-                    list.Add(Declaration_Statement(LVT));
+                    list.Add(Embedded_Statement());
                 }
-
-                list.Add(Embedded_Statement());
-
+                catch (Exception ex)
+                {
+                    if (analyzer.stepBackCount > maxAnPos)
+                        throw new Exception(ex.Message);
+                    throw new Exception(DeclarationStatementError);
+                }
             }
 
             return list;
@@ -2146,6 +2196,12 @@ namespace Compilator.SyntaxisModule
                 throw new Exception("Destructor_Declaration can not have a null parameter!");
 
             List<SyntaxisNode> list = Local_Variable_Declarators();
+
+            Token semilicon = analyzer.GetToken();
+            if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
+                !semilicon.value.Equals(Operators.OP.opSemicolon))
+                throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get " +
+                    ((semilicon == null) ? "Null reference exeption!" : semilicon.ToString()));
 
             DeclarationStatementNode node = new DeclarationStatementNode();
             node.children.Add(type);
@@ -2313,7 +2369,7 @@ namespace Compilator.SyntaxisModule
             };
         }
 
-        private SyntaxisNode Boolean_Expression() => ParsePimaryExpression();
+        private SyntaxisNode Boolean_Expression() => ParseExpression();//ParsePimaryExpression();
 
         private SyntaxisNode Switch_Statement()
         {
@@ -2329,7 +2385,7 @@ namespace Compilator.SyntaxisModule
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"(\", but get" +
                     ((leftBR == null) ? "Null reference exeption!" : leftBR.ToString()));
 
-            var expression = ParsePimaryExpression();
+            var expression = ParseExpression();//ParsePimaryExpression();
 
             Token rightBR = analyzer.GetToken();
             if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
@@ -2373,10 +2429,10 @@ namespace Compilator.SyntaxisModule
             while (true)
             {
                 Token keyWord = analyzer.GetToken();
+
+                
                 if (keyWord == null || keyWord.GetTokenType() != TokenType.KeyWord ||
                     !(keyWord.value.Equals(KeyWords.KW.kwCase) || keyWord.value.Equals(KeyWords.KW.kwDefault)))
-                //throw SynException.ShowException(EXType.IncorrectToken, "Expected keyword \"case or defauld\", but get" +
-                //    ((keyWord == null) ? "Null reference exeption!" : keyWord.ToString()));
                 {
                     analyzer.StepBack();
                     break;
@@ -2408,7 +2464,7 @@ namespace Compilator.SyntaxisModule
             return new SwitchBlockNode() { token = leftCyrcleBR, children = list };
         }
 
-        private SyntaxisNode Constant_Expression() => ParsePimaryExpression();
+        private SyntaxisNode Constant_Expression() => ParseExpression();//ParsePimaryExpression();
 
         private SyntaxisNode While_Statement()
         {
@@ -2744,17 +2800,19 @@ namespace Compilator.SyntaxisModule
                     return new PostIncrementNode() { token = tok2, children = new List<SyntaxisNode> { pExpression } };
                 case Operators.OP.opDecrementExpression:
                     return new PostDecrementNode() { token = tok2, children = new List<SyntaxisNode> { pExpression } };
-                case Operators.OP.opLeftParenthesis:
-                    Token rightBR = analyzer.GetToken();
-                    if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
-                        !rightBR.value.Equals(Operators.OP.opRightParenthesis))
-                        throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \")\", but get"+
-                            ((rightBR == null) ? "Null reference exception!" : rightBR.ToString()));
+                //case Operators.OP.opLeftParenthesis:
+                //    Token rightBR = analyzer.GetToken();
+                //    if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
+                //        !rightBR.value.Equals(Operators.OP.opRightParenthesis))
+                //        throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \")\", but get"+
+                //            ((rightBR == null) ? "Null reference exception!" : rightBR.ToString()));
 
-                    return new InvocationExpressionNode() { token = tok2, children = new List<SyntaxisNode>() { pExpression } };
+                //    return new InvocationExpressionNode() { token = tok2, children = new List<SyntaxisNode>() { pExpression } };
                 default:
-                    throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"(\", \"++\" or \"--\", but get"+
-                        ((tok2 == null) ? "Null reference exception!" : tok2.ToString()));
+                    analyzer.StepBack();
+                    return pExpression; //member access (invocation expression)
+                    //throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"(\", \"++\" or \"--\", but get"+
+                    //    ((tok2 == null) ? "Null reference exception!" : tok2.ToString()));
             }
         }
 

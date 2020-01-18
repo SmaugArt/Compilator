@@ -1,0 +1,7 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˪UsingNode
+▓▓˪OperatorNode: .
+▓▓▓˫Identificator:github
+▓▓▓˪OperatorNode: .
+▓▓▓▓˫Identificator:log
+▓▓▓▓˪Identificator:error

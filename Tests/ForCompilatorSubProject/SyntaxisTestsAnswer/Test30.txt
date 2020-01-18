@@ -1,0 +1,16 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˪ClassNode:class
+▓▓˫Компонента типа:public
+▓▓˫Identificator:classik
+▓▓˪ClassBody: {}
+▓▓▓˪Not have a any token because this node na container for any Method Declaration Nodes
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫SimpleTypeNode:   int
+▓▓▓▓˫Identificator:Method
+▓▓▓▓˪ProgrammBlockNode: {}
+▓▓▓▓▓˪ProgrammBlockNode: {}
+▓▓▓▓▓▓˪this node is a container for StatementExpressionNode!
+▓▓▓▓▓▓▓˪MemberAccessNode:   .
+▓▓▓▓▓▓▓▓˫Identificator:perem
+▓▓▓▓▓▓▓▓˪InvocationExpressionNode: ()
+▓▓▓▓▓▓▓▓▓˪Identificator:ToString

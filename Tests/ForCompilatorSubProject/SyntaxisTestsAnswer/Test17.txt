@@ -1,0 +1,14 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˪ClassNode:class
+▓▓˫Компонента типа:public
+▓▓˫Identificator:classik
+▓▓˪ClassBody: {}
+▓▓▓˪Not have a any token because this node a container for any Field Declaration Nodes
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫ArrayTypeNode: []
+▓▓▓▓▓˪SimpleTypeNode:   int
+▓▓▓▓˪VariableDeclaratorNode =
+▓▓▓▓▓˫Identificator:gg
+▓▓▓▓▓˪ArrayInitializerNode: {}
+▓▓▓▓▓▓˫IntegerNode:  7
+▓▓▓▓▓▓˪IntegerNode:  8

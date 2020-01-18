@@ -1,0 +1,34 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˪ClassNode:class
+▓▓˫Компонента типа:public
+▓▓˫Identificator:classik
+▓▓˪ClassBody: {}
+▓▓▓˪Not have a any token because this node na container for any Method Declaration Nodes
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫SimpleTypeNode:   int
+▓▓▓▓˫Identificator:Method
+▓▓▓▓˪ProgrammBlockNode: {}
+▓▓▓▓▓˫SwitchStatementNode 5,2: KeyWord: switch
+▓▓▓▓▓▓˫MemberAccessNode:   .
+▓▓▓▓▓▓▓˫Identificator:perem
+▓▓▓▓▓▓▓˪InvocationExpressionNode: ()
+▓▓▓▓▓▓▓▓˪Identificator:ToString
+▓▓▓▓▓▓˪SwitchBlockNode: {}
+▓▓▓▓▓▓▓˫SwitchLlabelNode: case
+▓▓▓▓▓▓▓▓˫Identificator:True
+▓▓▓▓▓▓▓▓˪ReturnStatementNode: return
+▓▓▓▓▓▓▓▓▓˪IntegerNode:  3
+▓▓▓▓▓▓▓˫SwitchLlabelNode: case
+▓▓▓▓▓▓▓▓˫DoubleNode:   44.4
+▓▓▓▓▓▓▓▓˫this node is a container for StatementExpressionNode!
+▓▓▓▓▓▓▓▓▓˪AssignmentNode:   =
+▓▓▓▓▓▓▓▓▓▓˫Identificator:bird
+▓▓▓▓▓▓▓▓▓▓˪BinaryOperationExpressionNode:+
+▓▓▓▓▓▓▓▓▓▓▓˫IntegerNode:  4
+▓▓▓▓▓▓▓▓▓▓▓˪IntegerNode:  4
+▓▓▓▓▓▓▓▓˪BreakStatementNode: break
+▓▓▓▓▓▓▓˪SwitchLlabelNode: default
+▓▓▓▓▓▓▓▓˪ReturnStatementNode: return
+▓▓▓▓▓▓▓▓▓˪IntegerNode:  7
+▓▓▓▓▓˪ReturnStatementNode: return
+▓▓▓▓▓▓˪IntegerNode:  5

@@ -1,0 +1,29 @@
+˪Do not have a value, because it's a Start(base) node!!!
+▓˪ClassNode:class
+▓▓˫Компонента типа:public
+▓▓˫Identificator:classik
+▓▓˪ClassBody: {}
+▓▓▓˪Not have a any token because this node na container for any Method Declaration Nodes
+▓▓▓▓˫Компонента типа:public
+▓▓▓▓˫SimpleTypeNode:   int
+▓▓▓▓˫Identificator:Method
+▓▓▓▓˪ProgrammBlockNode: {}
+▓▓▓▓▓˫IfStatementNode 5,2: KeyWord: if
+▓▓▓▓▓▓˫ConditionalOrExpressionNode:||
+▓▓▓▓▓▓▓˫ConditionalAndExpressionNode:&&
+▓▓▓▓▓▓▓▓˫RelationalExpressionNode:>
+▓▓▓▓▓▓▓▓▓˫Identificator:bird
+▓▓▓▓▓▓▓▓▓˪IntegerNode:  3
+▓▓▓▓▓▓▓▓˪RelationalExpressionNode:<
+▓▓▓▓▓▓▓▓▓˫Identificator:bird
+▓▓▓▓▓▓▓▓▓˪IntegerNode:  4
+▓▓▓▓▓▓▓˪ConditionalAndExpressionNode:&&
+▓▓▓▓▓▓▓▓˫RelationalExpressionNode:>
+▓▓▓▓▓▓▓▓▓˫Identificator:bird
+▓▓▓▓▓▓▓▓▓˪IntegerNode:  10
+▓▓▓▓▓▓▓▓˪RelationalExpressionNode:<
+▓▓▓▓▓▓▓▓▓˫Identificator:bird
+▓▓▓▓▓▓▓▓▓˪IntegerNode:  20
+▓▓▓▓▓▓˪ReturnStatementNode: return
+▓▓▓▓▓▓▓˪IntegerNode:  5
+▓▓▓▓▓˪ReturnStatementNode: return
