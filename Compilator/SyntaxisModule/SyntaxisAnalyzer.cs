@@ -1815,7 +1815,7 @@ namespace Compilator.SyntaxisModule
 
             if (token == null || token.GetTokenType() != TokenType.KeyWord && token.GetTokenType() != TokenType.Identificator)
                 throw SynException.ShowException(EXType.IncorrectToken,
-                    (token == null) ? "Null reference Exception" : "TokenType = " + token.GetTokenType());
+                    (token == null) ? "Null reference Exception" : "Expected Identificator, but get " + token.ToString());
 
             //в случае KyeWord
             if (token.GetTokenType() == TokenType.KeyWord)
@@ -1841,7 +1841,7 @@ namespace Compilator.SyntaxisModule
 
             if (token == null || token.GetTokenType() != TokenType.Identificator)
                 throw SynException.ShowException(EXType.IncorrectToken,
-                    (token == null) ? "Null reference Exception" : "TokenType = " + token.GetTokenType());
+                    (token == null) ? "Null reference Exception" : "Expected Identificator, but get "+token.ToString());
             return new NodeIdentificator() { token = token };
         }
 
@@ -1861,7 +1861,7 @@ namespace Compilator.SyntaxisModule
 
             if (token == null || token.GetTokenType() != TokenType.Identificator)
                 throw SynException.ShowException(EXType.IncorrectToken,
-                    (token == null) ? "Null reference Exception" : "TokenType = " + token.GetTokenType());
+                    (token == null) ? "Null reference Exception" : "Expected Identificator, but get " + token.ToString());
             Token dot = analyzer.GetToken();
 
             if (dot != null && dot.GetTokenType() == TokenType.Operator && dot.value.Equals(Operators.OP.opDot))

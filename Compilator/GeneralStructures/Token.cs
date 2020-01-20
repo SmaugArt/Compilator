@@ -27,6 +27,10 @@ namespace Compilator.GeneralStructures
         TokenType type;
         public object value { get; private set; }
 
+        public bool parseError = false;
+
+        private const string parseErrorString = "Error of parse a ";
+
 
         public Token(string text, int linePos, int letterPos, TokenType tokenType)
         {
@@ -38,7 +42,7 @@ namespace Compilator.GeneralStructures
 
         public override string ToString() => string.Format( //отвечает за переопределение метода вывода данных как String
             "{0},{1}: {2}",  // - по левому краю + - по правому выравнивания в символах
-            line, letter, type.ToString() + ": " + text);
+            line, letter, (parseError? parseErrorString:"")+type.ToString() + ": " + text);
 
         /// <summary>
         /// преобразует строку по типу в какое-то значение

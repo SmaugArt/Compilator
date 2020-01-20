@@ -68,7 +68,7 @@ namespace Compilator.AnalyzerModule
             SavePreviousStatus(); //for step back
             StatusKey statusOfAnalyz = StatusKey.Start;
 
-            if (currentStatus != AnalyzerStatus.OK) return null;
+            if (currentStatus != AnalyzerStatus.OK) return new Token("End file", -1, -1, TokenType.Null);//null;
 
             string newString = ""; //пустая строка
 
@@ -82,9 +82,10 @@ namespace Compilator.AnalyzerModule
                 {
                     currentStatus = AnalyzerStatus.Empty;
 
-                    if (newString.Equals("")) { return null; }
+                    if (newString.Equals(""))
+                        return new Token("End file", -1, -1, TokenType.Null);//null; }
 
-                    typeOfToken = sTokens[statusOfAnalyz].endFileType; //присваиваем получившееся значение
+                        typeOfToken = sTokens[statusOfAnalyz].endFileType; //присваиваем получившееся значение
                     break;
 
                 } //конец файла
@@ -161,6 +162,7 @@ namespace Compilator.AnalyzerModule
                 if (!nToken.Finalyze())
                 {
                     currentStatus = AnalyzerStatus.Error;
+                    nToken.parseError = true;
                     return nToken;
                 }
 
@@ -240,6 +242,13 @@ namespace Compilator.AnalyzerModule
             reader.DiscardBufferedData();
             reader.BaseStream.Seek(currentPos.globalPos, SeekOrigin.Begin);
             return true;
+        }
+
+        virtual public Token Peek()
+        {
+            var tok = this.GetToken();
+            this.StepBack();
+            return tok;
         }
     }
 }

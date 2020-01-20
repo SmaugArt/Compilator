@@ -41,5 +41,12 @@ namespace Compilator.AnalyzerModule
             valueOfSteps.RemoveAt(valueOfSteps.Count - 1);
             return true;
         }
+
+        public override Token Peek()
+        {
+            var tok = this.GetToken();
+            this.StepBack();
+            return tok;
+        }
     }
 }

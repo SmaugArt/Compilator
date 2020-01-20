@@ -135,6 +135,8 @@
             // TryCheck
             // 
             this.TryCheck.AutoSize = true;
+            this.TryCheck.Checked = true;
+            this.TryCheck.CheckState = System.Windows.Forms.CheckState.Checked;
             this.TryCheck.Location = new System.Drawing.Point(13, 69);
             this.TryCheck.Name = "TryCheck";
             this.TryCheck.Size = new System.Drawing.Size(92, 21);
