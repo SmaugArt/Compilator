@@ -1,0 +1,4 @@
+Error of parse Conditional expression.
+Message: Error of parse Conditional expression.
+Message: Incorrect token! Lexer error.
+Message: 3,26: Operator: ]

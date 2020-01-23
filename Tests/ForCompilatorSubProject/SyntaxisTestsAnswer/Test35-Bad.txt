@@ -1,0 +1,2 @@
+Incorrect token! Lexer error.
+Message: Expected Operator ";", but get: 10,4: Operator: }
