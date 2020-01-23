@@ -32,17 +32,12 @@ namespace Compilator.SyntaxisModule
         /// <returns></returns>
         public SyntaxisNode SyntaxisParse()
         {
-            //if (analyzer.GetToken() == null)
-            //    return new NodeLiteral() { token = new Token("", 0, 0, TokenType.Null) };
-            //analyzer.StepBack();
             SyntaxisNode node = Compilation_Unit();
 
             //Добавляю условие в центральный (главный) узел парсера
             //Если остались неразобранные значения, то это плохо
-
             var nullToken2 = analyzer.GetToken();
             if(!SynCheck.TypeCheck(nullToken2, TokenType.Null)) //теперь GetToken не возвращает null!!!
-            ////////////////if (nullToken2 != null && nullToken2.GetTokenType() != TokenType.Null)
                 throw new Exception("Unexpected Token! Message: " + nullToken2.ToString());
 
             return node;
@@ -51,7 +46,7 @@ namespace Compilator.SyntaxisModule
         /// <summary>
         /// Делаем Using directives без using_alias_directive
         /// После вызываем namespace_member_declaration
-        //// Базовый Node не имеет начального значения
+        /// Базовый Node не имеет начального значения
         /// </summary>
         /// <returns></returns>
         private GlobalNode Compilation_Unit()
@@ -92,8 +87,6 @@ namespace Compilator.SyntaxisModule
         {
             Token usingTok = analyzer.GetToken();
             if(!SynCheck.ValueCheck(usingTok, TokenType.KeyWord, KeyWords.KW.kwUsing))
-            ////////////if (usingTok == null || usingTok.GetTokenType() != TokenType.KeyWord
-            ////////////    || !usingTok.value.Equals(KeyWords.KW.kwUsing))
             {
                 analyzer.StepBack();
                 return null;
@@ -104,7 +97,6 @@ namespace Compilator.SyntaxisModule
 
             Token commaDot = analyzer.GetToken();
             if(!SynCheck.ValueCheck(commaDot, TokenType.Operator, Operators.OP.opSemicolon))
-            /////////if (commaDot == null || commaDot.GetTokenType() != TokenType.Operator || !commaDot.value.Equals(Operators.OP.opSemicolon))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected \";\", but get " + commaDot.ToString());
 
             return new UsingNode() { token = usingTok, children = new List<SyntaxisNode>() { node } };
@@ -124,7 +116,6 @@ namespace Compilator.SyntaxisModule
 
                 if (SynCheck.TypeCheck(t, TokenType.Null)) break; //проверяем на непустые значения
 
-                /////////////////t.GetTokenType() == TokenType.KeyWord && t.value.Equals(KeyWords.KW.kwNamespace))
                 if (SynCheck.ValueCheck(t, TokenType.KeyWord, KeyWords.KW.kwNamespace))
                     namespaceDeclar.Add(Namespace_Declaration());
                 else
@@ -151,15 +142,11 @@ namespace Compilator.SyntaxisModule
             Token namespaceOp = analyzer.GetToken();
 
             if(!SynCheck.ValueCheck(namespaceOp, TokenType.KeyWord, KeyWords.KW.kwNamespace))
-            /////////////////////if (namespaceOp == null || namespaceOp.GetTokenType() != TokenType.KeyWord ||
-            /////////////////////    !namespaceOp.value.Equals(KeyWords.KW.kwNamespace))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected keyword \"using\", but get: " + namespaceOp.ToString());
 
             var qualityIdNode = Qualified_Identifier();
 
             Token leftCyrkleBR = analyzer.GetToken();
-            /////////////////////if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() != TokenType.Operator ||
-            /////////////////////    !leftCyrkleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
             if(!SynCheck.ValueCheck(leftCyrkleBR, TokenType.Operator, Operators.OP.opLeftCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " + leftCyrkleBR.ToString());
             
@@ -167,8 +154,6 @@ namespace Compilator.SyntaxisModule
             var namespaceBodyNode = Compilation_Unit();//Namespace_Body();
 
             Token rightCyrkleBR = analyzer.GetToken();
-            ////////////////////if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() != TokenType.Operator ||
-            ////////////////////    !rightCyrkleBR.value.Equals(Operators.OP.opRightCurlyBracket))
             if (!SynCheck.ValueCheck(rightCyrkleBR, TokenType.Operator, Operators.OP.opRightCurlyBracket))
                     throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " + rightCyrkleBR.ToString());
 
@@ -176,8 +161,6 @@ namespace Compilator.SyntaxisModule
 
             //возможна запятая после фигурных скобок
             Token commaDot = analyzer.GetToken();
-            /////////////////////////if (commaDot == null || commaDot.GetTokenType() != TokenType.Operator ||
-            /////////////////////////    !commaDot.value.Equals(Operators.OP.opSemicolon))
             if (!SynCheck.ValueCheck(commaDot, TokenType.Operator, Operators.OP.opSemicolon)) ;
                 analyzer.StepBack();
 
@@ -190,8 +173,6 @@ namespace Compilator.SyntaxisModule
             Token dot = analyzer.GetToken();
 
             if(!SynCheck.ValueCheck(dot, TokenType.Operator, Operators.OP.opDot))
-            ////////////////////////if (dot == null || dot.GetTokenType() != TokenType.Operator ||
-            ////////////////////////    !dot.value.Equals(Operators.OP.opDot))
             {
                 analyzer.StepBack();
                 return node;
@@ -212,7 +193,6 @@ namespace Compilator.SyntaxisModule
         {
             Token modifier = analyzer.GetToken();
 
-            ////////////////////////modifier == null || modifier.GetTokenType() != TokenType.KeyWord || !CheckModify(modifier))
             if (!SynCheck.TypeCheck(modifier, TokenType.KeyWord) || !CheckModify(modifier))
             {
                 analyzer.StepBack();
@@ -222,13 +202,9 @@ namespace Compilator.SyntaxisModule
 
             Token type = analyzer.GetToken();
             if(!SynCheck.TypeCheck(type, TokenType.KeyWord))
-            //////////////////////////if (type == null || type.GetTokenType() != TokenType.KeyWord)
             {
                 if(!SynCheck.ValueCheck(type, TokenType.Operator, Operators.OP.opRightCurlyBracket))
-                ///////////////////if(type == null || type.GetTokenType() != TokenType.Operator ||
-                ///////////////////    !type.value.Equals(Operators.OP.opRightCurlyBracket))
-                    throw SynException.ShowException(EXType.IncorrectToken,
-                    "Expected a [type] name!\r\nMessage: " + type.ToString());
+                    throw SynException.ShowException(EXType.IncorrectToken, "Expected a [type] name!\r\nMessage: " + type.ToString());
 
                 analyzer.StepBack();
                 return new EmptyNode();
@@ -280,7 +256,6 @@ namespace Compilator.SyntaxisModule
 
             if (mod != null)
             {
-                //////////////////////////if (mod.GetTokenType() != TokenType.KeyWord)
                 if (!SynCheck.TypeCheck(mod, TokenType.KeyWord))
                     throw SynException.ShowException(EXType.IncorrectToken, $"Expected a {typeName} modifier! Message: " + mod.ToString());
 
@@ -319,163 +294,27 @@ namespace Compilator.SyntaxisModule
 
         private TypeComponentsNode ParseClassComponents(Token modifier, Token identificator = null) => ParseTypesComponents(modifier, identificator, "Class", 
             KeyWords.KW.kwNew, KeyWords.KW.kwPublic, KeyWords.KW.kwProtected, KeyWords.KW.kwPrivate, KeyWords.KW.kwAbstract);
-        ////////////////////////{
-        ////////////////////////    var mod = modifier;
-
-        ////////////////////////    if (mod != null)
-        ////////////////////////    {
-        ////////////////////////        ////////////////if (mod.GetTokenType() != TokenType.KeyWord)
-        ////////////////////////        if(!SynCheck.TypeCheck(mod, TokenType.KeyWord))
-        ////////////////////////            throw SynException.ShowException(EXType.IncorrectToken, "Expected a Class modifier! Message: " + mod.ToString());
-
-        ////////////////////////        switch ((KeyWords.KW)mod.value)
-        ////////////////////////        {
-        ////////////////////////            case KeyWords.KW.kwNew:
-        ////////////////////////            case KeyWords.KW.kwPublic:
-        ////////////////////////            case KeyWords.KW.kwProtected:
-        ////////////////////////            case KeyWords.KW.kwPrivate:
-        ////////////////////////            case KeyWords.KW.kwAbstract://?
-        ////////////////////////                break;
-        ////////////////////////            default:
-        ////////////////////////                throw SynException.ShowException(EXType.IncorrectToken, "Unexpected Class modifier! Message: " + mod.ToString());
-        ////////////////////////        }
-        ////////////////////////    }
-
-
-        ////////////////////////    Token ident = identificator;
-        ////////////////////////    if (ident == null)
-        ////////////////////////        ident = Parse_Identificator().token;
-        ////////////////////////    else
-        ////////////////////////    {
-        ////////////////////////        ////////////////if (ident.GetTokenType() != TokenType.Identificator)
-        ////////////////////////        if(!SynCheck.TypeCheck(ident, TokenType.Identificator))
-        ////////////////////////            throw SynException.ShowException(EXType.IncorrectToken, "Unexpected identificator! Message: " + ident.ToString());
-
-        ////////////////////////    }
-
-        ////////////////////////    //Код с дополнительными компонентами
-
-        ////////////////////////    return new TypeComponentsNode()
-        ////////////////////////    {
-        ////////////////////////        token = ident,
-        ////////////////////////        children = new List<SyntaxisNode>()
-        ////////////////////////        {
-        ////////////////////////            new TypeModificatorNode(){token=mod}
-        ////////////////////////        }
-        ////////////////////////    };
-        ////////////////////////}
 
         private TypeComponentsNode ParseEnumComponents(Token modifier, Token identificator = null) => ParseTypesComponents(modifier, identificator, "Enum",
             KeyWords.KW.kwNew, KeyWords.KW.kwPublic, KeyWords.KW.kwProtected, KeyWords.KW.kwPrivate);
-        ////////////////////{
-        ////////////////////    var mod = modifier;
-
-        ////////////////////    if (mod != null)
-        ////////////////////    {
-        ////////////////////        ////////////if (mod.GetTokenType() != TokenType.KeyWord)
-        ////////////////////        if (!SynCheck.TypeCheck(mod, TokenType.KeyWord))
-        ////////////////////            throw SynException.ShowException(EXType.IncorrectToken, "Expected a Class modifier! Message: " + mod.ToString());
-
-        ////////////////////        switch ((KeyWords.KW)mod.value)
-        ////////////////////        {
-        ////////////////////            case KeyWords.KW.kwNew:
-        ////////////////////            case KeyWords.KW.kwPublic:
-        ////////////////////            case KeyWords.KW.kwProtected:
-        ////////////////////            case KeyWords.KW.kwPrivate:
-        ////////////////////                break;
-        ////////////////////            default:
-        ////////////////////                throw SynException.ShowException(EXType.IncorrectToken, "Unexpected Enum modifier! Message: " + modifier.ToString());
-        ////////////////////        }
-        ////////////////////    }
-
-        ////////////////////    Token ident = identificator;
-        ////////////////////    if (ident == null)
-        ////////////////////        ident = Parse_Identificator().token;
-        ////////////////////    else
-        ////////////////////    {
-        ////////////////////        ////////////////////if (ident.GetTokenType() != TokenType.Identificator)
-        ////////////////////        if(!SynCheck.TypeCheck(ident, TokenType.Identificator))
-        ////////////////////            throw SynException.ShowException(EXType.IncorrectToken, "Unexpected identificator! Message: " + ident.ToString());
-        ////////////////////    }
-
-        ////////////////////    //Код с дополнительными компонентами
-        ////////////////////    return new TypeComponentsNode()
-        ////////////////////    {
-        ////////////////////        token = ident,
-        ////////////////////        children = new List<SyntaxisNode>()
-        ////////////////////        {
-        ////////////////////            new TypeModificatorNode(){token=modifier}
-        ////////////////////        }
-        ////////////////////    };
-        ////////////////////}
-
+        
         private TypeComponentsNode ParseStructComponents(Token modifier, Token identificator = null) => ParseTypesComponents(modifier, identificator, "Struct",
             KeyWords.KW.kwNew, KeyWords.KW.kwPublic, KeyWords.KW.kwProtected, KeyWords.KW.kwPrivate);
-        //////////////////////{
-        //////////////////////    var mod = modifier;
-
-        //////////////////////    if (mod != null)
-        //////////////////////    {
-        //////////////////////        if (mod.GetTokenType() != TokenType.KeyWord)
-        //////////////////////            throw SynException.ShowException(EXType.IncorrectToken,
-        //////////////////////                "Expected a Class modifier!\r\nMessage: " + ((mod == null) ? "Null reference exeption!" : mod.ToString()));
-
-        //////////////////////        switch ((KeyWords.KW)mod.value)
-        //////////////////////        {
-        //////////////////////            case KeyWords.KW.kwNew:
-        //////////////////////            case KeyWords.KW.kwPublic:
-        //////////////////////            case KeyWords.KW.kwProtected:
-        //////////////////////            case KeyWords.KW.kwPrivate:
-        //////////////////////                break;
-        //////////////////////            default:
-        //////////////////////                throw SynException.ShowException(EXType.IncorrectToken,
-        //////////////////////           "Unexpected Struct modifier!\r\nMessage: " + modifier.ToString());
-        //////////////////////        }
-        //////////////////////    }
-
-        //////////////////////    Token ident = identificator;
-        //////////////////////    if (ident == null)
-        //////////////////////        ident = Parse_Identificator().token;
-        //////////////////////    else
-        //////////////////////    {
-        //////////////////////        if (ident.GetTokenType() != TokenType.Identificator)
-        //////////////////////            throw SynException.ShowException(EXType.IncorrectToken,
-        //////////////////////                "Unexpected identificator! \r\nMessage: " + ident.ToString());
-
-        //////////////////////    }
-
-        //////////////////////    //Код с дополнительными компонентами
-
-        //////////////////////    return new TypeComponentsNode()
-        //////////////////////    {
-        //////////////////////        token = ident,
-        //////////////////////        children = new List<SyntaxisNode>()
-        //////////////////////        {
-        //////////////////////            new TypeModificatorNode(){token=modifier}
-        //////////////////////        }
-        //////////////////////    };
-        //////////////////////}
 
         #region Class
         private ClassBodyNode Class_Body()
         {
             Token leftCyrkleBR = analyzer.GetToken();
-            ////////////////////if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() != TokenType.Operator ||
-            ////////////////////    !leftCyrkleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
             if(!SynCheck.ValueCheck(leftCyrkleBR, TokenType.Operator, Operators.OP.opLeftCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " + leftCyrkleBR.ToString());
 
             List<SyntaxisNode> classMember = Class_Member_Declarations();
 
             Token rightCyrkleBR = analyzer.GetToken();
-            //////////////////////if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////    !rightCyrkleBR.value.Equals(Operators.OP.opRightCurlyBracket))
             if(!SynCheck.ValueCheck(rightCyrkleBR, TokenType.Operator, Operators.OP.opRightCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"}\", but get: " + rightCyrkleBR.ToString());
 
             Token commaDot = analyzer.GetToken();
-            //////////if (commaDot == null || commaDot.GetTokenType() != TokenType.Operator ||
-            //////////    !commaDot.value.Equals(Operators.OP.opSemicolon))
             if(!SynCheck.ValueCheck(commaDot, TokenType.Operator, Operators.OP.opSemicolon))
                 analyzer.StepBack();
 
@@ -504,8 +343,6 @@ namespace Compilator.SyntaxisModule
             while (true)
             {
                 Token rghtCurclyBR = analyzer.Peek();
-                ////////////////////////////if (rghtCurclyBR != null && rghtCurclyBR.GetTokenType() == TokenType.Operator &&
-                ////////////////////////////    rghtCurclyBR.value.Equals(Operators.OP.opRightCurlyBracket))
                 if(SynCheck.ValueCheck(rghtCurclyBR, TokenType.Operator, Operators.OP.opRightCurlyBracket))
                     break;
 
@@ -552,8 +389,6 @@ namespace Compilator.SyntaxisModule
             Token tilda = analyzer.GetToken();
 
             //+++++destructor
-            ////////////////////////if (tilda != null && tilda.GetTokenType() == TokenType.Operator
-            ////////////////////////    && tilda.value.Equals(Operators.OP.opTilda))
             if(SynCheck.ValueCheck(tilda, TokenType.Operator, Operators.OP.opTilda))
             {
                 return Destructor_Declaration(tilda);
@@ -567,8 +402,6 @@ namespace Compilator.SyntaxisModule
 
             ///+++++const
             Token _const = analyzer.Peek();
-            //////////////////////////if (_const != null && _const.GetTokenType() == TokenType.KeyWord &&
-            //////////////////////////    _const.value.Equals(KeyWords.KW.kwConst))
             if(SynCheck.ValueCheck(_const, TokenType.KeyWord, KeyWords.KW.kwConst))
             {
                 ((Dictionary<string, bool>)dic[1]).TryGetValue("Constant", out access);
@@ -584,12 +417,9 @@ namespace Compilator.SyntaxisModule
             Token leftBR = analyzer.Peek();
             analyzer.StepBack();
 
-            /////////////////////////////////////if (identify != null && identify.GetTokenType() == TokenType.Identificator)
             if(SynCheck.TypeCheck(identify, TokenType.Identificator))
             {
                 //true = Constructor_Declaration,false = field_declaration
-                ////////////////////////////////////////if (leftBR != null && leftBR.GetTokenType() == TokenType.Operator &&
-                ////////////////////////////////////////    leftBR.value.Equals(Operators.OP.opLeftParenthesis))
                 if(SynCheck.ValueCheck(leftBR, TokenType.Operator, Operators.OP.opLeftParenthesis))
                 {
                     ((Dictionary<string, bool>)dic[1]).TryGetValue("Constructor", out access);
@@ -611,8 +441,6 @@ namespace Compilator.SyntaxisModule
 
             //+++++проверка на void -> проверка на method
             Token _void = analyzer.GetToken();
-            //////////////////////////if (_void != null && _void.GetTokenType() == TokenType.KeyWord &&
-            //////////////////////////    _void.value.Equals(KeyWords.KW.kwVoid))
             if(SynCheck.ValueCheck(_void, TokenType.KeyWord, KeyWords.KW.kwVoid))
             {
                 ((Dictionary<string, bool>)dic[1]).TryGetValue("Method", out access);
@@ -631,12 +459,9 @@ namespace Compilator.SyntaxisModule
             leftBR = analyzer.Peek();//Token leftBR = analyzer.GetToken();
             analyzer.StepBack();
 
-            //////////////////////////if (identify2 == null || identify2.GetTokenType() != TokenType.Identificator)
             if(!SynCheck.TypeCheck(identify2, TokenType.Identificator))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Identificator, bur get " + identify2.ToString());
 
-            ////////////////////////////////if (leftBR != null && leftBR.GetTokenType() == TokenType.Operator &&
-            ////////////////////////////////    leftBR.value.Equals(Operators.OP.opLeftParenthesis))
             if(SynCheck.ValueCheck(leftBR, TokenType.Operator, Operators.OP.opLeftParenthesis))
             {
                 ((Dictionary<string, bool>)dic[1]).TryGetValue("Method", out access);
@@ -657,7 +482,6 @@ namespace Compilator.SyntaxisModule
         private object[] Class_Member_Declaration_Modifier()
         {
             Token tok = analyzer.GetToken();
-            //////////////////////////////////if (tok == null || tok.GetTokenType() != TokenType.KeyWord)
             if(!SynCheck.TypeCheck(tok, TokenType.KeyWord))
             {
                 analyzer.StepBack();
@@ -697,8 +521,6 @@ namespace Compilator.SyntaxisModule
         private ConstantDeclarationNode Constant_Declaration(Token modifier)
         {
             Token _const = analyzer.GetToken();
-            //////////////////////if (_const == null || _const.GetTokenType() != TokenType.KeyWord ||
-            //////////////////////    !_const.value.Equals(KeyWords.KW.kwConst))
             if(!SynCheck.ValueCheck(_const, TokenType.KeyWord, KeyWords.KW.kwConst))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected KeyWord \"Const\"! But get " +  _const.ToString());
 
@@ -707,8 +529,6 @@ namespace Compilator.SyntaxisModule
 
             //не добавляю semilicon в node!!!
             Token semilicon = analyzer.GetToken();
-            //////////////////////////if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
-            //////////////////////////     !semilicon.value.Equals(Operators.OP.opSemicolon))
             if(!SynCheck.ValueCheck(semilicon, TokenType.Operator, Operators.OP.opSemicolon))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\"! But get " + semilicon.ToString());
 
@@ -730,9 +550,6 @@ namespace Compilator.SyntaxisModule
                 if (list.Count > 0)
                 {
                     Token comma = analyzer.GetToken();
-
-                    ////////////////////////////if (comma == null || comma.GetTokenType() != TokenType.Operator ||
-                    ////////////////////////////    !comma.value.Equals(Operators.OP.opComma))
                     if(!SynCheck.ValueCheck(comma, TokenType.Operator, Operators.OP.opComma))
                     {
                         analyzer.StepBack();
@@ -743,8 +560,6 @@ namespace Compilator.SyntaxisModule
                 NodeIdentificator identify = Parse_Identificator();
                 Token equals = analyzer.GetToken();
 
-                //////////////////////////////////if (equals == null || equals.GetTokenType() != TokenType.Operator ||
-                //////////////////////////////////    !equals.value.Equals(Operators.OP.opEquals))
                 if(!SynCheck.ValueCheck(equals, TokenType.Operator, Operators.OP.opEquals))
                     throw SynException.ShowException(EXType.IncorrectToken,"Expected Operator \"=\"! But get " + equals.ToString());
 
@@ -764,8 +579,6 @@ namespace Compilator.SyntaxisModule
 
             //не добавляю semilicon в node!!!
             Token semilicon = analyzer.GetToken();
-            ////////////////////////////////////if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////     !semilicon.value.Equals(Operators.OP.opSemicolon))
             if(!SynCheck.ValueCheck(semilicon, TokenType.Operator, Operators.OP.opSemicolon))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\"! But get " + semilicon.ToString());
 
@@ -788,9 +601,6 @@ namespace Compilator.SyntaxisModule
                 if (list.Count > 0)
                 {
                     Token comma = analyzer.GetToken();
-
-                    ////////////////////////////////if (comma == null || comma.GetTokenType() != TokenType.Operator ||
-                    ////////////////////////////////    !comma.value.Equals(Operators.OP.opComma))
                     if(!SynCheck.ValueCheck(comma, TokenType.Operator, Operators.OP.opComma))
                     {
                         analyzer.StepBack();
@@ -800,8 +610,6 @@ namespace Compilator.SyntaxisModule
 
                 var iden = Parse_Identificator();
                 Token equals = analyzer.GetToken();
-                ////////////////////////////////////if (equals == null || equals.GetTokenType() != TokenType.Operator ||
-                ////////////////////////////////////    !equals.value.Equals(Operators.OP.opEquals))
                 if(!SynCheck.ValueCheck(equals, TokenType.Operator, Operators.OP.opEquals))
                     throw SynException.ShowException(EXType.IncorrectToken, "Expected a Operator \"=\", but get " +
                         ((equals == null) ? "Null reference exeption!" : equals.ToString()));
@@ -828,9 +636,6 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Variable_Initializer()
         {
             Token leftCyrcleBR = analyzer.Peek();
-
-            ////////////////////////////////if (leftCyrcleBR != null && leftCyrcleBR.GetTokenType() == TokenType.Operator &&
-            ////////////////////////////////    leftCyrcleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
             if(SynCheck.ValueCheck(leftCyrcleBR, TokenType.Operator, Operators.OP.opLeftCurlyBracket))
                 return Array_Initializer();
 
@@ -843,14 +648,10 @@ namespace Compilator.SyntaxisModule
             var memberName = Parse_Identificator();
 
             Token leftBR = analyzer.GetToken();
-            //////////////////////////////////if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////    !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
             if(!SynCheck.ValueCheck(leftBR, TokenType.Operator, Operators.OP.opLeftParenthesis))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"(\", but get: " + leftBR.ToString());
 
             Token rightBR = analyzer.GetToken();
-            //////////////////////////////////////if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////    !rightBR.value.Equals(Operators.OP.opRightParenthesis))
             if(!SynCheck.ValueCheck(rightBR, TokenType.Operator, Operators.OP.opRightParenthesis))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \")\", but get: " + rightBR.ToString());
 
@@ -868,8 +669,6 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Constructor_Body()
         {
             Token semilicon = analyzer.GetToken();
-            ////////////////////////////if (semilicon != null && semilicon.GetTokenType() == TokenType.Operator &&
-            ////////////////////////////    semilicon.value.Equals(Operators.OP.opSemicolon))
             if(SynCheck.ValueCheck(semilicon, TokenType.Operator, Operators.OP.opSemicolon))
                 return new EmptyNode();
 
@@ -893,14 +692,10 @@ namespace Compilator.SyntaxisModule
             var memberName = Parse_Identificator();
 
             Token leftBR = analyzer.GetToken();
-            ////////////////////////////////if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////    !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
             if(!SynCheck.ValueCheck(leftBR, TokenType.Operator, Operators.OP.opLeftParenthesis))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"(\", but get: " + leftBR.ToString());
 
             Token rightBR = analyzer.GetToken();
-            ////////////////////////////////////////if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////////    !rightBR.value.Equals(Operators.OP.opRightParenthesis))
             if(!SynCheck.ValueCheck(rightBR, TokenType.Operator, Operators.OP.opRightParenthesis))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \")\", but get: " + rightBR.ToString());
 
@@ -918,8 +713,6 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Method_Body()
         {
             Token semilicon = analyzer.GetToken();
-            //////////////////////////////////if (semilicon != null && semilicon.GetTokenType() == TokenType.Operator &&
-            //////////////////////////////////    semilicon.value.Equals(Operators.OP.opSemicolon))
             if(SynCheck.ValueCheck(semilicon, TokenType.Operator, Operators.OP.opSemicolon))
                 return new EmptyNode();
 
@@ -941,14 +734,10 @@ namespace Compilator.SyntaxisModule
             var identifier = Parse_Identificator();
 
             Token leftBR = analyzer.GetToken();
-            //////////////////////////////////////////////if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////////////    !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
             if(!SynCheck.ValueCheck(leftBR, TokenType.Operator, Operators.OP.opLeftParenthesis))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"(\", but get: " + leftBR.ToString());
 
             Token rightBR = analyzer.GetToken();
-            //////////////////////////////////if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////    !rightBR.value.Equals(Operators.OP.opRightParenthesis))
             if(!SynCheck.ValueCheck(rightBR, TokenType.Operator, Operators.OP.opRightParenthesis))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \")\", but get: " + rightBR.ToString());
 
@@ -965,27 +754,20 @@ namespace Compilator.SyntaxisModule
         private StructureBodyNode Struct_Body()
         {
             Token leftCyrkleBR = analyzer.GetToken();
-            ////////////////////////////////////////if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////////    !leftCyrkleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
             if(!SynCheck.ValueCheck(leftCyrkleBR, TokenType.Operator, Operators.OP.opLeftCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " + leftCyrkleBR.ToString());
 
             List<SyntaxisNode> structMember = Struct_Member_Declarations();
 
             Token rightCyrkleBR = analyzer.GetToken();
-            //////////////////////////////////////////if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////////    !rightCyrkleBR.value.Equals(Operators.OP.opRightCurlyBracket))
             if(!SynCheck.ValueCheck(rightCyrkleBR, TokenType.Operator, Operators.OP.opRightCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"}\", but get: " + rightCyrkleBR.ToString());
 
             Token commaDot = analyzer.GetToken();
-            ////////////////////////////////////////if (commaDot == null || commaDot.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////////    !commaDot.value.Equals(Operators.OP.opSemicolon))
             if(!SynCheck.ValueCheck(commaDot, TokenType.Operator, Operators.OP.opSemicolon))
                 analyzer.StepBack();
 
-            StructureBodyNode BN = new StructureBodyNode() { token = leftCyrkleBR, children = structMember };//////////////////////////};
-            ///////////////////////////////////////////////////////////////////////////////////////////BN.children.AddRange(structMember);
+            StructureBodyNode BN = new StructureBodyNode() { token = leftCyrkleBR, children = structMember };
 
             return BN;
         }
@@ -1002,8 +784,6 @@ namespace Compilator.SyntaxisModule
             while (true)
             {
                 Token rghtCurclyBR = analyzer.Peek();
-                //////////////////////////////////////////if (rghtCurclyBR != null && rghtCurclyBR.GetTokenType() == TokenType.Operator &&
-                //////////////////////////////////////////    rghtCurclyBR.value.Equals(Operators.OP.opRightCurlyBracket))
                 if(SynCheck.ValueCheck(rghtCurclyBR, TokenType.Operator, Operators.OP.opRightCurlyBracket))
                     break;
 
@@ -1056,8 +836,6 @@ namespace Compilator.SyntaxisModule
 
             ///+++++const
             Token _const = analyzer.Peek();
-            //////////////////////////////////////////////////if (_const != null && _const.GetTokenType() == TokenType.KeyWord &&
-            //////////////////////////////////////////////////    _const.value.Equals(KeyWords.KW.kwConst))
             if(SynCheck.ValueCheck(_const, TokenType.KeyWord, KeyWords.KW.kwConst))
             {
                 ((Dictionary<string, bool>)dic[1]).TryGetValue("Constant", out access);
@@ -1072,12 +850,9 @@ namespace Compilator.SyntaxisModule
             Token identify = analyzer.GetToken();
             Token leftBR = analyzer.Peek();
             analyzer.StepBack();
-            ///////////////////////////////////////////////////////if (identify != null && identify.GetTokenType() == TokenType.Identificator)
             if(SynCheck.TypeCheck(identify, TokenType.Identificator))
             {
                 //true = Constructor_Declaration,false = field_declaration
-                //////////////////////////////////////////if (leftBR != null && leftBR.GetTokenType() == TokenType.Operator &&
-                //////////////////////////////////////////    leftBR.value.Equals(Operators.OP.opLeftParenthesis))
                 if(SynCheck.ValueCheck(leftBR, TokenType.Operator, Operators.OP.opLeftParenthesis))
                 {
                     ((Dictionary<string, bool>)dic[1]).TryGetValue("Constructor", out access);
@@ -1099,8 +874,6 @@ namespace Compilator.SyntaxisModule
 
             //+++++проверка на void -> проверка на method
             Token _void = analyzer.GetToken();
-            //////////////////////////////////////////////if (_void != null && _void.GetTokenType() == TokenType.KeyWord &&
-            //////////////////////////////////////////////    _void.value.Equals(KeyWords.KW.kwVoid))
             if(SynCheck.ValueCheck(_void, TokenType.KeyWord, KeyWords.KW.kwVoid))
             {
                 ((Dictionary<string, bool>)dic[1]).TryGetValue("Method", out access);
@@ -1119,12 +892,9 @@ namespace Compilator.SyntaxisModule
             leftBR = analyzer.Peek();
             analyzer.StepBack();
 
-            ////////////////////////////////////////if (identify2 == null || identify2.GetTokenType() != TokenType.Identificator)
             if(!SynCheck.TypeCheck(identify2, TokenType.Identificator))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Identificator, bur get " + identify2.ToString());
 
-            ////////////////////////////////////////////////if (leftBR != null && leftBR.GetTokenType() == TokenType.Operator &&
-            ////////////////////////////////////////////////    leftBR.value.Equals(Operators.OP.opLeftParenthesis))
             if(SynCheck.ValueCheck(leftBR, TokenType.Operator, Operators.OP.opLeftParenthesis))
             {
                 ((Dictionary<string, bool>)dic[1]).TryGetValue("Method", out access);
@@ -1146,27 +916,20 @@ namespace Compilator.SyntaxisModule
         private EnumBodyNode Enum_Body()
         {
             Token leftCyrkleBR = analyzer.GetToken();
-            //////////////////////////////////////////if (leftCyrkleBR == null || leftCyrkleBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////////    !leftCyrkleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
             if(!SynCheck.ValueCheck(leftCyrkleBR, TokenType.Operator, Operators.OP.opLeftCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " + leftCyrkleBR.ToString());
 
             List<SyntaxisNode> enumMember = Enum_Member_Declarations();
 
-            Token rightCyrkleBR = analyzer.GetToken();
-            ////////////////////////////////////////if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////////    !rightCyrkleBR.value.Equals(Operators.OP.opRightCurlyBracket))
+            Token rightCyrkleBR = analyzer.GetToken();           
             if(!SynCheck.ValueCheck(rightCyrkleBR, TokenType.Operator, Operators.OP.opRightCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"}\", but get: " + rightCyrkleBR.ToString());
 
             Token commaDot = analyzer.GetToken();
-            ////////////////////////////////////if (commaDot == null || commaDot.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////    !commaDot.value.Equals(Operators.OP.opSemicolon))
             if(!SynCheck.ValueCheck(commaDot, TokenType.Operator, Operators.OP.opSemicolon))
                 analyzer.StepBack();
 
             EnumBodyNode BN = new EnumBodyNode(){ token = leftCyrkleBR, children = enumMember};
-            //////////////////////////////////////////////////////BN.children.AddRange(enumMember);
             return BN;
         }
 
@@ -1192,8 +955,6 @@ namespace Compilator.SyntaxisModule
                 }
 
                 Token comma = analyzer.GetToken();
-                //////////////////////////////////////////if (comma == null || comma.GetTokenType() != TokenType.Operator ||
-                //////////////////////////////////////////    !comma.value.Equals(Operators.OP.opComma))
                 if(!SynCheck.ValueCheck(comma, TokenType.Operator, Operators.OP.opComma))
                 {
                     analyzer.StepBack();
@@ -1209,8 +970,6 @@ namespace Compilator.SyntaxisModule
             var identify = Parse_Identificator();
 
             Token equalsTok = analyzer.GetToken();
-            //////////////////if (equalsTok == null || equalsTok.GetTokenType() != TokenType.Operator ||
-            //////////////////        !equalsTok.value.Equals(Operators.OP.opEquals))
             if(!SynCheck.ValueCheck(equalsTok, TokenType.Operator, Operators.OP.opEquals))
             {
                 analyzer.StepBack();
@@ -1233,16 +992,12 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Array_Initializer()
         {
             Token leftCyrcleBR = analyzer.GetToken();
-            //////////////////////////////////////if (leftCyrcleBR == null || leftCyrcleBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////    !leftCyrcleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
             if(!SynCheck.ValueCheck(leftCyrcleBR, TokenType.Operator, Operators.OP.opLeftCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"{\", but get: " + leftCyrcleBR.ToString());
 
             var VIL = Variable_Initializer_List();
 
             Token rightCyrcleBR = analyzer.GetToken();
-            //////////////////////////////////////////if (rightCyrcleBR == null || rightCyrcleBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////////    !rightCyrcleBR.value.Equals(Operators.OP.opRightCurlyBracket))
             if(!SynCheck.ValueCheck(rightCyrcleBR, TokenType.Operator, Operators.OP.opRightCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected operator \"}\", but get: " + rightCyrcleBR.ToString());
 
@@ -1258,9 +1013,6 @@ namespace Compilator.SyntaxisModule
                 if (list.Count > 0)
                 {
                     Token comma = analyzer.GetToken();
-
-                    ////////////////////////////////if (comma == null || comma.GetTokenType() != TokenType.Operator ||
-                    ////////////////////////////////    !comma.value.Equals(Operators.OP.opComma))
                     if(!SynCheck.ValueCheck(comma, TokenType.Operator, Operators.OP.opComma))
                     {
                         analyzer.StepBack();
@@ -1285,7 +1037,6 @@ namespace Compilator.SyntaxisModule
             if (token == null) return parsePNACE;
 
             //+++++member_access
-            ///////////////////////////////////////if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opDot)
             if (SynCheck.ValueCheck(token, TokenType.Operator, Operators.OP.opDot))
                 return new MemberAccessNode()
                 {
@@ -1296,19 +1047,16 @@ namespace Compilator.SyntaxisModule
             //-----member_access
 
             //+++++post increment expression
-            //////////////////////////////////////////////////if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opIncrementExpression)
             if (SynCheck.ValueCheck(token, TokenType.Operator, Operators.OP.opIncrementExpression))
                 return new PostIncrementNode() { token = token, children = new List<SyntaxisNode>() { parsePNACE } };
             //-----post increment expression
 
             //+++++post decrement expression
-            ////////////////////////////////////////////////if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opDecrementExpression)
             if (SynCheck.ValueCheck(token, TokenType.Operator, Operators.OP.opDecrementExpression))
                 return new PostDecrementNode() { token = token, children = new List<SyntaxisNode>() { parsePNACE } };
             //-----post decrement expression
 
             //+++++element_access
-            ///////////////////////////////////////////////if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opLeftSquareBracket) {
             if (SynCheck.ValueCheck(token, TokenType.Operator, Operators.OP.opLeftSquareBracket))
             {
                 SyntaxisNode newNode = ParseExpression();
@@ -1323,11 +1071,9 @@ namespace Compilator.SyntaxisModule
             //-----element_access
 
             //+++++invocation expression
-            ////////////////////////////////////////////////////if (token.GetTokenType() == TokenType.Operator && (Operators.OP)token.value == Operators.OP.opLeftParenthesis) 
             if(SynCheck.ValueCheck(token, TokenType.Operator, Operators.OP.opLeftParenthesis))//without parameters constructor
             {
                 Token token2 = analyzer.GetToken();
-                //////////////////////////////////////////////////////if (token2 == null || token2.GetTokenType() != TokenType.Operator || (Operators.OP)token2.value != Operators.OP.opRightParenthesis)
                 if(!SynCheck.ValueCheck(token2, TokenType.Operator, Operators.OP.opRightParenthesis))
                     throw new Exception("Expected Operator \")\", but get:" + token2.ToString());
 
@@ -1342,9 +1088,6 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Parse_Primary_No_Array_Creation_Expression() //like a Primary expression
         {
             Token t = analyzer.GetToken();
-
-            //////////////////////////////////////////if (t == null) throw SynException.ShowException(EXType.NullNode, t.ToString());//return new EmptyNode(); //?
-
             switch (t.GetTokenType()) {
                 //+++++Literal
                 case TokenType.CharData:
@@ -1366,20 +1109,16 @@ namespace Compilator.SyntaxisModule
                         SyntaxisNode type = Type_Parse_Level1(); //получаю type (Некий идентификатор или KeyWord)
 
                         Token opLeftParenthesis = analyzer.GetToken();
-                        ///////////////////////////////////////////////if (opLeftParenthesis.GetTokenType() != TokenType.Operator || (Operators.OP)opLeftParenthesis.value != Operators.OP.opLeftParenthesis)
                         if(!SynCheck.ValueCheck(opLeftParenthesis, TokenType.Operator, Operators.OP.opLeftParenthesis))
                             throw new Exception("Expected \"(\", but get:" + opLeftParenthesis.ToString());
 
                         Token opRightParenthesis = analyzer.GetToken();
-                        ///////////////////////////////////////////////////if (opRightParenthesis.GetTokenType() != TokenType.Operator || (Operators.OP)opRightParenthesis.value != Operators.OP.opRightParenthesis)
                         if (!SynCheck.ValueCheck(opRightParenthesis, TokenType.Operator, Operators.OP.opRightParenthesis))
                             throw new Exception("Expected \")\", but get:" + opRightParenthesis.ToString());
 
                         Token LeftCyrkleBrace = analyzer.GetToken();
-                        ///////////////////////////////////////////////////////if (LeftCyrkleBrace.GetTokenType() != TokenType.Operator || (Operators.OP)LeftCyrkleBrace.value != Operators.OP.opLeftCurlyBracket)
                         if(!SynCheck.ValueCheck(LeftCyrkleBrace, TokenType.Operator, Operators.OP.opLeftCurlyBracket))
                         {
-                            //throw new Exception("Expected \"{\", but get:" + LeftCyrkleBrace.ToString());
                             analyzer.StepBack();
                             return new ObjectCreationExpressionNode()
                             {
@@ -1387,9 +1126,7 @@ namespace Compilator.SyntaxisModule
                             };
                         }
 
-                        Token RightCyrkleBrace = analyzer.GetToken();////////////////////////////////analyzer.GetToken();
-                        //////////////////////////////////////////////////////////////if (RightCyrkleBrace != null && RightCyrkleBrace.GetTokenType() == TokenType.Operator &&
-                        //////////////////////////////////////////////////////////////    RightCyrkleBrace.value.Equals(Operators.OP.opRightCurlyBracket))
+                        Token RightCyrkleBrace = analyzer.GetToken();
                         if (SynCheck.ValueCheck(RightCyrkleBrace, TokenType.Operator, Operators.OP.opRightCurlyBracket))
                         {
                             return new ObjectCreationExpressionNode()
@@ -1420,7 +1157,6 @@ namespace Compilator.SyntaxisModule
                     {
                         SyntaxisNode node = ParseExpression();
                         Token t2 = analyzer.GetToken();
-                        //////////////////////////////////////////////////////////if (t2.GetTokenType() == TokenType.Operator && (Operators.OP)t2.value == Operators.OP.opRightParenthesis)
                         if(SynCheck.ValueCheck(t2, TokenType.Operator, Operators.OP.opRightParenthesis))
                             return node;
                         throw new Exception("Expected Operator \")\", but get:" + t2.ToString());
@@ -1455,7 +1191,6 @@ namespace Compilator.SyntaxisModule
                 ConditionDepth = analyzer.stepBackCount;
                 ExceptionMessage = ex.Message;
 
-                //for (int i = analyzer.stepBackCount; i > stepBackCount;)
                 while (analyzer.stepBackCount > stepBackCount)
                     analyzer.StepBack();
             }
@@ -1480,14 +1215,11 @@ namespace Compilator.SyntaxisModule
             var left = Null_Coalescing_Expression();
 
             Token token1 = analyzer.GetToken();
-
-            ////////////////////if (token1 != null && token1.GetTokenType() == TokenType.Operator && token1.value.Equals(Operators.OP.opQuestionMark))
             if(SynCheck.ValueCheck(token1, TokenType.Operator, Operators.OP.opQuestionMark))
             {
                 var middle = ParseExpression();
                 Token tokenDoubleDot = analyzer.GetToken();
 
-                /////////////////////////////////////if (tokenDoubleDot == null || tokenDoubleDot.GetTokenType() != TokenType.Operator || !tokenDoubleDot.value.Equals(Operators.OP.opDoubleDot))
                 if(!SynCheck.ValueCheck(tokenDoubleDot, TokenType.Operator, Operators.OP.opDoubleDot))
                     throw new Exception("Expected Operator \":\", but get:" + tokenDoubleDot.ToString());
 
@@ -1502,13 +1234,11 @@ namespace Compilator.SyntaxisModule
 
         private SyntaxisNode Null_Coalescing_Expression() => Conditional_Or_Expression();
 
-        private SyntaxisNode Conditional_Or_Expression() //||
+        private SyntaxisNode Conditional_Or_Expression()  //||
         {
             var left = Conditional_And_Expression();
 
-            Token operatorOr = analyzer.GetToken(); //||
-
-            ////////////////////////////////////////////////////if (operatorOr != null && operatorOr.GetTokenType() == TokenType.Operator && operatorOr.value.Equals(Operators.OP.opOr))
+            Token operatorOr = analyzer.GetToken(); 
             if(SynCheck.ValueCheck(operatorOr, TokenType.Operator, Operators.OP.opOr))
                 return new ConditionalOrExpressionNode() { token = operatorOr, children = new List<SyntaxisNode>() { left, Conditional_Or_Expression() } };
 
@@ -1520,7 +1250,6 @@ namespace Compilator.SyntaxisModule
         {
             var left = Inclusive_Or_Expression();
             Token operatorAnd = analyzer.GetToken();
-            /////////////////////////////////////////////////////////////////////////////////////////
             if (SynCheck.ValueCheck(operatorAnd, TokenType.Operator, Operators.OP.opAnd))
                 return new ConditionalAndExpressionNode() { token = operatorAnd, children = new List<SyntaxisNode>() { left, Conditional_And_Expression() } };
 
@@ -1544,8 +1273,6 @@ namespace Compilator.SyntaxisModule
         {
             var left = And_Expression();
             Token opExclusiveOr = analyzer.GetToken();
-
-            /////////////////////////////////////////if (opExclusiveOr != null && opExclusiveOr.GetTokenType() == TokenType.Operator && opExclusiveOr.value.Equals(Operators.OP.opToDegree))
             if (SynCheck.ValueCheck(opExclusiveOr, TokenType.Operator, Operators.OP.opToDegree))
                 return new ExclusiveOrExpressionNode() { token = opExclusiveOr, children = new List<SyntaxisNode>() { left, Exclusive_Or_Expression() } };
 
@@ -1557,8 +1284,6 @@ namespace Compilator.SyntaxisModule
         {
             var left = EqualityExpression();
             Token opLogicalAnd = analyzer.GetToken();
-
-            ////////////////////////////////////////if (opLogicalAnd != null && opLogicalAnd.GetTokenType() == TokenType.Operator && opLogicalAnd.value.Equals(Operators.OP.opLogicalAnd))
             if(SynCheck.ValueCheck(opLogicalAnd, TokenType.Operator, Operators.OP.opLogicalAnd))
                 return new AndExpressionNode() { token = opLogicalAnd, children = new List<SyntaxisNode>() { left, And_Expression() } };
 
@@ -1570,9 +1295,6 @@ namespace Compilator.SyntaxisModule
         {
             var left = Relational_Expression_IS_AS();
             Token opEqualOrNotEqual = analyzer.GetToken();
-
-            ////////////////////if (opEqualOrNotEqual != null && opEqualOrNotEqual.GetTokenType() == TokenType.Operator &&
-            ////////////////////    (opEqualOrNotEqual.value.Equals(Operators.OP.opDoubleEquals) || opEqualOrNotEqual.value.Equals(Operators.OP.opNotEquals)))
             if(SynCheck.ValueCheck(opEqualOrNotEqual, TokenType.Operator, Operators.OP.opDoubleEquals, Operators.OP.opNotEquals))
                 return new EqualityExpressionNode() { token = opEqualOrNotEqual, children = new List<SyntaxisNode>() { left, EqualityExpression() } };
 
@@ -1584,9 +1306,6 @@ namespace Compilator.SyntaxisModule
         {
             var left = Relational_Expression();
             var kwISorAS = analyzer.GetToken();
-
-            //////////////////////////if (kwISorAS != null && kwISorAS.GetTokenType() == TokenType.KeyWord &&
-            //////////////////////////    (kwISorAS.value.Equals(KeyWords.KW.kwIs) || kwISorAS.value.Equals(KeyWords.KW.kwAs)))
             if (SynCheck.ValueCheck(kwISorAS, TokenType.KeyWord, KeyWords.KW.kwIs, KeyWords.KW.kwAs))
                 return new RelationalExpressionNode() { token = kwISorAS, children = new List<SyntaxisNode>() { left, Type_Parse_Level1() } };
 
@@ -1599,7 +1318,6 @@ namespace Compilator.SyntaxisModule
             var left = ShiftExpression();
             Token token = analyzer.GetToken();
 
-            ///////////////////////////////////if (token == null || token.GetTokenType() != TokenType.Operator)
             if(!SynCheck.TypeCheck(token, TokenType.Operator))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator" + token.ToString());
 
@@ -1634,9 +1352,6 @@ namespace Compilator.SyntaxisModule
         {
             var left = Multiplicative_Expression();
             Token token = analyzer.GetToken();
-
-            ////////////////////////////////////////////if (token != null && token.GetTokenType() == TokenType.Operator &&
-            ////////////////////////////////////////////    (token.value.Equals(Operators.OP.opPlus) || token.value.Equals(Operators.OP.opMinus)))
             if(SynCheck.ValueCheck(token, TokenType.Operator, Operators.OP.opPlus, Operators.OP.opMinus))
             {
                 var right = Additive_Expression();
@@ -1651,9 +1366,6 @@ namespace Compilator.SyntaxisModule
         {
             var left = Unary_Expression_Primary_Part();
             Token token = analyzer.GetToken();
-
-            ////////////////////////////////////////if (token != null && token.GetTokenType() == TokenType.Operator &&
-            ////////////////////////////////////////    (token.value.Equals(Operators.OP.opAsterisk) || token.value.Equals(Operators.OP.opRightSlash)))
             if(SynCheck.ValueCheck(token, TokenType.Operator, Operators.OP.opAsterisk, Operators.OP.opRightSlash))
             {
                 var right = Multiplicative_Expression();
@@ -1679,7 +1391,6 @@ namespace Compilator.SyntaxisModule
 
             try
             {
-                //return Unary_Expression();
                 var node = Unary_Expression();
                 if (node != null) return node;
             }
@@ -1706,8 +1417,6 @@ namespace Compilator.SyntaxisModule
         private ExpressionNode Unary_Expression()
         {
             Token token = analyzer.GetToken();
-
-            //////////////////////////////if (token != null && token.GetTokenType() == TokenType.Operator)
             if(SynCheck.TypeCheck(token, TokenType.Operator))
                 switch ((Operators.OP)token.value)
                 {
@@ -1741,9 +1450,6 @@ namespace Compilator.SyntaxisModule
                         //---
                         
                         Token leftCyrklyBrasket = analyzer.GetToken();
-
-                        //////////////////////////////////////if (leftCyrklyBrasket == null || leftCyrklyBrasket.GetTokenType() != TokenType.Operator ||
-                        //////////////////////////////////////    !leftCyrklyBrasket.value.Equals(Operators.OP.opRightParenthesis))
                         if(!SynCheck.ValueCheck(leftCyrklyBrasket, TokenType.Operator, Operators.OP.opRightParenthesis))
                             throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \")\", but get: " + leftCyrklyBrasket.ToString());
 
@@ -1758,29 +1464,19 @@ namespace Compilator.SyntaxisModule
         {
             var Node = Type_Parse_Level2();
             Token token = analyzer.GetToken();
-            //условия
-            ////////////////////////////////////////////////////////if (token == null)
-            ////////////////////////////////////////////////////////{
-            ////////////////////////////////////////////////////////    analyzer.StepBack();
-            ////////////////////////////////////////////////////////    return Node;
-            ////////////////////////////////////////////////////////}
 
             //+++++nullable_type
-            ///////////////////////////////////////////////////////if (token.GetTokenType() == TokenType.Operator && token.value.Equals(Operators.OP.opQuestionMark))
             if(SynCheck.ValueCheck(token, TokenType.Operator, Operators.OP.opQuestionMark))
                 return new NullableTypeNode() { token = token, children = new List<SyntaxisNode>() { Node } };
             //-----nullable_type
 
             //+++++Array_type
             //реализуем многомерные массивы !?
-            //////////////////////////////////////////////////////////////if (token.GetTokenType() == TokenType.Operator && token.value.Equals(Operators.OP.opLeftSquareBracket))
             if (SynCheck.ValueCheck(token, TokenType.Operator, Operators.OP.opLeftSquareBracket))
             {
                 List<SyntaxisNode> node = new List<SyntaxisNode>();
                 Token coma = analyzer.GetToken();
 
-                //////////////////////////////////////////////////////while (coma != null && coma.GetTokenType() == TokenType.Operator
-                //////////////////////////////////////////////////////    && coma.value.Equals(Operators.OP.opComma))
                 while(SynCheck.ValueCheck(coma, TokenType.Operator, Operators.OP.opComma))
                 {
                     node.Add(new OperatorNode() { token = coma });
@@ -1789,8 +1485,6 @@ namespace Compilator.SyntaxisModule
                 //analyzer.StepBack();
 
                 Token rightSquareBR = coma;//analyzer.GetToken();
-                ////////////////////////////////////////////////////////////////////////////if (rightSquareBR == null || rightSquareBR.GetTokenType() != TokenType.Operator
-                ////////////////////////////////////////////////////////////////////////////    || !rightSquareBR.value.Equals(Operators.OP.opRightSquareBracket))
                 if(!SynCheck.ValueCheck(rightSquareBR, TokenType.Operator, Operators.OP.opRightSquareBracket))
                     throw SynException.ShowException(EXType.IncorrectToken, "Expected \"]\", but get " + rightSquareBR.ToString());
 
@@ -1809,8 +1503,6 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Type_Parse_Level2() //убираем указатели type_unsafe
         {
             Token token = analyzer.GetToken();
-
-            ////////////////////////////////////////////////if (token == null || token.GetTokenType() != TokenType.KeyWord && token.GetTokenType() != TokenType.Identificator)
             if(!SynCheck.TypeCheck(token, TokenType.KeyWord, TokenType.Identificator))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Identificator, but get " + token.ToString());
 
@@ -1825,7 +1517,6 @@ namespace Compilator.SyntaxisModule
                     case KeyWords.KW.kwChar:
                         return new SimpleTypeNode() { token = token };
                 }
-
             //+++++type_parameter
             //type_parameter совмещаю с type_name, так как в обоих случаях используют identificator
             return Type_Name(token);
@@ -1834,10 +1525,9 @@ namespace Compilator.SyntaxisModule
         private NodeIdentificator Parse_Identificator(Token tokenRef = null)
         {
             Token token = (tokenRef == null) ? analyzer.GetToken() : tokenRef;
-
-            //////////////////////////////////////////////////if (token == null || token.GetTokenType() != TokenType.Identificator)
             if(!SynCheck.TypeCheck(token, TokenType.Identificator))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Identificator, but get: "+token.ToString());
+
             return new NodeIdentificator() { token = token };
         }
 
@@ -1854,13 +1544,10 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Namespace_Or_Type_Name(Token tokenRef = null)
         {
             Token token = (tokenRef == null) ? analyzer.GetToken() : tokenRef;
-
-            /////////////////////////////////////////////if (token == null || token.GetTokenType() != TokenType.Identificator)
             if(!SynCheck.TypeCheck(token, TokenType.Identificator))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Identificator, but get: " + token.ToString());
 
             Token dot = analyzer.GetToken();
-            //////////////////////////////////////////////////////////if (dot != null && dot.GetTokenType() == TokenType.Operator && dot.value.Equals(Operators.OP.opDot))
             if(SynCheck.ValueCheck(dot, TokenType.Operator, Operators.OP.opDot))
                 return new OperatorNode() { token = dot, children = new List<SyntaxisNode> { new NodeIdentificator() { token = token }, Namespace_Or_Type_Name() } };
 
@@ -1877,7 +1564,6 @@ namespace Compilator.SyntaxisModule
             SyntaxisNode node = Unary_Expression_Primary_Part();
 
             Token assigmentToken = analyzer.GetToken();
-            ////////////////////////////////////////if (assigmentToken == null || assigmentToken.GetTokenType() != TokenType.Operator)
             if(!SynCheck.TypeCheck(assigmentToken, TokenType.Operator))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator, but get: " + assigmentToken.ToString());
 
@@ -1898,7 +1584,6 @@ namespace Compilator.SyntaxisModule
                 case Operators.OP.opAsterisk:
                 case Operators.OP.opRightSlash:
                     Token equals = analyzer.GetToken();
-                    ////////////////////////////////////////////////////////////////if (equals == null || equals.GetTokenType() != TokenType.Operator && equals.value.Equals(Operators.OP.opEquals))
                     if(!SynCheck.ValueCheck(equals, TokenType.Operator, Operators.OP.opEquals))
                         throw SynException.ShowException(EXType.IncorrectToken);
                     return new AssignmentNode()
@@ -1959,16 +1644,12 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Object_Initializer()
         {
             Token leftFiqureBR = analyzer.GetToken();
-            //////////////////////////////////////////if (leftFiqureBR == null || leftFiqureBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////////    !leftFiqureBR.value.Equals(Operators.OP.opLeftCurlyBracket))
             if(!SynCheck.ValueCheck(leftFiqureBR, TokenType.Operator, Operators.OP.opLeftCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"{\", but get: "+ leftFiqureBR.ToString());
 
             //can be a null!!!
             List<SyntaxisNode> node = Member_Initializer_List();
             Token rightFiqureBR = analyzer.GetToken();
-            ////////////////////////////////////if (rightFiqureBR == null || rightFiqureBR.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////    !rightFiqureBR.value.Equals(Operators.OP.opRightCurlyBracket))
             if(!SynCheck.ValueCheck(rightFiqureBR, TokenType.Operator, Operators.OP.opRightCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"}\", bur get: "+rightFiqureBR.ToString());
 
@@ -1994,7 +1675,6 @@ namespace Compilator.SyntaxisModule
                 listOfNode.Add(memberInitializer);
 
                 Token comma = analyzer.GetToken();
-                //////////////////////////////////////////if (comma == null || comma.GetTokenType() != TokenType.Operator || !comma.value.Equals(Operators.OP.opComma))
                 if(!SynCheck.ValueCheck(comma, TokenType.Operator, Operators.OP.opComma))
                 {
                     analyzer.StepBack();
@@ -2013,7 +1693,6 @@ namespace Compilator.SyntaxisModule
             NodeIdentificator identificator = Parse_Identificator();
             Token equals = analyzer.GetToken();
 
-            ////////////////////////////////////////////if (equals == null || equals.GetTokenType() != TokenType.Operator || !equals.value.Equals(Operators.OP.opEquals))
             if(!SynCheck.ValueCheck(equals, TokenType.Operator, Operators.OP.opEquals))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"=\", but get " + equals.ToString());
 
@@ -2028,8 +1707,6 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Initializer_Value()
         {
             Token tok = analyzer.Peek();
-
-            ////////////////////////////////////////////////if (tok != null && tok.GetTokenType() == TokenType.Operator && tok.value.Equals(Operators.OP.opLeftCurlyBracket))
             if(SynCheck.ValueCheck(tok, TokenType.Operator, Operators.OP.opLeftCurlyBracket))
                 return ParseObjectOrCollectionInitializer();
 
@@ -2039,8 +1716,6 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Collection_Initializer()
         {
             Token leftFiqureBR = analyzer.GetToken();
-            //////////////////////////////////////////if (leftFiqureBR == null || leftFiqureBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////////    !leftFiqureBR.value.Equals(Operators.OP.opLeftCurlyBracket))
             if(!SynCheck.ValueCheck(leftFiqureBR, TokenType.Operator, Operators.OP.opLeftCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"{\", but get: " + leftFiqureBR.ToString());
 
@@ -2050,8 +1725,6 @@ namespace Compilator.SyntaxisModule
                 throw new Exception("Expected one ore more element initializing after: " + leftFiqureBR.ToString());
 
             Token rightFiqureBR = analyzer.GetToken();
-            ////////////////////////////////////////////if (rightFiqureBR == null || rightFiqureBR.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////////////    !rightFiqureBR.value.Equals(Operators.OP.opRightCurlyBracket))
             if(!SynCheck.ValueCheck(rightFiqureBR, TokenType.Operator, Operators.OP.opRightCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"}\", but get: " + rightFiqureBR.ToString());
 
@@ -2070,7 +1743,6 @@ namespace Compilator.SyntaxisModule
                 listOfNode.Add(memberInitializer);
                 Token comma = analyzer.GetToken();
 
-                ///////////////////////////////////////////if (comma == null || comma.GetTokenType() != TokenType.Operator || !comma.value.Equals(Operators.OP.opComma))
                 if(!SynCheck.ValueCheck(comma, TokenType.Operator, Operators.OP.opComma))
                 {
                     analyzer.StepBack();
@@ -2090,8 +1762,6 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Element_Initializer()
         {
             Token leftCyrkleBR = analyzer.GetToken();
-            //////////////////////////////////////////////if (leftCyrkleBR != null && leftCyrkleBR.GetTokenType() == TokenType.Operator &&
-            //////////////////////////////////////////////    leftCyrkleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
             if(SynCheck.ValueCheck(leftCyrkleBR, TokenType.Operator, Operators.OP.opLeftCurlyBracket))
             {
                 List<SyntaxisNode> expressionList = Expression_List();
@@ -2099,8 +1769,6 @@ namespace Compilator.SyntaxisModule
                     throw new Exception("Expected one ore more expression after: " + leftCyrkleBR.ToString());
 
                 Token rightCyrkleBR = analyzer.GetToken();
-                ////////////////////////////////////////////////////////if (rightCyrkleBR == null || rightCyrkleBR.GetTokenType() != TokenType.Operator ||
-                ////////////////////////////////////////////////////////    !rightCyrkleBR.value.Equals(Operators.OP.opRightCurlyBracket))
                 if(!SynCheck.ValueCheck(rightCyrkleBR, TokenType.Operator, Operators.OP.opRightCurlyBracket))
                     throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"}\", but get: " + rightCyrkleBR.ToString());
                 return new ExpressionListNode() { token = leftCyrkleBR, children = expressionList };
@@ -2121,7 +1789,6 @@ namespace Compilator.SyntaxisModule
                 listOfNode.Add(expression);
                 Token comma = analyzer.GetToken();
 
-                //////////////////////////////////////////////if (comma == null || comma.GetTokenType() != TokenType.Operator || !comma.value.Equals(Operators.OP.opComma))
                 if(!SynCheck.ValueCheck(comma, TokenType.Operator, Operators.OP.opComma))
                 {
                     analyzer.StepBack();
@@ -2142,16 +1809,12 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Block_Parse()
         {
             Token leftCyrcleBR = analyzer.GetToken();
-            //////////////////////////////////////////////////if (leftCyrcleBR == null || leftCyrcleBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////////////////    !leftCyrcleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
             if(!SynCheck.ValueCheck(leftCyrcleBR, TokenType.Operator, Operators.OP.opLeftCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"{\", but get: " + leftCyrcleBR.ToString());
 
             var SL = Statement_List();
 
             Token rightCyrcleBR = analyzer.GetToken();
-            ////////////////////////////////////////////////////if (rightCyrcleBR == null || rightCyrcleBR.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////////////////////    !rightCyrcleBR.value.Equals(Operators.OP.opRightCurlyBracket))
             if(!SynCheck.ValueCheck(rightCyrcleBR, TokenType.Operator, Operators.OP.opRightCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"}\", but get: " +rightCyrcleBR.ToString());
 
@@ -2192,12 +1855,8 @@ namespace Compilator.SyntaxisModule
             {
                 //некая хитрость : )
                 Token RightCyrcleBR = analyzer.Peek();
-                ////////////////////////////////////////if (RightCyrcleBR != null && RightCyrcleBR.GetTokenType() == TokenType.Operator
-                ////////////////////////////////////////    && RightCyrcleBR.value.Equals(Operators.OP.opRightCurlyBracket))
                 if(SynCheck.ValueCheck(RightCyrcleBR, TokenType.Operator, Operators.OP.opRightCurlyBracket)) break;
 
-                //////////////////////////////////if (RightCyrcleBR != null && RightCyrcleBR.GetTokenType() == TokenType.KeyWord
-                //////////////////////////////////    && (RightCyrcleBR.value.Equals(KeyWords.KW.kwCase) || RightCyrcleBR.value.Equals(KeyWords.KW.kwDefault)))
                 if(SynCheck.ValueCheck(RightCyrcleBR, TokenType.KeyWord, KeyWords.KW.kwCase, KeyWords.KW.kwDefault)) break;
                 
                 SyntaxisNode LVT = null;
@@ -2237,8 +1896,6 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Local_Variable_Type()
         {
             Token _var = analyzer.GetToken();
-            ////////////////////////////////if (_var != null && _var.GetTokenType() == TokenType.KeyWord &&
-            ////////////////////////////////    _var.value.Equals(KeyWords.KW.kwVar))
             if(SynCheck.ValueCheck(_var, TokenType.KeyWord, KeyWords.KW.kwVar))
                 return new VarTypeNode() { token = _var };
 
@@ -2260,8 +1917,6 @@ namespace Compilator.SyntaxisModule
         {
             SyntaxisNode identify = Parse_Identificator();
             Token equals = analyzer.GetToken();
-            //////////////////////////////////////////////////if (equals == null || equals.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////////////////    !equals.value.Equals(Operators.OP.opEquals))
             if(!SynCheck.ValueCheck(equals, TokenType.Operator, Operators.OP.opEquals))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"=\", but get: " + equals.ToString());
 
@@ -2284,8 +1939,6 @@ namespace Compilator.SyntaxisModule
             List<SyntaxisNode> list = Local_Variable_Declarators();
 
             Token semilicon = analyzer.GetToken();
-            ////////////////////////////////////////////////if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////////////////    !semilicon.value.Equals(Operators.OP.opSemicolon))
             if(!SynCheck.ValueCheck(semilicon, TokenType.Operator, Operators.OP.opSemicolon))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get: " +semilicon.ToString());
 
@@ -2307,8 +1960,6 @@ namespace Compilator.SyntaxisModule
             {
                 SyntaxisNode identify = Parse_Identificator();
                 Token equals = analyzer.GetToken();
-                //////////////////////////////////////////if (equals == null || equals.GetTokenType() != TokenType.Operator ||
-                //////////////////////////////////////////    !equals.value.Equals(Operators.OP.opEquals))
                 if(!SynCheck.ValueCheck(equals, TokenType.Operator, Operators.OP.opEquals))
                     throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"=\", but get: " + equals.ToString());
 
@@ -2324,8 +1975,6 @@ namespace Compilator.SyntaxisModule
                 });
 
                 Token comma = analyzer.GetToken();
-                //////////////////////////////////////////////////if (comma == null || comma.GetTokenType() != TokenType.Operator ||
-                //////////////////////////////////////////////////    !comma.value.Equals(Operators.OP.opComma))
                 if(!SynCheck.ValueCheck(comma, TokenType.Operator, Operators.OP.opComma))
                 {
                     analyzer.StepBack();
@@ -2348,8 +1997,6 @@ namespace Compilator.SyntaxisModule
             //смотрим на то, что идет первым символом
             //если ничего не подходит (try type parse для переменных, иначе primaryExpression); 
             Token tok = analyzer.Peek();
-
-            ////////////////////////////////////if (tok != null && tok.GetTokenType() == TokenType.Operator)
             if(SynCheck.TypeCheck(tok, TokenType.Operator))
                 switch ((Operators.OP)tok.value)
                 {
@@ -2359,7 +2006,6 @@ namespace Compilator.SyntaxisModule
                         return Empty_Statement();//важно записать для if и т.д.
                 }
 
-            //////////////////////////////////////////////if (tok != null && tok.GetTokenType() == TokenType.KeyWord)
             if(SynCheck.TypeCheck(tok, TokenType.KeyWord))
                 switch ((KeyWords.KW)tok.value)
                 {
@@ -2392,8 +2038,6 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Empty_Statement()
         {
             Token tok = analyzer.GetToken();
-            ////////////////////////////////////////////////if (tok == null || tok.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////////////////    !tok.value.Equals(Operators.OP.opSemicolon))
             if(!SynCheck.ValueCheck(tok, TokenType.Operator, Operators.OP.opSemicolon))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get: "+ tok.ToString());
 
@@ -2403,30 +2047,22 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode If_Statement()
         {
             Token tok = analyzer.GetToken();
-            //////////////////////////////////////////if (tok == null || tok.GetTokenType() != TokenType.KeyWord ||
-            //////////////////////////////////////////    !tok.value.Equals(KeyWords.KW.kwIf))
             if(!SynCheck.ValueCheck(tok, TokenType.KeyWord, KeyWords.KW.kwIf))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"if\", but get: " + tok.ToString());
 
             Token leftBR = analyzer.GetToken();
-            ////////////////////////////////////////////if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////////////    !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
             if(!SynCheck.ValueCheck(leftBR, TokenType.Operator, Operators.OP.opLeftParenthesis))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"(\", but get: " + leftBR.ToString());
 
             var boolean_expression = Boolean_Expression();
 
             Token rightBR = analyzer.GetToken();
-            ////////////////////////////////////////////////////////if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////////////////////////    !rightBR.value.Equals(Operators.OP.opRightParenthesis))
             if(!SynCheck.ValueCheck(rightBR, TokenType.Operator, Operators.OP.opRightParenthesis))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \")\", but get: " + rightBR.ToString());
 
             var EmbExpression1 = Embedded_Statement();
 
             Token _ifTok = analyzer.GetToken();
-            ////////////////////////////////////////////////////////////if (_ifTok == null || _ifTok.GetTokenType() != TokenType.KeyWord ||
-            ////////////////////////////////////////////////////////////    !_ifTok.value.Equals(KeyWords.KW.kwElse))
             if(!SynCheck.ValueCheck(_ifTok, TokenType.KeyWord, KeyWords.KW.kwElse))
             {
                 analyzer.StepBack();
@@ -2460,22 +2096,16 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Switch_Statement()
         {
             Token tok = analyzer.GetToken();
-            ////////////////////////////////////if (tok == null || tok.GetTokenType() != TokenType.KeyWord ||
-            ////////////////////////////////////    !tok.value.Equals(KeyWords.KW.kwSwitch))
             if(!SynCheck.ValueCheck(tok, TokenType.KeyWord, KeyWords.KW.kwSwitch))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"switch\", but get: " + tok.ToString());
 
             Token leftBR = analyzer.GetToken();
-            ////////////////////////////////////////if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////////    !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
             if(!SynCheck.ValueCheck(leftBR, TokenType.Operator, Operators.OP.opLeftParenthesis))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"(\", but get: " + leftBR.ToString());
 
             var expression = ParseExpression();//ParsePimaryExpression();
 
             Token rightBR = analyzer.GetToken();
-            //////////////////////////////////////////////if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////////////    !rightBR.value.Equals(Operators.OP.opRightParenthesis))
             if(!SynCheck.ValueCheck(rightBR, TokenType.Operator, Operators.OP.opRightParenthesis))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \")\", but get: " + rightBR.ToString());           
 
@@ -2504,16 +2134,12 @@ namespace Compilator.SyntaxisModule
             List<SyntaxisNode> list = new List<SyntaxisNode>();
 
             Token leftCyrcleBR = analyzer.GetToken();
-            //////////////////////////////////////if (leftCyrcleBR == null || leftCyrcleBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////    !leftCyrcleBR.value.Equals(Operators.OP.opLeftCurlyBracket))
             if(!SynCheck.ValueCheck(leftCyrcleBR, TokenType.Operator, Operators.OP.opLeftCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"{\", but get: " + leftCyrcleBR.ToString());
 
             while (true)
             {
                 Token keyWord = analyzer.GetToken();
-                ////////////////////////////////////////if (keyWord == null || keyWord.GetTokenType() != TokenType.KeyWord ||
-                ////////////////////////////////////////    !(keyWord.value.Equals(KeyWords.KW.kwCase) || keyWord.value.Equals(KeyWords.KW.kwDefault)))
                 if(!SynCheck.ValueCheck(keyWord, TokenType.KeyWord, KeyWords.KW.kwCase, KeyWords.KW.kwDefault))
                 {
                     analyzer.StepBack();
@@ -2523,8 +2149,6 @@ namespace Compilator.SyntaxisModule
                 var constant_expression = keyWord.value.Equals(KeyWords.KW.kwCase) ? Constant_Expression() : null;
 
                 Token dotDot = analyzer.GetToken();
-                ////////////////////////////////////////////////////if (dotDot == null || dotDot.GetTokenType() != TokenType.Operator ||
-                ////////////////////////////////////////////////////    !dotDot.value.Equals(Operators.OP.opDoubleDot))
                 if(!SynCheck.ValueCheck(dotDot, TokenType.Operator, Operators.OP.opDoubleDot))
                     throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \":\", but get: "+ dotDot.ToString());
 
@@ -2536,8 +2160,6 @@ namespace Compilator.SyntaxisModule
             }
 
             Token rightCyrcleBR = analyzer.GetToken();
-            //////////////////////////////////////////////////////////////if (rightCyrcleBR == null || rightCyrcleBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////////////////////////////    !rightCyrcleBR.value.Equals(Operators.OP.opRightCurlyBracket))
             if(!SynCheck.ValueCheck(rightCyrcleBR, TokenType.Operator, Operators.OP.opRightCurlyBracket))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"}\", but get: " + rightCyrcleBR.ToString());
 
@@ -2549,22 +2171,16 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode While_Statement()
         {
             Token whileTok = analyzer.GetToken();
-            //////////////////////////////////////////////////////////if (whileTok == null || whileTok.GetTokenType() != TokenType.KeyWord ||
-            //////////////////////////////////////////////////////////    !whileTok.value.Equals(KeyWords.KW.kwWhile))
             if(!SynCheck.ValueCheck(whileTok, TokenType.KeyWord, KeyWords.KW.kwWhile))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"while\", but get: " + whileTok.ToString());
 
             Token leftBR = analyzer.GetToken();
-            ////////////////////////////////////////////if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////////////    !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
             if(!SynCheck.ValueCheck(leftBR, TokenType.Operator, Operators.OP.opLeftParenthesis))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"(\", but get: " + leftBR.ToString());
 
             var expression = Boolean_Expression();
 
             Token rightBR = analyzer.GetToken();
-            //////////////////////////////////////////////////if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////////////////    !rightBR.value.Equals(Operators.OP.opRightParenthesis))
             if(!SynCheck.ValueCheck(rightBR, TokenType.Operator, Operators.OP.opRightParenthesis))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \")\", but get: " + rightBR.ToString());
 
@@ -2584,8 +2200,6 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Do_Statement()
         {
             Token doTok = analyzer.GetToken();
-            //////////////////////////////////////////if (doTok == null || doTok.GetTokenType() != TokenType.KeyWord ||
-            //////////////////////////////////////////    !doTok.value.Equals(KeyWords.KW.kwDo))
             if(!SynCheck.ValueCheck(doTok, TokenType.KeyWord, KeyWords.KW.kwDo))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"do\", but get: " + doTok.ToString());
 
@@ -2593,29 +2207,21 @@ namespace Compilator.SyntaxisModule
 
             //while
             Token whileTok = analyzer.GetToken();
-            //////////////////////////////////////if(whileTok == null || whileTok.GetTokenType() != TokenType.KeyWord ||
-            //////////////////////////////////////    !whileTok.value.Equals(KeyWords.KW.kwWhile))
             if(!SynCheck.ValueCheck(whileTok, TokenType.KeyWord, KeyWords.KW.kwWhile))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"while\", but get: " + whileTok.ToString());
             //---while
 
             Token leftBR = analyzer.GetToken();
-            //////////////////////////////////////////if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////////    !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
             if(!SynCheck.ValueCheck(leftBR, TokenType.Operator, Operators.OP.opLeftParenthesis))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"(\", but get: " + leftBR.ToString());
 
             var expression = Boolean_Expression();
 
             Token rightBR = analyzer.GetToken();
-            ////////////////////////////////////////////if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////////////    !rightBR.value.Equals(Operators.OP.opRightParenthesis))
             if(!SynCheck.ValueCheck(rightBR, TokenType.Operator, Operators.OP.opRightParenthesis))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \")\", but get: " + rightBR.ToString());
 
             Token tokSemilikon = analyzer.GetToken();
-            ////////////////////////////////////if(tokSemilikon == null || tokSemilikon.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////    !tokSemilikon.value.Equals(Operators.OP.opSemicolon))
             if(!SynCheck.ValueCheck(tokSemilikon, TokenType.Operator, Operators.OP.opSemicolon))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get: " + tokSemilikon.ToString());
 
@@ -2644,20 +2250,14 @@ namespace Compilator.SyntaxisModule
             SyntaxisNode iteratorNode = null;
 
             Token forTok = analyzer.GetToken();
-            ////////////////////////////////////////if (forTok == null || forTok.GetTokenType() != TokenType.KeyWord ||
-            ////////////////////////////////////////    !forTok.value.Equals(KeyWords.KW.kwFor))
             if(!SynCheck.ValueCheck(forTok, TokenType.KeyWord, KeyWords.KW.kwFor))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"for\", but get: " +  forTok.ToString());
 
             Token leftBR = analyzer.GetToken();
-            //////////////////////////////////////////////if (leftBR == null || leftBR.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////////////    !leftBR.value.Equals(Operators.OP.opLeftParenthesis))
             if(!SynCheck.ValueCheck(leftBR, TokenType.Operator, Operators.OP.opLeftParenthesis))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \"(\", but get: " + leftBR.ToString());
 
             Token semilikon1 = analyzer.GetToken();
-            ////////////////////////////////////if (semilikon1 == null || semilikon1.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////    !semilikon1.value.Equals(Operators.OP.opSemicolon))
             if(!SynCheck.ValueCheck(semilikon1, TokenType.Operator, Operators.OP.opSemicolon))
             {
                 analyzer.StepBack();
@@ -2665,15 +2265,11 @@ namespace Compilator.SyntaxisModule
                 initializerNode = For_Initializer();
 
                 semilikon1 = analyzer.GetToken();
-                //////////////////////////////////////if (semilikon1 == null || semilikon1.GetTokenType() != TokenType.Operator ||
-                //////////////////////////////////////!semilikon1.value.Equals(Operators.OP.opSemicolon))
                 if(!SynCheck.ValueCheck(semilikon1, TokenType.Operator, Operators.OP.opSemicolon))
                     throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get: " + semilikon1.ToString());
             }
 
             Token semilikon2 = analyzer.GetToken();
-            ////////////////////////////////////if (semilikon2 == null || semilikon2.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////    !semilikon2.value.Equals(Operators.OP.opSemicolon))
             if(!SynCheck.ValueCheck(semilikon2, TokenType.Operator, Operators.OP.opSemicolon))
             {
                 analyzer.StepBack();
@@ -2681,15 +2277,11 @@ namespace Compilator.SyntaxisModule
                 conditionalNode = For_Condition();
 
                 semilikon2 = analyzer.GetToken();
-                //////////////////////////////////////if (semilikon2 == null || semilikon2.GetTokenType() != TokenType.Operator ||
-                //////////////////////////////////////!semilikon2.value.Equals(Operators.OP.opSemicolon))
                 if(!SynCheck.ValueCheck(semilikon2, TokenType.Operator, Operators.OP.opSemicolon))
                     throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get: " + semilikon2.ToString());
             }
 
             Token rightBR = analyzer.GetToken();
-            ////////////////////////////////////if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////////////    !rightBR.value.Equals(Operators.OP.opRightParenthesis))
             if(!SynCheck.ValueCheck(rightBR, TokenType.Operator, Operators.OP.opRightParenthesis))
             {
                 analyzer.StepBack();
@@ -2697,8 +2289,6 @@ namespace Compilator.SyntaxisModule
                 iteratorNode = For_Iterator();
 
                 rightBR = analyzer.GetToken();
-                //////////////////////////////////////////if (rightBR == null || rightBR.GetTokenType() != TokenType.Operator ||
-                //////////////////////////////////////////!rightBR.value.Equals(Operators.OP.opRightParenthesis))
                 if(!SynCheck.ValueCheck(rightBR, TokenType.Operator, Operators.OP.opRightParenthesis))
                     throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get: " + rightBR.ToString());
             }
@@ -2812,8 +2402,6 @@ namespace Compilator.SyntaxisModule
 
             //+++ pre-expression
             Token tok = analyzer.GetToken();
-            //////////////////////if (tok != null && tok.GetTokenType() == TokenType.Operator &&
-            //////////////////////    (tok.value.Equals(Operators.OP.opIncrementExpression) || tok.value.Equals(Operators.OP.opDecrementExpression)))
             if(SynCheck.ValueCheck(tok, TokenType.Operator, Operators.OP.opIncrementExpression, Operators.OP.opDecrementExpression))
             {
                 if (tok.value.Equals(Operators.OP.opIncrementExpression))//++
@@ -2837,24 +2425,19 @@ namespace Compilator.SyntaxisModule
             }
             //---
             //+++object_creation_expression
-            ////////////////////////////////////////////////////////if (tok != null && tok.GetTokenType() == TokenType.KeyWord &&
-            ////////////////////////////////////////////////////////    tok.value.Equals(KeyWords.KW.kwNew))
             if(SynCheck.ValueCheck(tok, TokenType.KeyWord, KeyWords.KW.kwNew))
             {
                 SyntaxisNode type = Type_Parse_Level1(); //получаю type (Некий идентификатор или KeyWord)
 
                 Token opLeftParenthesis = analyzer.GetToken();
-                ////////////////////////////////////if (opLeftParenthesis.GetTokenType() != TokenType.Operator || (Operators.OP)opLeftParenthesis.value != Operators.OP.opLeftParenthesis)
                 if(!SynCheck.ValueCheck(opLeftParenthesis, TokenType.Operator, Operators.OP.opLeftParenthesis))
                     throw new Exception("Expected Operator \"(\", but get: " + opLeftParenthesis.ToString());
 
                 Token opRightParenthesis = analyzer.GetToken();
                 if (!SynCheck.ValueCheck(opRightParenthesis, TokenType.Operator, Operators.OP.opRightParenthesis))
-                    ///////////////////////////////if (opRightParenthesis.GetTokenType() != TokenType.Operator || (Operators.OP)opRightParenthesis.value != Operators.OP.opRightParenthesis)
                     throw new Exception("Expected Operator \")\", but get: " + opRightParenthesis.ToString());
 
                 Token LeftCyrkleBrace = analyzer.GetToken();
-                /////////////////////////////////if (LeftCyrkleBrace.GetTokenType() != TokenType.Operator || (Operators.OP)LeftCyrkleBrace.value != Operators.OP.opLeftCurlyBracket)
                 if(!SynCheck.ValueCheck(LeftCyrkleBrace, TokenType.Operator, Operators.OP.opLeftCurlyBracket))
                     throw new Exception("Expected Operator \"{\", but get: " + LeftCyrkleBrace.ToString());
 
@@ -2874,7 +2457,6 @@ namespace Compilator.SyntaxisModule
             var pExpression = ParsePimaryExpression();
             Token tok2 = analyzer.GetToken();
 
-            //////////////////////////////////////if (tok2 == null || tok2.GetTokenType() != TokenType.Operator)
             if(!SynCheck.TypeCheck(tok2, TokenType.Operator))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator token, but get: "+ tok2.ToString());
 
@@ -2893,15 +2475,11 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Break_Statement()
         {
             Token breakTok = analyzer.GetToken();
-            ////////////////////////////////////////if (breakTok == null || breakTok.GetTokenType() != TokenType.KeyWord ||
-            ////////////////////////////////////////    !breakTok.value.Equals(KeyWords.KW.kwBreak))
             if(!SynCheck.ValueCheck(breakTok, TokenType.KeyWord, KeyWords.KW.kwBreak) )
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"break\", but get "+ breakTok.ToString());
 
             Token semilicon = analyzer.GetToken();
-            //////////////////////////////////////////////if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////////////    !semilicon.value.Equals(Operators.OP.opSemicolon))
-            if(!SynCheck.ValueCheck(semilicon, TokenType.Operator, Operators.OP.opSemicolon))
+            if (!SynCheck.ValueCheck(semilicon, TokenType.Operator, Operators.OP.opSemicolon))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get: " + semilicon.ToString());
 
             return new BreakStatementNode() { token = breakTok };
@@ -2910,14 +2488,10 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Continue_Statement()
         {
             Token continueTok = analyzer.GetToken();
-            ////////////////////////////////if (continueTok == null || continueTok.GetTokenType() != TokenType.KeyWord ||
-            ////////////////////////////////    !continueTok.value.Equals(KeyWords.KW.kwContinue))
             if(!SynCheck.ValueCheck(continueTok, TokenType.KeyWord, KeyWords.KW.kwContinue))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"continue\", but get " + continueTok.ToString());
 
             Token semilicon = analyzer.GetToken();
-            //////////////////////////////////////if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////    !semilicon.value.Equals(Operators.OP.opSemicolon))
             if(!SynCheck.ValueCheck(semilicon, TokenType.Operator, Operators.OP.opSemicolon))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get " + semilicon.ToString());
 
@@ -2927,22 +2501,16 @@ namespace Compilator.SyntaxisModule
         private SyntaxisNode Return_Statement()
         {
             Token returnTok = analyzer.GetToken();
-            //////////////////////////////////////if (returnTok == null || returnTok.GetTokenType() != TokenType.KeyWord ||
-            //////////////////////////////////////    !returnTok.value.Equals(KeyWords.KW.kwReturn))
             if(!SynCheck.ValueCheck(returnTok, TokenType.KeyWord, KeyWords.KW.kwReturn))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Keyword \"return\", but get: " + returnTok.ToString());
 
             Token semilicon = analyzer.GetToken();
-            ////////////////////////////if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
-            ////////////////////////////    !semilicon.value.Equals(Operators.OP.opSemicolon))
             if(!SynCheck.ValueCheck(semilicon, TokenType.Operator, Operators.OP.opSemicolon))
             {
                 analyzer.StepBack();
                 var expression = ParseExpression();//ParsePimaryExpression();
 
                 semilicon = analyzer.GetToken();
-                ////////////////////////////////////////////if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
-                ////////////////////////////////////////////    !semilicon.value.Equals(Operators.OP.opSemicolon))
                 if (!SynCheck.ValueCheck(semilicon, TokenType.Operator, Operators.OP.opSemicolon))
                     throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get: " + semilicon.ToString());
 
@@ -2957,9 +2525,6 @@ namespace Compilator.SyntaxisModule
         {
             var statementExpression = Statement_Expression();
             Token semilicon = analyzer.GetToken();
-
-            //////////////////////////////////////////////////////////if (semilicon == null || semilicon.GetTokenType() != TokenType.Operator ||
-            //////////////////////////////////////////////////////////    !semilicon.value.Equals(Operators.OP.opSemicolon))
             if(!SynCheck.ValueCheck(semilicon, TokenType.Operator, Operators.OP.opSemicolon))
                 throw SynException.ShowException(EXType.IncorrectToken, "Expected Operator \";\", but get: " + semilicon.ToString());
 
@@ -2974,7 +2539,6 @@ namespace Compilator.SyntaxisModule
         /// <returns></returns>
         private bool CheckModify(Token tok)
         {
-            //////////////////////////////////////if (tok == null || tok.GetTokenType() != TokenType.KeyWord) return false;
             if (!SynCheck.TypeCheck(tok, TokenType.KeyWord)) return false;
 
             switch ((KeyWords.KW)tok.value)
