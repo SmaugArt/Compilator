@@ -1,0 +1,2 @@
+class classic{}
+enum classic{}

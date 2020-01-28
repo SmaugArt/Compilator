@@ -67,7 +67,7 @@ namespace Compilator.SymanticModule
         {
             List<SyntaxisNode> newList = new List<SyntaxisNode>();
 
-            for (int i = startPos; i < endPos; i++)
+            for (int i = startPos; i <= endPos; i++)
             {
                 if (i >= list.Count) break;
                 newList.Add(list[i]);

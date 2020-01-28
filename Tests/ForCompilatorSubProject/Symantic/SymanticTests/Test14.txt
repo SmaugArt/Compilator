@@ -1,0 +1,13 @@
+public class classik
+{
+   public void myMethod()
+   {
+      int classik=3;
+      
+      do      
+      {
+
+          int classik=3;
+      }while(classik == 3);
+   }
+}

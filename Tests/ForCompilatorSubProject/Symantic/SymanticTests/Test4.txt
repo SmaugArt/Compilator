@@ -1,0 +1,7 @@
+public enum k
+{
+   k=3,
+   r,
+   z,
+   k
+}

@@ -1,0 +1,15 @@
+public class classik
+{
+   public void myMethod()
+   {
+      int classik=3;
+      
+      switch(classik)
+      {
+          case 3:
+              int d=3;
+          case 4:
+              int d=3;
+      }
+   }
+}

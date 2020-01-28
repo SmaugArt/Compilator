@@ -1,0 +1,12 @@
+public class classik
+{
+   public void myMethod()
+   {
+      int classik=3;
+      
+      if(classik==3)
+      {
+          int classik =4;
+      }
+   }
+}

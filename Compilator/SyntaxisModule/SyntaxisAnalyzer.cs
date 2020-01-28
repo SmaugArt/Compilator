@@ -343,64 +343,64 @@ namespace Compilator.SyntaxisModule
             while (true)
             {
                 Token rghtCurclyBR = analyzer.Peek();
-                if(SynCheck.ValueCheck(rghtCurclyBR, TokenType.Operator, Operators.OP.opRightCurlyBracket))
+                if (SynCheck.ValueCheck(rghtCurclyBR, TokenType.Operator, Operators.OP.opRightCurlyBracket))
                     break;
 
-                int classMemberDeclarationDepth;
-                int typeDeclarationDepth;
-                string Error1;
-                string Error2;
-                SyntaxisNode node;
+                //////int classMemberDeclarationDepth;
+                //////int typeDeclarationDepth;
+                //////string Error1;
+                //////string Error2;
+                //////SyntaxisNode node;
 
-                if (SynTryShell.TryThis(analyzer, Class_Member_Declaration, out node, out classMemberDeclarationDepth, out Error1))
+                //////if (SynTryShell.TryThis(analyzer, Class_Member_Declaration, out node, out classMemberDeclarationDepth, out Error1))
+                //////{
+                //////    nodes.Add(node);
+                //////    continue;
+                //////}
+
+                //////if (SynTryShell.TryThis(analyzer, Type_Declaration, out node, out typeDeclarationDepth, out Error2))
+                //////{
+                //////    if (node.GetType() != typeof(EmptyNode))
+                //////        nodes.Add(node);
+                //////    else
+                //////        break;
+                //////}
+
+                //////if (classMemberDeclarationDepth > typeDeclarationDepth)
+                //////    throw new Exception(Error1);
+                //////throw new Exception(Error2);
+                int analyzerStartPos = analyzer.stepBackCount;
+                int classMemberDeclarationPos = analyzer.stepBackCount;
+                string classMemberDeclarationError = "";
+
+                try
                 {
-                    nodes.Add(node);
+                    nodes.Add(Class_Member_Declaration());
                     continue;
                 }
-
-                if (SynTryShell.TryThis(analyzer, Type_Declaration, out node, out typeDeclarationDepth, out Error2))
+                catch (Exception ex)
                 {
-                    if (node.GetType() != typeof(EmptyNode))
-                        nodes.Add(node);
+                    classMemberDeclarationPos = analyzer.stepBackCount;
+                    classMemberDeclarationError = ex.Message;
+
+                    while (analyzer.stepBackCount > analyzerStartPos)
+                        analyzer.StepBack();
+                }
+
+                try
+                {
+                    var typeDeclaration = Type_Declaration();
+                    if (typeDeclaration.GetType() != typeof(EmptyNode))
+                        nodes.Add(typeDeclaration);
                     else
                         break;
                 }
-
-                if (classMemberDeclarationDepth > typeDeclarationDepth)
-                    throw new Exception(Error1);
-                throw new Exception(Error2);
-                //int analyzerStartPos = analyzer.stepBackCount;
-                //int classMemberDeclarationPos = analyzer.stepBackCount;
-                //string classMemberDeclarationError = "";
-
-                //try
-                //{
-                //    nodes.Add(Class_Member_Declaration());
-                //    continue;
-                //}
-                //catch(Exception ex)
-                //{
-                //    classMemberDeclarationPos = analyzer.stepBackCount;
-                //    classMemberDeclarationError = ex.Message;
-
-                //    while (analyzer.stepBackCount> analyzerStartPos)
-                //        analyzer.StepBack();
-                //}
-
-                //try
-                //{
-                //    var typeDeclaration = Type_Declaration();
-                //    if (typeDeclaration.GetType() != typeof(EmptyNode))
-                //        nodes.Add(typeDeclaration);
-                //    else
-                //        break;
-                //}
-                //catch(Exception ex)
-                //{
-                //    if (analyzer.stepBackCount > classMemberDeclarationPos)
-                //        throw new Exception(ex.Message);
-                //    throw new Exception(classMemberDeclarationError);
-                //}
+                catch (Exception ex)
+                {
+                    if (analyzer.stepBackCount > classMemberDeclarationPos)
+                        throw new Exception(ex.Message);
+                    throw new Exception(classMemberDeclarationError);
+                }
             }
 
             return nodes;

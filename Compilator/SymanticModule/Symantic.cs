@@ -109,7 +109,8 @@ namespace Compilator.SymanticModule
                     storage.Add(levelIdentifiers);
                     levelIdentifiers = new List<List<Identify>>();
 
-                    EnumNodeCheck(item, 1);
+                    //EnumNodeCheck(item, 1);
+                    EnumNodeCheck(item.children[item.children.Count-1], 1);
 
                     //возвращаем все на место
                     levelIdentifiers.Clear();
@@ -137,7 +138,7 @@ namespace Compilator.SymanticModule
         }
         private void EnumNodeCheck(SyntaxisNode node, int level)
         {
-            if (node.GetType() != typeof(EnumNode))
+            if (node.GetType() != typeof(EnumBodyNode))//EnumNode))
                 throw SymException.Show(SymExType.IncorrectNode, node);
 
             levelIdentifiers.Insert(level - 1, new List<Identify>());
@@ -146,7 +147,7 @@ namespace Compilator.SymanticModule
             {
                 NodeIdentificator identify = item.children[0] as NodeIdentificator;
 
-                if (!SymMethod.CheckUnique(levelIdentifiers, identify.ToString(), level))
+                if (!SymMethod.CheckUnique(levelIdentifiers, identify.token.GetText(), level))
                     throw SymException.Show(SymExType.SimpleIdentify, identify);
 
                 levelIdentifiers[level - 1].Add(new Identify(identify, typeOfIdentify.Parameter));
@@ -206,7 +207,8 @@ namespace Compilator.SymanticModule
                     storage.Add(levelIdentifiers);
                     levelIdentifiers = new List<List<Identify>>();
 
-                    EnumNodeCheck(item, 1);
+                    //EnumNodeCheck(item, 1);
+                    EnumNodeCheck(item.children[item.children.Count - 1], 1);
 
                     //возвращаем все на место
                     levelIdentifiers.Clear();
