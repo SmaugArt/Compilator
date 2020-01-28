@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using Compilator.GeneralStructures;
 using Compilator.AnalyzerModule;
+using Compilator.SymanticModule;
 
 namespace Compilator
 {
@@ -53,30 +54,16 @@ namespace Compilator
 
                 SyntaxisModule.SyntaxisAnalyzer syn = new SyntaxisModule.SyntaxisAnalyzer(analyzer);
 
-                if (TryCheck.Checked)
                     try
                     {
                         var tree = syn.SyntaxisParse();
+                        new Symantic().Check(tree);
                         textBox1.Text = tree.ToString();
                     }
                     catch (Exception ex)
                     {
                         textBox1.Text = ex.Message;
                     }
-                else
-                {
-                    var tree = syn.SyntaxisParse();
-                    textBox1.Text = tree.ToString();
-                }
-
-                //tree.Print();
-
-                //while (analyzer.GetStatus() == AnalyzerStatus.OK)
-                //{
-                //    tokens.Add(analyzer.GetToken());
-                //}
-
-                //if (tokens[tokens.Count - 1] == null) tokens.RemoveAt(tokens.Count - 1);
             }
 
             ///Часть проверки

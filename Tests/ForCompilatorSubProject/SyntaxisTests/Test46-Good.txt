@@ -1,0 +1,6 @@
+public enum d
+{
+   s=1,
+   r,
+   e=2,
+}
