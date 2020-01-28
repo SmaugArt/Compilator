@@ -2321,7 +2321,9 @@ namespace Compilator.SyntaxisModule
             //return part
             ForStatementNode node = new ForStatementNode() { token = forTok };
             if (initialize) node.children.Add(initializerNode);
+            node.children.Add(new EmptyStatementNode() { token = semilikon1 });
             if (conditional) node.children.Add(conditionalNode);
+            node.children.Add(new EmptyStatementNode() { token = semilikon2 });
             if (iterator) node.children.Add(iteratorNode);
             node.children.Add(embededStatement);
 

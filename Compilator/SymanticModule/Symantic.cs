@@ -1,4 +1,5 @@
-﻿using Compilator.SyntaxisModule.Structures;
+﻿using Compilator.AnalyzerModule.AnalyzerStructures;
+using Compilator.SyntaxisModule.Structures;
 using System.Collections.Generic;
 
 namespace Compilator.SymanticModule
@@ -259,7 +260,7 @@ namespace Compilator.SymanticModule
                 {
                     int Pos = SymMethod.SearchPos(item.children, typeof(VariableDeclaratorNode));
                     List<SyntaxisNode> list = SymMethod.Copy(item.children, Pos);
-                    FieldDeclarationNodeCheck(list, level, className);
+                    ConstantDeclaratorNodeCheck(list, level, className);//FieldDeclarationNodeCheck(list, level, className);
                     continue;
                 }
 
@@ -309,6 +310,172 @@ namespace Compilator.SymanticModule
             //удаление данных
 
             notFoundPerem = notFoundReserve;
+            levelIdentifiers.RemoveAt(level - 1);
+        }
+
+        private void ConstantDeclaratorNodeCheck(List<SyntaxisNode> list, int level, string className)
+        {
+            foreach (SyntaxisNode item in list)
+            {
+                NodeIdentificator id = item.children[0] as NodeIdentificator;
+
+                if (!SymMethod.CheckUnique(levelIdentifiers, id.token.GetText(), level))
+                    throw SymException.Show(SymExType.SimpleIdentify, id);
+
+                if (id.token.GetText() == className)
+                    throw new System.Exception("Имя переменной не должно совпадать с именем класса: " + id.ToString());
+
+                levelIdentifiers[level - 1].Add(new Identify(id, typeOfIdentify.Peremen));
+
+                CheckNoneExistentNode(item.children[1], level);
+            }
+        }
+
+        private void ProgrammBlockNodeCheck(SyntaxisNode programmBlock, int level, bool createNewLevel = true)
+        {
+            if (programmBlock.GetType() != typeof(ProgrammBlockNode))
+                throw SymException.Show(SymExType.IncorrectNode, programmBlock);
+
+            if (createNewLevel) levelIdentifiers.Insert(level - 1, new List<Identify>());
+
+            foreach (SyntaxisNode item in programmBlock.children)
+            {
+                if (item.GetType() == typeof(DeclarationStatementNode))
+                {
+                    int pos = SymMethod.SearchPos(item.children, typeof(LocalVariableDeclaratorNode));
+                    List<SyntaxisNode> list = SymMethod.Copy(item.children, pos);
+                    LocalVariableDeclaratorNodeCheck(list, level);
+                    continue;
+                }
+
+                if (item.GetType() == typeof(ProgrammBlockNode))
+                {
+                    ProgrammBlockNodeCheck(item, level + 1);
+                    continue;
+                }
+
+                if (item.GetType() == typeof(AssignmentNode))
+                {
+                    CheckNoneExistentNode(item.children[0], level);  //identify
+                    CheckNoneExistentNode(item.children[1], level); //assigment part
+                    continue;
+                }
+
+                if (item.GetType() == typeof(IfStatementNode))
+                {
+                    CheckNoneExistentNode(item.children[0], level); //условие
+
+                    for (int i2 = 1; i2 < item.children.Count; i2++)
+                    {
+                        if (item.children[i2].GetType() != typeof(ProgrammBlockNode))
+                            ProgrammBlockNodeCheck(
+                                new ProgrammBlockNode()
+                                {
+                                    children = new List<SyntaxisNode>()
+                                    {
+                                        item.children[i2]
+                                    }
+                                },
+                             level + 1);
+                        else
+                            ProgrammBlockNodeCheck(item.children[i2], level + 1);
+                    }
+                    continue;
+                }
+
+                if (item.GetType() == typeof(SwitchStatementNode))
+                {
+                    CheckNoneExistentNode(item.children[0], level); //переменная
+
+                    SwitchBlockCheck(item.children[1], level + 1);
+                }
+
+                if (item.GetType() == typeof(WhileStatementNode))
+                {
+                    CheckNoneExistentNode(item.children[0], level);
+
+                    ProgrammBlockNodeCheck(item.children[1], level + 1);
+                }
+
+                if (item.GetType() == typeof(DoStatementNode))
+                {
+                    ProgrammBlockNodeCheck(item.children[0], level + 1);
+
+                    CheckNoneExistentNode(item.children[1], level);
+                }
+
+                if (item.GetType() == typeof(ForStatementNode))
+                {
+                    int pos = 0;
+
+                    if (item.children[pos].GetType() != typeof(EmptyStatementNode))
+                    {
+                        ForInitializerCheck(item.children[pos], level);
+                        pos++;
+                    }
+
+                    pos++;
+
+                    if (item.children[pos].GetType() != typeof(EmptyStatementNode))
+                    {
+                        For_Condition(item.children[pos], level);
+                        pos++;
+                    }
+
+                    pos++;
+
+                    if (item.children[pos].GetType() == typeof(Statement_Expression_List))
+                    {
+                        StatementExpressionListCheck(item.children[pos], level);
+                        pos++;
+                    }
+
+                    if(item.children[pos].GetType() != typeof(ProgrammBlockNode))
+                        ProgrammBlockNodeCheck(new ProgrammBlockNode()
+                            {
+                                children = new List<SyntaxisNode>()
+                                    { item.children[pos] }
+                            }, 
+                            level + 1);
+                    else
+                        ProgrammBlockNodeCheck(item.children[pos], level + 1);
+                }
+                //все остальное смотреть через CheckNoneExistentNode
+            }
+
+            if(createNewLevel) levelIdentifiers.RemoveAt(level - 1);
+        }
+        private void SwitchBlockCheck(SyntaxisNode node, int level)
+        {
+            if (node.GetType() != typeof(SwitchBlockNode))
+                    throw SymException.Show(SymExType.IncorrectNode, node);
+
+            levelIdentifiers.Insert(level - 1, new List<Identify>());
+
+            foreach (SyntaxisNode item in node.children)
+            {
+                if (item.token.value.Equals(KeyWords.KW.kwCase))
+                {
+                    CheckNoneExistentNode(item.children[0], level); //переменная
+
+                    ProgrammBlockNodeCheck(new ProgrammBlockNode()
+                                           {
+                                               children = new List<SyntaxisNode>()
+                                               { item.children[1] }
+                                           }, 
+                        level, false);
+                }
+                else
+                {
+                    ProgrammBlockNodeCheck(new ProgrammBlockNode()
+                    {
+                        children = new List<SyntaxisNode>()
+                                               { item.children[0] }
+                    },
+                       level, false);
+                }
+            }
+
             levelIdentifiers.RemoveAt(level - 1);
         }
     }
